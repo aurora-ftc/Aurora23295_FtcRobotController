@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.GoBildaPinpointDriver;
+import org.firstinspires.ftc.teamcode.PinpointDrive;
 
 import org.firstinspires.ftc.teamcode.subsystems.Elevator;
 import org.firstinspires.ftc.teamcode.subsystems.Rotator;
@@ -31,16 +32,21 @@ public class Red extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(-90));
-
-
+        PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
 
         TrajectoryActionBuilder traj1, traj2;
 
-        //traj1 = .actionBuilder(initialPose).strafeTo(new Pose2d(0, 0, Math.toRadians(0)));
+        traj1 = drive.actionBuilder(initialPose).strafeTo(new Vector2d(0, 0));
+        traj2 = traj1.endTrajectory().fresh().strafeToLinearHeading(new Vector2d(-40, 32), Math.toRadians(-140));
         Actions.runBlocking(
                 new SequentialAction(
-
+                        traj1.build(),
+                        //shooter.shoot(),
+                        traj2.build()
                 )
         );
+
+        telemetry.addData("Path", "Execution complete");
+        telemetry.update();
     }
 }
