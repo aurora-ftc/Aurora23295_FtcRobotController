@@ -40,6 +40,7 @@ public class LaunchSystem {
 
         liftServo.scaleRange(servoMin, servoMax);
 
+        //Set Servo Down
         liftServo.setPosition(1.0);
 
         updateTelemetry(telemetry);
@@ -48,7 +49,7 @@ public class LaunchSystem {
     }
 
     private void setLauncherPower(int step) {
-        if (step > 0 && step < powerSteps.length) {
+        if (step >= 0 && step < powerSteps.length) {
             if (launcherOn) {
                 launcherMotor.setPower(powerSteps[step]);
             } else {
