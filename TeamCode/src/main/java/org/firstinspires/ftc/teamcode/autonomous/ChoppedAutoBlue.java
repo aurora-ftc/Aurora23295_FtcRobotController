@@ -2,13 +2,12 @@ package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.launchSubSystem.LaunchSystem;
 
-@Autonomous
-public class ChoppedAuto extends LinearOpMode {
+@Autonomous(name = "ChoppedAutoBlue", group = "ChoppedAutos")
+public class ChoppedAutoBlue extends LinearOpMode {
     private MecanumDrive mecanumDrive = new MecanumDrive();
     private LaunchSystem launchSystem = new LaunchSystem();
     private final double[] powerSteps = {0.68, 0.68};
@@ -23,7 +22,7 @@ public class ChoppedAuto extends LinearOpMode {
         if(opModeIsActive()) {
             mecanumDrive.drive(1, 0 , 0, 0.4,telemetry); //Move Forward
             sleep(550);
-            mecanumDrive.drive(0, 0 , 0.2, 1,telemetry); //Rotate
+            mecanumDrive.drive(0, 0 , -0.2, 1,telemetry); //Rotate Counterclockwise
             sleep(500);
             mecanumDrive.drive(0, 0 , 0, 0,telemetry); //Stop
             launchSystem.toggleLauncher(); //Launcher on
@@ -54,9 +53,6 @@ public class ChoppedAuto extends LinearOpMode {
             launchSystem.toggleIntake(); //Intake off
             launchSystem.toggleLauncher(); //Launcher off
             launchSystem.updateLauncher();
-            sleep(500);
-            mecanumDrive.drive(0, 0 , -0.5, 1,telemetry);//Rotate intake to balls
-            mecanumDrive.
         }
     }
 
