@@ -2,11 +2,15 @@ package org.firstinspires.ftc.teamcode.teleOp.driveTrain;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "DriveOpMode", group = "OpModes")
 public class DriveOpMode extends OpMode {
     MecanumDrive drive = new MecanumDrive();
     double forward, strafe, rotate, slow;
+    private final ElapsedTime matchTimer = new ElapsedTime();
+    private boolean endgameRumbleDone;
+    private double recenterTime = 0;
 
     @Override
     public void init() {
@@ -17,7 +21,29 @@ public class DriveOpMode extends OpMode {
     }
 
     @Override
+    public void start() {
+
+        matchTimer.reset();
+        endgameRumbleDone = false;
+
+    }
+
+    @Override
     public void loop() {
+
+        //Keep Robot still while re-centering ODO
+        if (recenterTime > 0) {
+            // If 0.25 seconds have passed, end freeze
+            if (matchTimer.seconds() - recenterTime >= 0.25) {
+                recenterTime = 0; // done freezing
+            } else {
+                // Still in freeze period: stop motors and skip input processing
+                drive.drive(0, 0, 0, 0, telemetry);
+                telemetry.addLine("Recalibrating IMU...");
+                telemetry.update();
+                return; // skip the rest of loop for now
+            }
+        }
 
         //Takes controller inputs
         forward = -1 * gamepad1.left_stick_y;
@@ -29,14 +55,24 @@ public class DriveOpMode extends OpMode {
             slow = 0.5;
         } else if (gamepad1.right_trigger > 0.4) {
             slow = 2;
-        } else{
+        } else {
             slow = 1;
         }
 
         //Recenter field-centric driving
         //-STAY STILL FOR AT LEAST 0.25 SECONDS WHILE DOING SO FOR ACCURACY-
-        if (gamepad1.dpad_up) {
+        if (gamepad1.touchpad) {
+            gamepad1.rumbleBlips(2);
+            recenterTime = matchTimer.seconds();
             drive.OdoReset(telemetry);
+            return;
+        }
+
+        //Rumble controllers in Endgame
+        if (matchTimer.seconds() >= 90 && !endgameRumbleDone) {
+            gamepad1.rumble(500);
+            gamepad2.rumble(500);
+            endgameRumbleDone = true;
         }
 
         telemetry.addData("forward", forward);

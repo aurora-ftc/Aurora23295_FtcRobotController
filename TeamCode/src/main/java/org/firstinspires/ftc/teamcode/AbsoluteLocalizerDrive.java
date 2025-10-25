@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.messages.PoseMessage;
 abstract public class AbsoluteLocalizerDrive extends MecanumDrive {
     public LocalizationSensor localSensor;
     Pose2d lastPose = pose;
+
     public AbsoluteLocalizerDrive(HardwareMap hardwareMap, Pose2d pose) {
         super(hardwareMap, pose);
         localSensor = setupLocalization(hardwareMap);

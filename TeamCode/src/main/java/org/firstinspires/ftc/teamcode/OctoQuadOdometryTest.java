@@ -6,8 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-public class OctoQuadOdometryTest extends LinearOpMode
-{
+public class OctoQuadOdometryTest extends LinearOpMode {
     static final float TICKS_PER_MM = 12.66f;
     static final float X_OFFSET_FROM_CENTER_MM = -97.05f;
     static final float Y_OFFSET_FROM_CENTER_MM = -156.70f;
@@ -15,8 +14,7 @@ public class OctoQuadOdometryTest extends LinearOpMode
     static final int OQ_PORT_X = 1;
     static final int OQ_PORT_Y = 2;
 
-    public void runOpMode()
-    {
+    public void runOpMode() {
         OctoQuadFWv3 oq = hardwareMap.get(OctoQuadRR.class, "octoquad");
         /*
         SkyStoneDriveBase base;
@@ -39,8 +37,7 @@ public class OctoQuadOdometryTest extends LinearOpMode
         oq.setLocalizerVelocityIntervalMS(25);
         oq.resetLocalizerAndCalibrateIMU();
 
-        while (opModeInInit())
-        {
+        while (opModeInInit()) {
             telemetry.addData("Localizer status", oq.getLocalizerStatus());
             telemetry.addData("Heading Axis Detection", oq.getLocalizerHeadingAxisChoice());
             telemetry.update();
@@ -50,14 +47,10 @@ public class OctoQuadOdometryTest extends LinearOpMode
         int[] encoders = new int[8];
         OctoQuadFWv3.EncoderDataBlock encoderDataBlock = new OctoQuadFWv3.EncoderDataBlock();
 
-        while (opModeIsActive())
-        {
-            if (gamepad1.left_bumper)
-            {
-                oq.setLocalizerPose(500, 750, (float)(Math.PI/4.0f));
-            }
-            else if (gamepad1.right_bumper)
-            {
+        while (opModeIsActive()) {
+            if (gamepad1.left_bumper) {
+                oq.setLocalizerPose(500, 750, (float) (Math.PI / 4.0f));
+            } else if (gamepad1.right_bumper) {
                 oq.setLocalizerHeading((float) Math.PI);
             }
             /*
@@ -74,10 +67,9 @@ public class OctoQuadOdometryTest extends LinearOpMode
 
             telemetry.addData("Localizer status", localizer.localizerStatus);
 
-            if (localizer.isPoseDataValid())
-            {
-                telemetry.addData("Heading deg", localizer.heading_rad*180/Math.PI);
-                telemetry.addData("Heading dps", localizer.velHeading_radS*180/Math.PI);
+            if (localizer.isPoseDataValid()) {
+                telemetry.addData("Heading deg", localizer.heading_rad * 180 / Math.PI);
+                telemetry.addData("Heading dps", localizer.velHeading_radS * 180 / Math.PI);
                 telemetry.addData("X mm", localizer.posX_mm);
                 telemetry.addData("Y mm", localizer.posY_mm);
                 telemetry.addData("VX mm/s", localizer.velX_mmS);
@@ -88,9 +80,7 @@ public class OctoQuadOdometryTest extends LinearOpMode
                 //telemetry.addData("EncY", encoderDataBlock.positions[OQ_PORT_Y]);
                 //telemetry.addData("EncXV", encoderDataBlock.velocities[OQ_PORT_X]);
                 //telemetry.addData("EncYV", encoderDataBlock.velocities[OQ_PORT_Y]);
-            }
-            else
-            {
+            } else {
                 telemetry.addLine("Data not valid");
             }
 

@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 
-
 import static com.qualcomm.hardware.rev.RevHubOrientationOnRobot.zyxOrientation;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -23,6 +22,46 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  */
 @Config
 public class OctoQuadDrive extends AbsoluteLocalizerDrive {
+    public static Params PARAMS = new Params();
+
+    public OctoQuadDrive(HardwareMap hardwareMap, Pose2d pose) {
+        super(hardwareMap, pose);
+    }
+
+    @Override
+    public LocalizationSensor setupLocalization(HardwareMap hardwareMap) {
+        FlightRecorder.write("OCTOQUAD_PARAMS", PARAMS);
+        OctoQuadRR octoquad = hardwareMap.get(OctoQuadRR.class, PARAMS.octoquadDeviceName);
+
+        octoquad.setLocalizerPortX(PARAMS.odometryPortX);
+        octoquad.setLocalizerPortY(PARAMS.odometryPortY);
+
+        octoquad.setSingleEncoderDirection(PARAMS.odometryPortX, PARAMS.xDirection);
+        octoquad.setSingleEncoderDirection(PARAMS.odometryPortY, PARAMS.yDirection);
+
+        // RR localizer note: don't love this conversion (change driver?)
+        octoquad.setLocalizerTcpOffsetMM_X((float) DistanceUnit.MM.fromInches(PARAMS.xOffset));
+        octoquad.setLocalizerTcpOffsetMM_Y((float) DistanceUnit.MM.fromInches(PARAMS.yOffset));
+
+
+        octoquad.setLocalizerCountsPerMM_X((float) PARAMS.encoderResolution);
+        octoquad.setLocalizerCountsPerMM_Y((float) PARAMS.encoderResolution);
+
+        octoquad.setLocalizerImuHeadingScalar((float) PARAMS.angularScalar);
+
+        octoquad.setLocalizerVelocityIntervalMS(25);
+
+
+        /*
+        Reset the localization and calibrate the IMU.
+         */
+        octoquad.baseInitialize();
+
+        octoquad.writePose(pose);
+
+        return octoquad;
+    }
+
     public static class Params {
         /*
         Set this to the name that your Octoquad is configured as in your hardware config.
@@ -80,49 +119,6 @@ public class OctoQuadDrive extends AbsoluteLocalizerDrive {
          Note: OctoQuad IMU is always used for base localization
          */
         public boolean useOctoQuadIMUForTuning = true;
-    }
-    public static Params PARAMS = new Params();
-
-    public OctoQuadDrive(HardwareMap hardwareMap, Pose2d pose) {
-        super(hardwareMap, pose);
-    }
-
-    @Override
-    public LocalizationSensor setupLocalization(HardwareMap hardwareMap) {
-        FlightRecorder.write("OCTOQUAD_PARAMS",PARAMS);
-        OctoQuadRR octoquad = hardwareMap.get(OctoQuadRR.class,PARAMS.octoquadDeviceName);
-
-        if (PARAMS.useOctoQuadIMUForTuning) {
-            lazyImu = new LazyImu(hardwareMap, PARAMS.octoquadDeviceName, new RevHubOrientationOnRobot(zyxOrientation(0, 0, 0)));
-        }
-
-        octoquad.setLocalizerPortX(PARAMS.odometryPortX);
-        octoquad.setLocalizerPortY(PARAMS.odometryPortY);
-
-        octoquad.setSingleEncoderDirection(PARAMS.odometryPortX,PARAMS.xDirection);
-        octoquad.setSingleEncoderDirection(PARAMS.odometryPortY,PARAMS.yDirection);
-
-        // RR localizer note: don't love this conversion (change driver?)
-        octoquad.setLocalizerTcpOffsetMM_X((float)DistanceUnit.MM.fromInches(PARAMS.xOffset));
-        octoquad.setLocalizerTcpOffsetMM_Y((float)DistanceUnit.MM.fromInches(PARAMS.yOffset));
-
-
-        octoquad.setLocalizerCountsPerMM_X((float) PARAMS.encoderResolution);
-        octoquad.setLocalizerCountsPerMM_Y((float) PARAMS.encoderResolution);
-
-        octoquad.setLocalizerImuHeadingScalar((float) PARAMS.angularScalar);
-
-        octoquad.setLocalizerVelocityIntervalMS(25);
-
-
-        /*
-        Reset the localization and calibrate the IMU.
-         */
-        octoquad.baseInitialize();
-
-        octoquad.writePose(pose);
-
-        return octoquad;
     }
 
 }
