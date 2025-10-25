@@ -30,7 +30,7 @@ public class RestoreBlue extends LinearOpMode {
 
         TrajectoryActionBuilder traj1;
 
-        traj1 = drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(-14, -62), Math.toRadians(110));
+        traj1 = drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(-14, -62), Math.toRadians(115));
         Actions.runBlocking(
                 new SequentialAction(
                         traj1.build()

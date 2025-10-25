@@ -28,7 +28,7 @@ public class RestoreRed extends LinearOpMode {
 
         TrajectoryActionBuilder traj1;
 
-        traj1 = drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(14, -62), Math.toRadians(70));
+        traj1 = drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(14, -62), Math.toRadians(67));
         Actions.runBlocking(
                 new SequentialAction(
                         traj1.build()

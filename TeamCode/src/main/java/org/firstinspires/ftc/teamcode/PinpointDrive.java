@@ -44,8 +44,8 @@ public class PinpointDrive extends MecanumDrive {
         // RR localizer note: These units are inches, presets are converted from mm (which is why they are inexact)
         //public double xOffset = -3.3071;
         //public double yOffset = -6.6142;
-        public double xOffset = 6;
-        public double yOffset = 7;
+        public double xOffset = -1.61;
+        public double yOffset = 0;
 
         /*
         Set the kind of pods used by your robot. If you're using goBILDA odometry pods, select either

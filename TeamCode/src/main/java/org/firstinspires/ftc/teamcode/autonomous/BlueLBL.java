@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Lift;
 public class BlueLBL extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose2d initialPose = new Pose2d(-14, -62, Math.toRadians(110));
+        Pose2d initialPose = new Pose2d(-14, -62, Math.toRadians(115));
         PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
@@ -39,17 +39,20 @@ public class BlueLBL extends LinearOpMode {
         traj1 = drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(-9, -24), Math.toRadians(90));
         Actions.runBlocking(
                 new SequentialAction(
-                        new ParallelAction(
-                                lift.lift(1, 2),
-                                launcher.launch(0.75, 3)
-                        ),
+//                        new ParallelAction(
+                        launcher.launch(0.75, 5),
+                        lift.lift(1, 2),
+//                        ),
                         lift.lift(0, 2),
                         lift.lift(1, 1),
                         intake.spin(1, 1),
+//                        new SleepAction(0.5),
+                        intake.spin(0, 1),
                         launcher.launch(0.75, 2),
                         lift.lift(0, 2),
                         lift.lift(1, 1),
                         intake.spin(1, 1),
+                        intake.spin(0, 1),
                         launcher.launch(0.75, 2),
                         lift.lift(0, 2),
                         lift.lift(1, 1),
