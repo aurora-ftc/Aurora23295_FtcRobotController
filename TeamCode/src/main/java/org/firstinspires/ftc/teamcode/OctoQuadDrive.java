@@ -33,10 +33,6 @@ public class OctoQuadDrive extends AbsoluteLocalizerDrive {
         FlightRecorder.write("OCTOQUAD_PARAMS", PARAMS);
         OctoQuadRR octoquad = hardwareMap.get(OctoQuadRR.class, PARAMS.octoquadDeviceName);
 
-        if (PARAMS.useOctoQuadIMUForTuning) {
-            lazyImu = new LazyImu(hardwareMap, PARAMS.octoquadDeviceName, new RevHubOrientationOnRobot(zyxOrientation(0, 0, 0)));
-        }
-
         octoquad.setLocalizerPortX(PARAMS.odometryPortX);
         octoquad.setLocalizerPortY(PARAMS.odometryPortY);
 
