@@ -22,11 +22,11 @@ import org.firstinspires.ftc.teamcode.subsystems.Lift;
 public class Red extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose2d initialPose = new Pose2d(9, -48, Math.toRadians(65));
+        Pose2d initialPose = new Pose2d(14, -62, Math.toRadians(70));
         PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
-        Lift lift = new Lift(hardwareMap, telemetry);
+        Lift lift = new Lift(hardwareMap);
 
         TrajectoryActionBuilder traj1, traj2;
         while (!opModeIsActive() && !isStopRequested()) {
@@ -40,13 +40,21 @@ public class Red extends LinearOpMode {
         traj1 = drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(9, -24), Math.toRadians(90));
         Actions.runBlocking(
                 new SequentialAction(
-                        //launcher.launch(0.7, 2),
-                        lift.lift(0)
-                        //new SleepAction(5),
-                        //intake.spin(1, 1),
-                        //launcher.launch(0.7, 2)
-                        //lift.lift(0)
-                        //traj1.build()
+                        new ParallelAction(
+                                lift.lift(1, 2),
+                                launcher.launch(0.7, 3)
+                        ),
+                        lift.lift(0, 1),
+                        lift.lift(1, 1),
+                        intake.spin(1, 1),
+                        launcher.launch(0.7, 2),
+                        lift.lift(0, 3),
+                        lift.lift(1, 1),
+                        intake.spin(1, 1),
+                        launcher.launch(0.7, 2),
+                        lift.lift(0, 3),
+                        lift.lift(1, 1),
+                        traj1.build()
                 )
         );
 

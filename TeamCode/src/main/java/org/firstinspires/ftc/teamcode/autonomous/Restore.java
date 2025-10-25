@@ -32,7 +32,7 @@ public class Restore extends LinearOpMode {
 
         //traj1 = drive.actionBuilder(initialPose).strafeTo(new Vector2d(0, 0));
         //traj2 = traj1.endTrajectory().fresh().strafeToLinearHeading(new Vector2d(32, -39), Math.toRadians(90));
-        traj1 = drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(9, -48), Math.toRadians(65));
+        traj1 = drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(14, -62), Math.toRadians(70));
         Actions.runBlocking(
                 new SequentialAction(
 //                        new ParallelAction(

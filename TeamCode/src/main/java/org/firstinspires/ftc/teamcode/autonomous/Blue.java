@@ -40,13 +40,13 @@ public class Blue extends LinearOpMode {
                 new SequentialAction(
                         new ParallelAction(
                                 launcher.launch(0.7, 2),
-                                lift.lift(0)
+                                lift.lift(0, 3)
                         ),
                         intake.spin(1, 1),
                         new SleepAction(1),
                         new ParallelAction(
                                 launcher.launch(0.7, 2),
-                                lift.lift(0)
+                                lift.lift(0, 3)
                         ),
                         traj1.build()
                 )
