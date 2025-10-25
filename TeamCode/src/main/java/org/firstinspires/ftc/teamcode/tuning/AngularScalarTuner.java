@@ -15,9 +15,7 @@ public class AngularScalarTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         MecanumDrive drive;
-        if (TuningOpModes.DRIVE_CLASS == SparkFunOTOSDrive.class) {
-            drive = new SparkFunOTOSDrive(hardwareMap, new Pose2d(0, 0, 0));
-        } else if (TuningOpModes.DRIVE_CLASS == OctoQuadDrive.class) {
+        if (TuningOpModes.DRIVE_CLASS == OctoQuadDrive.class) {
             drive = new OctoQuadDrive(hardwareMap, new Pose2d(0, 0, 0));
         } else {
             throw new RuntimeException("Tuning Angular Scalar is only necessary with OctoQuad and OTOS.");

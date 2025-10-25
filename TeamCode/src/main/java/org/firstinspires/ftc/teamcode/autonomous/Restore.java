@@ -26,7 +26,7 @@ public class Restore extends LinearOpMode {
         PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
-        Lift lift = new Lift(hardwareMap);
+        Lift lift = new Lift(hardwareMap, telemetry);
 
         TrajectoryActionBuilder traj1, traj2;
 
