@@ -19,7 +19,7 @@ public class Launcher {
 
         launcherMotor.setPower(0);
         launcherMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
     public class Launch implements Action {
