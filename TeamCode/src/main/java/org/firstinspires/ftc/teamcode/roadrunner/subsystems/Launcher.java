@@ -3,19 +3,20 @@ package org.firstinspires.ftc.teamcode.roadrunner.subsystems;
 import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Launcher {
-    private final DcMotorEx launcherMotor;
+    private final DcMotor launcherMotor;
 
     public Launcher(HardwareMap hwMap) {
-        launcherMotor = hwMap.get(DcMotorEx.class, "launcher_motor");
-        launcherMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        launcherMotor = hwMap.get(DcMotor.class, "launcher_motor");
+        launcherMotor.setDirection(DcMotor.Direction.FORWARD);
         launcherMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         launcherMotor.setPower(0);
-        launcherMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        launcherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void stop() {
@@ -23,7 +24,7 @@ public class Launcher {
     }
 
     public void farPower() {
-        launcherMotor.setPower(0.70);
+        launcherMotor.setPower(0.8);
     }
 
     public void setPower(double power) {
@@ -40,12 +41,17 @@ public class Launcher {
                 if (!init) {
                     timer.reset();
                     init = true;
+                    packet.put("Timer", "Reset");
                 }
+
+                launcherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 if (timer.seconds() < duration) {
                     launcherMotor.setPower(power);
+                    packet.put("Power", power);
                     return true;
                 } else {
                     launcherMotor.setPower(0);
+                    packet.put("Power", power);
                     return false;
                 }
             }

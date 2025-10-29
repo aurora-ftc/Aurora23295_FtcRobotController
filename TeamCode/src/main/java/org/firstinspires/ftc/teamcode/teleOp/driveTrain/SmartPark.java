@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode.teleOp.driveTrain;
 
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
-
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
@@ -19,27 +18,19 @@ public class SmartPark {
         this.dwive = dwive;
     }
 
-    /**
-     * Parks the robot to the target position using the most efficient approach.
-     * Acceptable final headings are 0, 90, 180, 270 degrees.
-     */
-    public void parkToTarget(Vector2d target) {
-        // Update odometry first
+    public TrajectoryActionBuilder buildParkAction(Vector2d target, Telemetry tele) {
         drive.updateOdo();
-
-        // Get current odometry position
         Pose2D odoPos = drive.getOdoPosition();
-        double currentHeading = odoPos.getHeading(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES);
+
         double robotX = odoPos.getX(DistanceUnit.INCH);
         double robotY = odoPos.getY(DistanceUnit.INCH);
+        double currentHeading = odoPos.getHeading(AngleUnit.DEGREES);
 
-        // Compute angle to target in degrees
         double angleToTarget = Math.toDegrees(Math.atan2(target.y - robotY, target.x - robotX));
-
-        // Snap desired heading to nearest cardinal direction (0, 90, 180, 270)
-        double[] cardinalAngles = {0, 90, 180, 270};
+        double[] cardinalAngles = {0.0, 90.0, 180.0, 270.0};
         double bestAngle = cardinalAngles[0];
-        double minDiff = Math.abs(angleDiff(angleToTarget, cardinalAngles[0]));
+        double minDiff = Math.abs(angleDiff(angleToTarget, bestAngle));
+
         for (double a : cardinalAngles) {
             double diff = Math.abs(angleDiff(angleToTarget, a));
             if (diff < minDiff) {
@@ -48,22 +39,29 @@ public class SmartPark {
             }
         }
 
-        // Decide whether to drive forward or backward
         double diffToCurrent = angleDiff(bestAngle, currentHeading);
         boolean shouldReverse = Math.abs(diffToCurrent) > 90;
 
-        // Build trajectory
-        Pose2d startPoseRR = new Pose2d(robotX, robotY, Math.toRadians(currentHeading));
-        TrajectoryActionBuilder parkBuilder = dwive.actionBuilder(startPoseRR);
+        Pose2d startPose = new Pose2d(robotX, robotY, Math.toRadians(currentHeading));
 
-        if (shouldReverse) {parkBuilder.setReversed(true);}
-        parkBuilder.splineTo(target, Math.toRadians(bestAngle));
+        TrajectoryActionBuilder builder;
 
-        // Execute trajectory
-        Actions.runBlocking(new SequentialAction(parkBuilder.build()));
+        if (shouldReverse) {
+            builder = dwive.actionBuilder(startPose)
+                    .setReversed(true)
+                    .splineTo(target, Math.toRadians(bestAngle));
+        } else {
+            builder = dwive.actionBuilder(startPose)
+                    .setReversed(false)
+                    .splineTo(target, Math.toRadians(bestAngle));
+        }
+
+        tele.addLine("SmartPark trajectory built");
+        tele.update();
+
+        return builder; // return Trajectory (not executed or built yet)
     }
 
-    // Helper: returns shortest difference between two angles in degrees [-180, 180]
     private double angleDiff(double target, double current) {
         double diff = target - current;
         diff = ((diff + 180) % 360) - 180;

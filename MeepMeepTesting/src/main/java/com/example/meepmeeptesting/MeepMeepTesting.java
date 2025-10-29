@@ -42,8 +42,8 @@ public class MeepMeepTesting {
                         .waitSeconds(1)
                         .back(20, velConstraint1, accelConstraint1)
                         .waitSeconds(2)
+                        .setReversed(true)
                         .splineTo(new Vector2d(55, 13), Math.toRadians(90))
-                        .waitSeconds(1)
                         .turn(Math.toRadians(70))
                         .build());
 

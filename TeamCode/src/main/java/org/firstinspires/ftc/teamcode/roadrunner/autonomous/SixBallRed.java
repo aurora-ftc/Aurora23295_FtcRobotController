@@ -56,14 +56,15 @@ public class SixBallRed extends LinearOpMode {
                 .turn(Math.toRadians(70));
 
         TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(36, 26, Math.toRadians(270)))
-                .lineToY(46, collectingBallsVel, collectingBallsAccel);
+                .lineToY(50, collectingBallsVel, collectingBallsAccel);
 
-        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(36, 46, Math.toRadians(270)))
-                .splineTo(new Vector2d(55, 13), Math.toRadians(159))
-                .turn(Math.toRadians(70));
+        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(36, 50, Math.toRadians(270)))
+                .setReversed(true)
+                .splineTo(new Vector2d(53, 13), Math.toRadians(339));
 
-        TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(55, 13, Math.toRadians(160)))
-                .splineTo(new Vector2d(20, 13), Math.toRadians(270));
+        TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(53, 13, Math.toRadians(159)))
+                .setReversed(false)
+                .splineTo(new Vector2d(20, 13), Math.toRadians(0));
 
         // ---------------------- Wait for Start ----------------------
         while (!opModeIsActive() && !isStopRequested()) {
@@ -108,27 +109,27 @@ public class SixBallRed extends LinearOpMode {
     }
     private Action shootThree(Lift lift, Intake intake) {
         return new SequentialAction(
-                lift.liftForTime(0, 1),
+                lift.liftForTime(0, 0.2),
                 lift.liftForTime(1, 1),
-                new SleepAction(0.5),
+                new SleepAction(0.1),
 
                 new InstantAction(() -> intake.fullPower()),
                 new SleepAction(0.8),
                 new InstantAction(() -> intake.stop()),
-                new SleepAction(0.8),
+                new SleepAction(0.7),
 
-                lift.liftForTime(0, 1),
+                lift.liftForTime(0, 0.1),
                 lift.liftForTime(1, 1),
-                new SleepAction(0.5),
+                new SleepAction(0.1),
 
                 new InstantAction(() -> intake.fullPower()),
                 new SleepAction(0.8),
                 new InstantAction(() -> intake.stop()),
-                new SleepAction(0.8),
+                new SleepAction(0.7),
 
-                lift.liftForTime(0, 1),
+                lift.liftForTime(0, 0.1),
                 lift.liftForTime(1, 1),
-                new SleepAction(0.5)
+                new SleepAction(0.1)
         );
     }
 
