@@ -40,7 +40,7 @@ public class SmartPark {
         }
 
         double diffToCurrent = angleDiff(bestAngle, currentHeading);
-        boolean shouldReverse = Math.abs(diffToCurrent) > 90;
+        boolean shouldReverse = Math.abs(diffToCurrent) < 90;
 
         Pose2d startPose = new Pose2d(robotX, robotY, Math.toRadians(currentHeading));
 

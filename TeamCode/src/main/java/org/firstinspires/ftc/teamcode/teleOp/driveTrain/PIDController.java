@@ -1,16 +1,20 @@
 package org.firstinspires.ftc.teamcode.teleOp.driveTrain;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 public class PIDController {
     public double kp;
     public double ki;
     public double kd;
+    public double kv;
 
     public double target;
     public double current;
     public double output;
     private double integral;
-    private double previousError;
-    private double previousTime; // Using System.nanoTime() or ElapsedTime for more accurate timing
+    public double previousError;
+    public double previousTime; // Using System.nanoTime() or ElapsedTime for more accurate timing
+
 
     public PIDController(double kp, double ki, double kd) {
         this.kp = kp;
@@ -18,8 +22,16 @@ public class PIDController {
         this.kd = kd;
         target = 0.0;
         integral = 0.0;
-        previousError = 0.0;
-        previousTime = 0.0; // Initialize with current time in actual implementation
+        previousError = 0.0;// Initialize with current time in actual implementation
+    }
+    public PIDController(double kp, double ki, double kd, double kv) {
+        this.kp = kp;
+        this.ki = ki;
+        this.kd = kd;
+        this.kv = kv;
+        target = 0.0;
+        integral = 0.0;
+        previousError = 0.0;// Initialize with current time in actual implementation
     }
 
     public void setKP(double kp) {
@@ -34,28 +46,49 @@ public class PIDController {
         this.kd = kd;
     }
 
+    public void setKV(double kv) {this.kv = kv;}
+
     public void setTarget(double target) {
         this.target = target;
     }
 
     public double calculateOutput(double current, double time) {
         this.current = current;
-        double error = target - current;
+        double error = angleWrap(target - current);
         double deltaTime = time - previousTime;
 
-        double derivative = (deltaTime > 0) ? (error - previousError) / deltaTime : 0.0;
+        if (deltaTime <= 0) return output;
 
+        double derivative = (error - previousError) / deltaTime;
+
+        // prevent integral wind-up
         integral += error * deltaTime;
+        integral = Math.max(-1, Math.min(1, integral));
 
-        // Calculate the output
-        double output = kp * error + ki * integral + kd * derivative;
-        output = Math.max(-1.0, Math.min(1.0, output));
+        output = kp * error + ki * integral + kd * derivative;
 
+        // clamp output
+        //if (Math.abs(error) < 0.02) output = 0;
+        //output = Math.max(-0.7, Math.min(0.7, output));
 
         previousError = error;
         previousTime = time;
 
-        this.output = output;
         return output;
     }
+    public double calculateOutputFF(double targetVelocity) {
+        double ff = kv * targetVelocity;
+        return ff;
+    }
+
+    public double angleWrap(double radians){
+        while(radians > Math.PI){
+            radians -= 2 * Math.PI;
+        }
+        while(radians < -Math.PI){
+            radians += 2 * Math.PI;
+        }
+        return radians;
+    }
+
 }

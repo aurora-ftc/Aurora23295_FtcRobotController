@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp.driveTrain;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -21,11 +22,16 @@ public class DriveLaunchMode extends OpMode {
     private TrajectoryActionBuilder parkAction = null;
     private MecanumDrive drive = new MecanumDrive();
     private ElapsedTime matchTime = new ElapsedTime();
-    private Pose2d initialPose = new Pose2d(12, -63, Math.toRadians(90));
+    private Pose2d startPose = new Pose2d(12, -63, Math.toRadians(90));
     private PinpointDrive dwive;
     private SmartPark smartPark;
     private LaunchSystem launchSystem = new LaunchSystem();
-
+    private FtcDashboard dashboard = FtcDashboard.getInstance();
+    private ElapsedTime PIDTimer = new ElapsedTime();
+    private Pose2D initialPose, goalPose;
+    private double forward, strafe, rotate;
+    double lastHeading = 0;
+    boolean projHeadingCalculated;
     private final double[] powerSteps = {0.6, 0.67, 0.72, 1.0};
     private double slow = 1;
     private boolean endgameRumbleDone;
@@ -39,9 +45,20 @@ public class DriveLaunchMode extends OpMode {
     public void init() {
 
         drive.init(hardwareMap, telemetry);
+        if (ConstantConfig.blueSide) {
+            goalPose = new Pose2D(DistanceUnit.INCH, -67, 67,
+                    AngleUnit.DEGREES, 0);
+        } else {
+            goalPose = new Pose2D(DistanceUnit.INCH, 67, 67,
+                    AngleUnit.DEGREES, 0);
+        }
+        drive.initTracker(goalPose, false);
+
+        dashboard.isEnabled();
+
         launchSystem.init(0.10, 0.24, powerSteps, hardwareMap, telemetry);
 
-        dwive = new PinpointDrive(hardwareMap, initialPose);
+        dwive = new PinpointDrive(hardwareMap, startPose);
         smartPark = new SmartPark(drive, dwive);
 
         telemetry.addLine("DriveLaunchMode Initialized");
@@ -52,6 +69,24 @@ public class DriveLaunchMode extends OpMode {
     @Override
     public void start() {
 
+        drive.setPIDTargetHeading(Math.PI / 2.0);
+
+        drive.resetOdoHeading(telemetry);
+
+        drive.deactivateTrackGoal();
+
+        if (ConstantConfig.blueSide) {
+            initialPose = new Pose2D(DistanceUnit.INCH, -12, -63,
+                    AngleUnit.DEGREES, 90);
+        } else {
+            initialPose = new Pose2D(DistanceUnit.INCH, 12, -63,
+                    AngleUnit.DEGREES, 90);
+        }
+        drive.setOdoPosition(initialPose);
+
+        lastHeading = initialPose.getHeading(AngleUnit.RADIANS);
+
+        PIDTimer.reset();
         matchTime.reset();
 
         endgameRumbleDone = false;
@@ -76,70 +111,49 @@ public class DriveLaunchMode extends OpMode {
             }
         }
 
-        if (gamepad1.rightBumperWasPressed()) {
-            Vector2d target = ConstantConfig.blueSide ?
-                    new Vector2d(33.05, -37.7)
-                    :new Vector2d(-33.05, -37.7);
-
-            drive.updateOdo();
-            Pose2D odoPos = drive.getOdoPosition();
-
-            double robotX = odoPos.getX(DistanceUnit.INCH);
-            double robotY = odoPos.getY(DistanceUnit.INCH);
-            double currentHeading = odoPos.getHeading(AngleUnit.DEGREES);
-
-            double angleToTarget = Math.toDegrees(Math.atan2(target.y - robotY, target.x - robotX));
-            double[] cardinalAngles = {0.0, 90.0, 180.0, 270.0};
-            double bestAngle = cardinalAngles[0];
-            double minDiff = Math.abs(angleDiff(angleToTarget, bestAngle));
-
-            for (double a : cardinalAngles) {
-                double diff = Math.abs(angleDiff(angleToTarget, a));
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    bestAngle = a;
-                }
-            }
-
-            double diffToCurrent = angleDiff(bestAngle, currentHeading);
-            boolean shouldReverse = Math.abs(diffToCurrent) > 90;
-
-            Pose2d startPose = new Pose2d(robotX, robotY, Math.toRadians(currentHeading));
-
-            TrajectoryActionBuilder builder = dwive.actionBuilder(startPose);
-
-            if (shouldReverse)
-                builder.setReversed(true);
-
-            builder.splineTo(target, Math.toRadians(bestAngle));
-
-            Actions.runBlocking(new SequentialAction(parkAction.build()));
-            // return Trajectory (not executed or built yet)
-        }
-
-        if (gamepad1.leftBumperWasPressed()) {
-            Vector2d parkTarget = ConstantConfig.blueSide ?
-                    new Vector2d(33.05, -37.7)
-                    :new Vector2d(-33.05, -37.7);
-
-            telemetry.addLine("Sent");
-            parkAction = smartPark.buildParkAction(parkTarget, telemetry);
-            telemetry.addLine("Returned");
-            Actions.runBlocking(new SequentialAction(parkAction.build()));
-            telemetry.addLine("Built");
-        }
-
-        // Driving controls
-        double forward = -gamepad1.left_stick_y;
-        double strafe = gamepad1.left_stick_x;
-        double rotate = gamepad1.right_stick_x * 1.1;
-
         // Speed modifiers
         if (gamepad1.left_trigger > 0.4)
             slow = 0.65;
         else if (gamepad1.right_trigger > 0.4)
             slow = 0.35;
-        else slow = 1;
+        else
+            slow = 1;
+
+        forward = -1 * gamepad1.left_stick_y;
+        strafe = gamepad1.left_stick_x;
+
+        if (!drive.trackGoalOn) {
+            if (Math.abs(gamepad1.right_stick_x) > 0.03) {
+
+                rotate = gamepad1.right_stick_x;
+                lastHeading = drive.getOdoHeading(AngleUnit.RADIANS);
+                projHeadingCalculated = false;
+                PIDTimer.reset();
+
+            } else if (PIDTimer.milliseconds() > 240) {
+
+                if (!projHeadingCalculated) {
+                    lastHeading = drive.getOdoHeading(AngleUnit.RADIANS);
+                    projHeadingCalculated = true;
+                }
+
+                rotate = drive.headingPID(lastHeading, ConstantConfig.driveKp,
+                        ConstantConfig.driveKi, ConstantConfig.driveKd);
+                slow = 1;
+
+            } else {
+
+                rotate = 0;
+
+            }
+
+            drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
+
+        } else{
+
+            drive.trackGoal(telemetry, forward, strafe, slow);
+
+        }
 
         // Endgame rumble
         if (matchTime.seconds() >= 100 && !endgameRumbleDone) {
@@ -180,31 +194,37 @@ public class DriveLaunchMode extends OpMode {
 
         //Reset heading
         if (gamepad1.touchpad) {
+            drive.setPIDTargetHeading(0.0);
+            lastHeading = 0;
             gamepad1.rumbleBlips(2);
             recenterTime = matchTime.seconds();
-            drive.OdoReset(telemetry);
+            drive.resetOdoHeading(telemetry);
             return;
+        }
+
+        if (gamepad1.rightBumperWasPressed())
+            drive.toggleTrackGoal();
+
+        if (gamepad1.dpadLeftWasPressed()) {
+            drive.setPIDTargetHeading(0.0);
+            lastHeading = 0;
+            drive.resetOdoPosition(telemetry);
         }
 
         // Continuous subsystem updates
         launchSystem.intakeBlipLoop();
         launchSystem.updateLauncher();
 
-        drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
+        //Telemetry
+        if (ConstantConfig.debug) {
+            launchSystem.debugTelemetry(telemetry);
+            drive.debugTelemetry(telemetry);
+        } else {
+            launchSystem.compTelemetry(telemetry);
+            drive.compTelemetry(telemetry);
+        }
 
-        // Telemetry
-        telemetry.addData("Speed", slow);
-        telemetry.addData("Forward", forward);
-        telemetry.addData("Strafe", strafe);
-        telemetry.addData("Rotate", rotate);
-
-        launchSystem.updateTelemetry(telemetry);
         telemetry.update();
 
     }
-private double angleDiff(double target, double current) {
-    double diff = target - current;
-    diff = ((diff + 180) % 360) - 180;
-    return diff;
-}
 }
