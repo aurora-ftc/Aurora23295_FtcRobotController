@@ -1,0 +1,58 @@
+package org.firstinspires.ftc.teamcode.roadrunner.tuning;
+
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.OctoQuadDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
+
+@Disabled
+public final class ManualFeedbackTuner extends LinearOpMode {
+    public static double DISTANCE = 16;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        if (TuningOpModes.DRIVE_CLASS.equals(OctoQuadDrive.class)) {
+            OctoQuadDrive drive = new OctoQuadDrive(hardwareMap, new Pose2d(0, 0, 0));
+
+            waitForStart();
+
+            while (opModeIsActive()) {
+                Actions.runBlocking(
+                        drive.actionBuilder(new Pose2d(0, 0, 0))
+                                .lineToX(DISTANCE)
+                                .lineToX(0)
+                                .build());
+            }
+
+        } else if (TuningOpModes.DRIVE_CLASS.equals(PinpointDrive.class)) {
+            PinpointDrive drive = new PinpointDrive(hardwareMap, new Pose2d(0, 0, 0));
+
+            waitForStart();
+
+            while (opModeIsActive()) {
+                Actions.runBlocking(
+                        drive.actionBuilder(new Pose2d(0, 0, 0))
+                                .lineToX(DISTANCE)
+                                .lineToX(0)
+                                .build());
+            }
+        } else if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
+            MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
+            waitForStart();
+
+            while (opModeIsActive()) {
+                Actions.runBlocking(
+                        drive.actionBuilder(new Pose2d(0, 0, 0))
+                                .lineToX(DISTANCE)
+                                .lineToX(0)
+                                .build());
+            }
+        } else {
+            throw new RuntimeException();
+        }
+    }
+}

@@ -2,6 +2,9 @@ repositories {
     mavenCentral()
     google() // Needed for androidx
     maven { url = 'https://maven.brott.dev/' }
+    maven {
+        url "https://repo.dairy.foundation/releases"
+    }
 }
 
 dependencies {
@@ -13,10 +16,16 @@ dependencies {
     implementation 'org.firstinspires.ftc:Hardware:11.0.0'
     implementation 'org.firstinspires.ftc:FtcCommon:11.0.0'
     implementation 'org.firstinspires.ftc:Vision:11.0.0'
+
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    //Needed for FTC dashboard:
-    implementation('com.acmerobotics.dashboard:dashboard:0.5.0') {
-        exclude group: 'org.firstinspires.ftc'
+
+    implementation 'dev.frozenmilk.sinister:Sloth:0.2.4'
+    implementation 'com.acmerobotics.slothboard:dashboard:0.2.4+0.4.17'
+
+    //implementation ('com.acmerobotics.roadrunner:ftc:0.1.21') {
+    //    exclude group: "com.acmerobotics.dashboard"
+    //}
+    implementation ('com.acmerobotics.roadrunner:actions:1.0.1') {
+        exclude group: "com.acmerobotics.dashboard"
     }
 }
-
