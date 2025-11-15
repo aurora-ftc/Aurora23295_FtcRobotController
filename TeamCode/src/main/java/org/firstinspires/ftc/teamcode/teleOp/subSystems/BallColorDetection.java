@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -154,7 +155,7 @@ public class BallColorDetection {
         double dh = (h - meanH) / sigmaH;
         double ds = (s - meanS) / sigmaS;
         double dv = (v - meanV) / sigmaV;
-        return Math.sqrt(dh*dh + ds*ds + dv*dv);
+        return Math.sqrt(dh * dh + ds * ds + dv * dv);
     }
 
 }

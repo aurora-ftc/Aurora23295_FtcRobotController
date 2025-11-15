@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -11,9 +10,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LimelightLocalization {
     /**
@@ -37,6 +33,7 @@ public class LimelightLocalization {
             return null;
         }
     }
+
     public Pose2D get2DLocation(Double heading) {
         limelight.updateRobotOrientation(heading);
         LLResult llResult = limelight.getLatestResult();
@@ -54,7 +51,7 @@ public class LimelightLocalization {
 
     public double getDistance(double ta) {
         double scale = 30665.96; //change ts
-        double distance = scale/ta;
+        double distance = scale / ta;
         return distance;
     }
 }

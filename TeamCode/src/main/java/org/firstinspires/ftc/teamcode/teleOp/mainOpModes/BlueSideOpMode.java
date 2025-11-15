@@ -1,22 +1,20 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
-import org.firstinspires.ftc.teamcode.teleOp.ConstantConfig;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
-import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightLocalization;
+import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
+import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "BlueSideOpMode", group = "OpModes")
 public class BlueSideOpMode extends OpMode {
@@ -32,7 +30,8 @@ public class BlueSideOpMode extends OpMode {
     private Pose2D initialPose, goalPose;
     private LimelightLocalization limelight = new LimelightLocalization();
     private double forward, strafe, rotate;
-    private double lastHeading = 0;;
+    private double lastHeading = 0;
+    ;
     private final double[] powerSteps = ConstantConfig.powerVals;
     private double slow = 1;
     private boolean endgameRumbleDone, projHeadingCalculated;
@@ -138,7 +137,7 @@ public class BlueSideOpMode extends OpMode {
 
             drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
 
-        } else{
+        } else {
 
             drive.trackGoal(telemetry, forward, strafe, slow);
 
@@ -180,7 +179,7 @@ public class BlueSideOpMode extends OpMode {
             lastHeading = 0;
             gamepad1.rumbleBlips(2);
             recenterTime = matchTime.seconds();
-            drive.resetOdoHeading(telemetry);
+            drive.resetOdoHeading();
             return;
         }
 
@@ -211,7 +210,7 @@ public class BlueSideOpMode extends OpMode {
             drive.debugTelemetry(telemetry, slow);
         } else {
             launchSystem.compTelemetry(telemetry);
-            drive.compTelemetry(telemetry, slow);
+            drive.updateTelemetry(telemetry, slow);
         }
 
         telemetry.addData("BlueSide", ConstantConfig.blueSide);

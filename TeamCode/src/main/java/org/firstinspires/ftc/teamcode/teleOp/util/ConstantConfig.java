@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teleOp;
+package org.firstinspires.ftc.teamcode.teleOp.util;
 
 import com.acmerobotics.dashboard.config.Config;
 
@@ -32,5 +32,4 @@ public class ConstantConfig {
             AngleUnit.DEGREES, 90);
 
     public static double[] powerVals = {40, 42, 44, 85};
-
 }

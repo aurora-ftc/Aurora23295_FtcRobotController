@@ -9,10 +9,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
-import org.firstinspires.ftc.teamcode.teleOp.ConstantConfig;
+import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
@@ -181,7 +180,7 @@ public class RedSideOpMode extends OpMode {
             lastHeading = 0;
             gamepad1.rumbleBlips(2);
             recenterTime = matchTime.seconds();
-            drive.resetOdoHeading(telemetry);
+            drive.resetOdoHeading();
             return;
         }
 
@@ -212,7 +211,7 @@ public class RedSideOpMode extends OpMode {
             drive.debugTelemetry(telemetry, slow);
         } else {
             launchSystem.compTelemetry(telemetry);
-            drive.compTelemetry(telemetry, slow);
+            drive.updateTelemetry(telemetry, slow);
         }
 
         telemetry.addData("BlueSide", ConstantConfig.blueSide);

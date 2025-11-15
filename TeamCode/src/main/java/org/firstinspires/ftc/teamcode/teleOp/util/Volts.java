@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode.teleOp.util;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 public class Volts {
     // fields / init
     double Vnominal = 12.5;          // voltage where you tuned F

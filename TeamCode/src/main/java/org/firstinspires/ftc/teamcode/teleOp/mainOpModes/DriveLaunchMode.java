@@ -1,42 +1,61 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
-import org.firstinspires.ftc.teamcode.teleOp.ConstantConfig;
+import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
-import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightLocalization;
+import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "DriveLaunchMode", group = "OpModes")
 public class DriveLaunchMode extends OpMode {
+
+// --- Trajectory & Drive Components ---
+
     private TrajectoryActionBuilder parkAction = null;
     private MecanumDrive drive = new MecanumDrive();
-    private ElapsedTime matchTime = new ElapsedTime();
-    private ElapsedTime PIDTimer = new ElapsedTime();
-    private Pose2d startPose = new Pose2d(12, -63, Math.toRadians(90));
     private PinpointDrive dwive;
     private SmartPark smartPark;
+
+// --- Timers ---
+
+    private ElapsedTime matchTime = new ElapsedTime();
+    private ElapsedTime PIDTimer = new ElapsedTime();
+
+// --- Pose Tracking ---
+
+    private Pose2d startPose = new Pose2d(12, -63, Math.toRadians(90));
+    private Pose2D initialPose, goalPose;
+
+// --- Subsystems ---
+
     private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
     private FtcDashboard dashboard = FtcDashboard.getInstance();
-    private Pose2D initialPose, goalPose;
+    private MultipleTelemetry telemetry = new MultipleTelemetry();
     private LimelightLocalization limelight = new LimelightLocalization();
+
+// --- Control State ---
+
     private double forward, strafe, rotate;
-    private double lastHeading = 0;;
+    private double lastHeading = 0;
     private final double[] powerSteps = ConstantConfig.powerVals;
     private double slow = 1;
+
+// --- Flags ---
+
     private boolean endgameRumbleDone, projHeadingCalculated;
     private boolean liftDown = true;
+
     private double startWait = 0.0;
     private double recenterTime = 0.0;
     int shotsLeft = 0;
@@ -97,7 +116,6 @@ public class DriveLaunchMode extends OpMode {
 
     @Override
     public void loop() {
-
         // Recenter freeze period (Unnecessary now but still useful)
         if (recenterTime > 0) {
             if (matchTime.seconds() - recenterTime >= 0.25) {
@@ -142,7 +160,7 @@ public class DriveLaunchMode extends OpMode {
 
             drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
 
-        } else{
+        } else {
 
             drive.trackGoal(telemetry, forward, strafe, slow);
 
@@ -166,7 +184,7 @@ public class DriveLaunchMode extends OpMode {
         else if (gamepad1.circleWasPressed()) launchSystem.toggleIntakeReverse();
 
         //Lift hit
-        if(gamepad1.dpadRightWasPressed()) shotsLeft = 3;
+        if (gamepad1.dpadRightWasPressed()) shotsLeft = 3;
 
 
         if (gamepad1.crossWasPressed()) {
@@ -197,7 +215,7 @@ public class DriveLaunchMode extends OpMode {
             lastHeading = 0;
             gamepad1.rumbleBlips(2);
             recenterTime = matchTime.seconds();
-            drive.resetOdoHeading(telemetry);
+            drive.resetOdoHeading();
             return;
         }
 
@@ -219,23 +237,26 @@ public class DriveLaunchMode extends OpMode {
 
         // Continuous subsystem updates
         double dist = drive.getDistanceFromGoal();
-        telemetry.addData("Distance from goal", dist);
         launchSystem.intakeBlipLoop();
         launchSystem.updateLauncher(telemetry, dist, hardwareMap);
 
-        //Telemetry
+        updateAllTelemetry(dist, slow);
+
+        telemetry.update();
+    }
+
+    private void updateAllTelemetry(double dist, double slow) {
+        telemetry.addData("shotsLeft", shotsLeft);
+        telemetry.addData("Distance from goal", dist);
+        telemetry.addData("BlueSide", ConstantConfig.blueSide);
+
         if (ConstantConfig.debug) {
             telemetry.addLine("Debug Enabled");
             launchSystem.debugTelemetry(telemetry);
             drive.debugTelemetry(telemetry, slow);
         } else {
             launchSystem.compTelemetry(telemetry);
-            drive.compTelemetry(telemetry, slow);
+            drive.updateTelemetry(telemetry, slow);
         }
-
-        telemetry.addData("BlueSide", ConstantConfig.blueSide);
-
-        telemetry.update();
-
     }
 }

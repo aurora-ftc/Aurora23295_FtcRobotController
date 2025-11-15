@@ -1,16 +1,19 @@
 package org.firstinspires.ftc.teamcode.teleOp.driveTrain;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.teleOp.ConstantConfig;
+import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
 import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 
 import java.util.Locale;
@@ -33,7 +36,7 @@ public class MecanumDrive {
         backLeftMotor = hwMap.get(DcMotor.class, "back_left_motor");
         backRightMotor = hwMap.get(DcMotor.class, "back_right_motor");
 
-        odo = hwMap.get(GoBildaPinpointDriverRR.class,"odo");
+        odo = hwMap.get(GoBildaPinpointDriverRR.class, "odo");
 
         imu = hwMap.get(IMU.class, "imu");
 
@@ -73,7 +76,7 @@ public class MecanumDrive {
         odo.resetPosAndIMU();
 
         headingPID = new PIDController(ConstantConfig.driveKp, ConstantConfig.driveKi, ConstantConfig.driveKd); // tune these values
-        headingPID.setTarget(Math.PI / 2.0);// default goalPose heading = 0 degrees
+        headingPID.setTarget(Math.PI / 2.0); //default goalPose heading = 0 degrees
         headingPID.previousTime = System.nanoTime() / 1e9;
 
         String PIDData = String.format(Locale.US, "{KP: %.3f, KI: %.3f, KD: %.3f}",
@@ -174,34 +177,26 @@ public class MecanumDrive {
         telemetry.addLine();
     }
 
-    public void compTelemetry(Telemetry telemetry, double slow) {
-        telemetry.addData("Odo Status", odo.getDeviceStatus());
-        telemetry.addLine();
-        telemetry.addData("Position", data);
-        telemetry.addLine();
-        telemetry.addData("Speed Modifier", slow == 0.35? "Slow (0.35)": "Normal (1.0)");
-        telemetry.addLine();
-    }
-
     public void setPIDTargetHeading(double targetHeading) {
         headingPID.setTarget(targetHeading);
     }
 
-    public void resetOdoHeading(Telemetry telemetry) {
+    public void resetOdoHeading() {
 
         //Resets Heading and Position -STAY STILL FOR AT LEAST 0.25 SECONDS WHILE DOING SO FOR ACCURACY-
         odo.resetYaw();
         odo.update(GoBildaPinpointDriverRR.ReadData.ONLY_UPDATE_HEADING);
-        telemetry.update();
 
     }
 
     public void resetOdoPosition(Telemetry telemetry) {
-        odo.setPosition(new Pose2D(DistanceUnit.INCH, 0 , 0,
+        odo.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0,
                 AngleUnit.RADIANS, 0));
     }
 
-    public void updateOdo() {odo.update();}
+    public void updateOdo() {
+        odo.update();
+    }
 
     public void setOdoPosition(Pose2D pose) {
         odo.setPosition(pose);
@@ -230,6 +225,34 @@ public class MecanumDrive {
     public void initTracker(Pose2D goalPose, boolean trackGoalOn) {
         this.goalPose = goalPose;
         this.trackGoalOn = trackGoalOn;
+    }
+
+    public void drawRobot(Canvas field) {
+        Pose2D pose = getOdoPosition();
+
+        double x = pose.getX(DistanceUnit.INCH);
+        double y = pose.getY(DistanceUnit.INCH);
+        double heading = pose.getHeading(AngleUnit.RADIANS);
+
+        double robotSize = 9;
+        double half = robotSize / 2;
+
+        double[][] points = {
+                {half, 0},
+                {half, half},
+                {half, -half},
+        };
+
+        double[][] transformed = new double[3][2];
+        for (int i = 0; i < 3; i++) {
+            transformed[i][0] = x + points[i][0] * Math.cos(heading) - points[i][1] * Math.sin(heading);
+            transformed[i][1] = y + points[i][0] * Math.sin(heading) + points[i][1] * Math.cos(heading);
+        }
+
+        field.strokePolyline(
+                new double[]{transformed[0][0], transformed[1][0], transformed[2][0], transformed[0][0]},
+                new double[]{transformed[0][1], transformed[1][1], transformed[2][1], transformed[0][1]}
+        );
     }
 
     public void trackGoal(Telemetry tele, double forward, double strafe, double slow) {
@@ -284,6 +307,47 @@ public class MecanumDrive {
 
     public double smoothDrive(double input) {
         return 0.3 * Math.tan(input * 1.2792);
+    }
+    public void updateTelemetry(Telemetry telemetry, double slow) {
+
+        TelemetryPacket packet = new TelemetryPacket();
+        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        updateOdo();
+
+        Pose2D pos = odo.getPosition();
+        double headingDeg = getOdoHeading(AngleUnit.DEGREES);
+
+        multiTelemetry.addLine("===== Mecanum Drive Telemetry =====");
+        multiTelemetry.addData("OdoStatus", odo.getDeviceStatus());
+        multiTelemetry.addData("Pinpoint Frequency", odo.getFrequency());
+        multiTelemetry.addData("X (in)", pos.getX(DistanceUnit.INCH));
+        multiTelemetry.addData("Y (in)", pos.getY(DistanceUnit.INCH));
+        multiTelemetry.addData("Heading (deg)", headingDeg);
+
+        Canvas field = packet.fieldOverlay();
+
+        drawRobot(field);
+
+        multiTelemetry.addData("Speed Modifier",
+                slow == 0.35 ? "Slow (0.35)" : String.format(Locale.US, "Normal (%.2f)", slow));
+
+        multiTelemetry.addData("Forward (calc)", newForward);
+        multiTelemetry.addData("Strafe (calc)", newStrafe);
+        multiTelemetry.addData("Theta (rad)", theta);
+
+        multiTelemetry.addData("New Forward", newForward);
+        multiTelemetry.addData("New Strafe", newStrafe);
+        multiTelemetry.addData("Theta (Radians)", theta);
+
+        if (trackGoalOn && goalPose != null) {
+            multiTelemetry.addLine("--- Goal Tracking ---");
+            multiTelemetry.addData("Goal X (in)", goalPose.getX(DistanceUnit.INCH));
+            multiTelemetry.addData("Goal Y (in)", goalPose.getY(DistanceUnit.INCH));
+            multiTelemetry.addData("Distance to Goal (in)", getDistanceFromGoal());
+        }
+
+        multiTelemetry.update();
     }
 
 }
