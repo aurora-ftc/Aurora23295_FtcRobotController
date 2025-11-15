@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.teleOp.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,7 @@ public class LimelightLocalization {
     private Limelight3A limelight;
 
     public void init(HardwareMap hwMap, int pipeline) {
-        limelight = hwMap.get(Limelight3A.class, "limelight");
+        limelight = hwMap.get(Limelight3A.class, Constants.HardwareConfig.limelight);
         limelight.pipelineSwitch(pipeline); //0 is the normal
         limelight.start();
     }
@@ -37,6 +38,7 @@ public class LimelightLocalization {
             return null;
         }
     }
+
     public Pose2D get2DLocation(Double heading) {
         limelight.updateRobotOrientation(heading);
         LLResult llResult = limelight.getLatestResult();
@@ -44,8 +46,9 @@ public class LimelightLocalization {
             Pose3D botPose3D = llResult.getBotpose_MT2();
             Position pose = botPose3D.getPosition();
             YawPitchRollAngles yawPitchRollAngles = botPose3D.getOrientation();
-            Pose2D botPose2D = new Pose2D(DistanceUnit.INCH, pose.x, pose.y,
-                    AngleUnit.RADIANS, yawPitchRollAngles.getYaw(AngleUnit.RADIANS));
+            Pose2D botPose2D = new Pose2D(DistanceUnit.INCH, pose.x * 39.37, pose.y * 39.37,
+                    AngleUnit.RADIANS,
+                    yawPitchRollAngles.getYaw(AngleUnit.RADIANS) > 0.01? yawPitchRollAngles.getYaw(AngleUnit.RADIANS) : 0);
             return botPose2D;
         } else {
             return null;

@@ -27,14 +27,14 @@ import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Lift;
 import java.util.Arrays;
 
 @Config
-@Autonomous(name = "AUTONOMOUS_RED_SIX", group = "ChoppedAutos")
-public class SixBallRed extends LinearOpMode {
+@Autonomous(name = "AUTONOMOUS_BLUE_SIX", group = "ChoppedAutos")
+public class SixBallBlue extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         // ---------------------- Initialize ----------------------
-        Pose2d initialPose = new Pose2d(63, 12, Math.toRadians(180));
+        Pose2d initialPose = new Pose2d(63, -12, Math.toRadians(180));
         PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap, telemetry);
         Lift lift = new Lift(hardwareMap);
@@ -48,22 +48,22 @@ public class SixBallRed extends LinearOpMode {
 
         // ---------------------- Trajectories ----------------------
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading(new Vector2d(55, 12), Math.toRadians(156.5));
+                .strafeToLinearHeading(new Vector2d(55, -12), Math.toRadians(-156.5));
 
-        TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(55, 13, Math.toRadians(156.5)))
-                .strafeToLinearHeading(new Vector2d(36, 30), Math.toRadians(270));
+        TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(55, -13, Math.toRadians(-156.5)))
+                .strafeToLinearHeading(new Vector2d(36, -30), Math.toRadians(-270));
 
-        TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(36, 30, Math.toRadians(270)))
-                .lineToY(54, collectingBallsVel, collectingBallsAccel);
+        TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(36, -30, Math.toRadians(-270)))
+                .lineToY(-54, collectingBallsVel, collectingBallsAccel);
 
-        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(36, 54, Math.toRadians(270)))
+        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(36, -54, Math.toRadians(-270)))
                 .setReversed(true)
-                .strafeToLinearHeading(new Vector2d(53, 13), Math.toRadians(156.5));
-                //.splineTo(new Vector2d(53, 13), Math.toRadians(339));
+                .strafeToLinearHeading(new Vector2d(53, -13), Math.toRadians(-156.5));
+        //.splineTo(new Vector2d(53, 13), Math.toRadians(339));
 
-        TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(53, 13, Math.toRadians(156.5)))
+        TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(53, -13, Math.toRadians(-156.5)))
                 .setReversed(false)
-                .strafeToLinearHeading(new Vector2d(35, 13), Math.toRadians(180));
+                .strafeToLinearHeading(new Vector2d(35, -13), Math.toRadians(-180));
 
         // ---------------------- Wait for Start ----------------------
         while (!opModeIsActive() && !isStopRequested()) {

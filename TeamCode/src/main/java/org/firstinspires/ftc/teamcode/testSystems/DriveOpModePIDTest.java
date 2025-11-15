@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.teleOp.ConstantConfig;
+import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 
@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 public class DriveOpModePIDTest extends OpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     MecanumDrive drive = new MecanumDrive();
+    MecanumDrive.GoalTracker goalTracker;
     LaunchIntakeSystem launcher = new LaunchIntakeSystem();
     ElapsedTime PIDTimer = new ElapsedTime();
     Pose2D initialPose, goalPose;
@@ -34,18 +35,19 @@ public class DriveOpModePIDTest extends OpMode {
 
         drive.init(hardwareMap, telemetry);
 
-        if (ConstantConfig.blueSide) {
+        if (Constants.blueSide) {
             goalPose = new Pose2D(DistanceUnit.INCH, -67, 67,
                     AngleUnit.DEGREES, 0);
         } else {
             goalPose = new Pose2D(DistanceUnit.INCH, 67, 67,
                     AngleUnit.DEGREES, 0);
         }
-        drive.initTracker(goalPose, false);
+
+        goalTracker = drive.new GoalTracker(goalPose, false);
 
         dashboard.isEnabled();
 
-        launcher.init(0.1,0.24, powerSteps, hardwareMap, telemetry);
+        launcher.init(powerSteps, hardwareMap, telemetry);
 
         shooterOn = false;
 
@@ -58,9 +60,7 @@ public class DriveOpModePIDTest extends OpMode {
 
         drive.resetOdoHeading(telemetry);
 
-        drive.deactivateTrackGoal();
-
-        if (ConstantConfig.blueSide) {
+        if (Constants.blueSide) {
             initialPose = new Pose2D(DistanceUnit.INCH, -12, -63,
                     AngleUnit.DEGREES, 90);
         } else {
@@ -89,7 +89,7 @@ public class DriveOpModePIDTest extends OpMode {
         forward = -1 * gamepad1.left_stick_y;
         strafe = gamepad1.left_stick_x;
 
-        if (!drive.trackGoalOn) {
+        if (!goalTracker.trackGoalOn) {
             if (Math.abs(gamepad1.right_stick_x) > 0.03) {
 
                 rotate = gamepad1.right_stick_x;
@@ -117,7 +117,7 @@ public class DriveOpModePIDTest extends OpMode {
 
         } else{
 
-            drive.trackGoal(telemetry, forward, strafe, slow);
+            goalTracker.trackGoal(telemetry, forward, strafe, slow);
 
         }
 
@@ -128,7 +128,7 @@ public class DriveOpModePIDTest extends OpMode {
         }
 
         if (gamepad1.rightBumperWasPressed())
-            drive.toggleTrackGoal();
+            goalTracker.toggleTrackGoal();
 
         if (gamepad1.dpadLeftWasPressed()) {
             drive.setPIDTargetHeading(0.0);
@@ -162,7 +162,7 @@ public class DriveOpModePIDTest extends OpMode {
             launcher.intakeBlipReset();
         }
 
-        double dist = drive.getDistanceFromGoal();
+        double dist = goalTracker.getDistanceFromGoal();
         launcher.intakeBlipLoop();
         launcher.updateLauncher(telemetry, dist, hardwareMap);
 
@@ -172,7 +172,7 @@ public class DriveOpModePIDTest extends OpMode {
         telemetry.addData("goalPose", goalPose);
         telemetry.addLine();
 
-        if (ConstantConfig.debug) {
+        if (Constants.debug) {
             launcher.debugTelemetry(telemetry);
             drive.debugTelemetry(telemetry, slow);
         } else {

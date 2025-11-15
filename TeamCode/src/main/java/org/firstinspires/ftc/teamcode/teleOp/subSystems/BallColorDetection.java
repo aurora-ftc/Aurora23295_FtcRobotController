@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.teleOp.Constants;
 
 public class BallColorDetection {
 
@@ -50,8 +51,8 @@ public class BallColorDetection {
     }
 
     public void init(HardwareMap hwMap) {
-        colorSensor = (RevColorSensorV3) hwMap.get(ColorSensor.class, "color_sensor");
-        colorSensor.setGain(10);
+        colorSensor = (RevColorSensorV3) hwMap.get(ColorSensor.class, Constants.HardwareConfig.colorSensor);
+        colorSensor.setGain(Constants.revColorSensorGain);
     }
 
     public DetectedColor getDetectedColor() {
@@ -74,42 +75,47 @@ public class BallColorDetection {
         s = hsv[1] * 255.0;
         v = hsv[2] * 255.0;
 
-        // Compute Gaussian probabilities
-        p_purple = gaussian3D(h, s, v,
-                meanH_purple, sigmaH_purple,
-                meanS_purple, sigmaS_purple,
-                meanV_purple, sigmaV_purple);
+        if (!Constants.useMahalanobisDistance) {
+            // Compute Gaussian probabilities
+            p_purple = gaussian3D(h, s, v,
+                    meanH_purple, sigmaH_purple,
+                    meanS_purple, sigmaS_purple,
+                    meanV_purple, sigmaV_purple);
 
-        p_green = gaussian3D(h, s, v,
-                meanH_green, sigmaH_green,
-                meanS_green, sigmaS_green,
-                meanV_green, sigmaV_green);
+            p_green = gaussian3D(h, s, v,
+                    meanH_green, sigmaH_green,
+                    meanS_green, sigmaS_green,
+                    meanV_green, sigmaV_green);
 
-//        // Choose which color is most likely
-//        if (p_purple > p_green && p_purple < minProb) {
-//            detectedColor = DetectedColor.PURPLE;
-//        } else if (p_green > p_purple && p_green > minProb) {
-//            detectedColor = DetectedColor.GREEN;
-//        } else {
-//            detectedColor = DetectedColor.UNKNOWN;
-//        }
-        dPurple = mahalanobisDistance(h, s, v,
-                meanH_purple, sigmaH_purple,
-                meanS_purple, sigmaS_purple,
-                meanV_purple, sigmaV_purple);
+            // Choose which color is most likely
+            if (p_purple > p_green && p_purple < minProb) {
+                detectedColor = DetectedColor.PURPLE;
+            } else if (p_green > p_purple && p_green > minProb) {
+                detectedColor = DetectedColor.GREEN;
+            } else {
+                detectedColor = DetectedColor.UNKNOWN;
+            }
 
-        dGreen = mahalanobisDistance(h, s, v,
-                meanH_green, sigmaH_green,
-                meanS_green, sigmaS_green,
-                meanV_green, sigmaV_green);
-
-        // Choose detected color
-        if (dPurple < threshold && dPurple < dGreen) {
-            detectedColor = DetectedColor.PURPLE;
-        } else if (dGreen < threshold && dGreen < dPurple) {
-            detectedColor = DetectedColor.GREEN;
         } else {
-            detectedColor = DetectedColor.UNKNOWN;
+
+            dPurple = mahalanobisDistance(h, s, v,
+                    meanH_purple, sigmaH_purple,
+                    meanS_purple, sigmaS_purple,
+                    meanV_purple, sigmaV_purple);
+
+            dGreen = mahalanobisDistance(h, s, v,
+                    meanH_green, sigmaH_green,
+                    meanS_green, sigmaS_green,
+                    meanV_green, sigmaV_green);
+
+            if (dPurple < threshold && dPurple < dGreen) {
+                detectedColor = DetectedColor.PURPLE;
+            } else if (dGreen < threshold && dGreen < dPurple) {
+                detectedColor = DetectedColor.GREEN;
+            } else {
+                detectedColor = DetectedColor.UNKNOWN;
+            }
+
         }
 
         return detectedColor;
@@ -119,6 +125,7 @@ public class BallColorDetection {
         tele.addData("Raw RGB", "(%d, %d, %d)", r, g, b);
         tele.addData("HSV", "(%.1f, %.1f, %.1f)", h, s, v);
         tele.addLine();
+        tele.addData("Using Mahalanobis Distance", Constants.useMahalanobisDistance);
         tele.addData("Mahalanobis Purple Distance", "%.6f", dPurple);
         tele.addData("Mahalanobis Green Distance", "%.6f", dGreen);
         tele.addLine();
@@ -133,11 +140,11 @@ public class BallColorDetection {
         tele.addData("Detected Color", detectedColor);
     }
 
-    private double gaussian(double x, double mean, double sigma) {
+    private static double gaussian(double x, double mean, double sigma) {
         return Math.exp(-0.5 * Math.pow((x - mean) / sigma, 2));
     }
 
-    private double gaussian3D(double h, double s, double v,
+    private static double gaussian3D(double h, double s, double v,
                               double meanH, double sigmaH,
                               double meanS, double sigmaS,
                               double meanV, double sigmaV) {
@@ -147,7 +154,7 @@ public class BallColorDetection {
         return pH * pS * pV;
     }
 
-    private double mahalanobisDistance(double h, double s, double v,
+    private static double mahalanobisDistance(double h, double s, double v,
                                        double meanH, double sigmaH,
                                        double meanS, double sigmaS,
                                        double meanV, double sigmaV) {

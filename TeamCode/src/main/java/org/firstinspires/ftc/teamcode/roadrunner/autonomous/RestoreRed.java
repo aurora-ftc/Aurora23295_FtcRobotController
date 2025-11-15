@@ -22,7 +22,7 @@ public class RestoreRed extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Pose2d initialPose = new Pose2d(9, -24, Math.toRadians(90));
         PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
-        Launcher launcher = new Launcher(hardwareMap);
+        Launcher launcher = new Launcher(hardwareMap, telemetry);
         Intake intake = new Intake(hardwareMap);
         Lift lift = new Lift(hardwareMap);
 

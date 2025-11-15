@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -9,10 +8,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
-import org.firstinspires.ftc.teamcode.teleOp.ConstantConfig;
+import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
@@ -30,10 +28,11 @@ public class DriveLaunchMode extends OpMode {
     private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
     private FtcDashboard dashboard = FtcDashboard.getInstance();
     private Pose2D initialPose, goalPose;
+    private MecanumDrive.GoalTracker goalTracker;
     private LimelightLocalization limelight = new LimelightLocalization();
     private double forward, strafe, rotate;
     private double lastHeading = 0;;
-    private final double[] powerSteps = ConstantConfig.powerVals;
+    private final double[] powerSteps = Constants.launcherPowerSteps;
     private double slow = 1;
     private boolean endgameRumbleDone, projHeadingCalculated;
     private boolean liftDown = true;
@@ -44,31 +43,31 @@ public class DriveLaunchMode extends OpMode {
     @Override
     public void init() {
 
+
         dwive = new PinpointDrive(hardwareMap, startPose);
         smartPark = new SmartPark(drive, dwive);
 
         //Drive Systems Init
         drive.init(hardwareMap, telemetry);
 
-        if (ConstantConfig.blueSide) {
-            goalPose = ConstantConfig.goalPoseBlue;
+        if (Constants.blueSide) {
+            goalPose = Constants.goalPoseBlue;
         } else {
-            goalPose = ConstantConfig.goalPoseRed;
+            goalPose = Constants.goalPoseRed;
         }
-        drive.initTracker(goalPose, false);
-        drive.deactivateTrackGoal();
+        goalTracker = drive.new GoalTracker(goalPose, false);
 
-        if (ConstantConfig.blueSide) {
-            initialPose = ConstantConfig.initialPoseBlue;
+        if (Constants.blueSide) {
+            initialPose = Constants.initialPoseBlue;
         } else {
-            initialPose = ConstantConfig.initialPoseRed;
+            initialPose = Constants.initialPoseRed;
         }
         drive.setOdoPosition(initialPose);
         telemetry.addData("initialPose", initialPose);
 
         dashboard.isEnabled();
 
-        launchSystem.init(0.10, 0.24, powerSteps, hardwareMap, telemetry);
+        launchSystem.init(powerSteps, hardwareMap, telemetry);
 
         telemetry.addData("initialPoseGotten", drive.getOdoPosition());
         telemetry.addLine("DriveLaunchMode Initialized");
@@ -111,21 +110,21 @@ public class DriveLaunchMode extends OpMode {
         }
 
         // Speed modifiers
-        if (gamepad1.left_trigger > 0.4) slow = 0.35;
+        if (gamepad1.left_trigger > 0.4) slow = Constants.slowSpeedLT;
         else slow = 1;
 
-        forward = drive.smoothDrive(-gamepad1.left_stick_y);
-        strafe = drive.smoothDrive(gamepad1.left_stick_x);
+        forward = MecanumDrive.smoothDrive(-gamepad1.left_stick_y);
+        strafe = MecanumDrive.smoothDrive(gamepad1.left_stick_x);
 
-        if (!drive.trackGoalOn) {
-            if (Math.abs(gamepad1.right_stick_x) > 0.03) {
+        if (!goalTracker.trackGoalOn) {
+            if (Math.abs(gamepad1.right_stick_x) > Constants.rotateStickDeadZone) {
 
-                rotate = drive.smoothDrive(gamepad1.right_stick_x);
+                rotate = MecanumDrive.smoothDrive(gamepad1.right_stick_x);
                 lastHeading = drive.getOdoHeading(AngleUnit.RADIANS);
                 projHeadingCalculated = false;
                 PIDTimer.reset();
 
-            } else if (PIDTimer.milliseconds() > 160) {
+            } else if (PIDTimer.milliseconds() > Constants.drivePIDBufferMS) {
 
                 if (!projHeadingCalculated) {
                     lastHeading = drive.getOdoHeading(AngleUnit.RADIANS);
@@ -144,7 +143,7 @@ public class DriveLaunchMode extends OpMode {
 
         } else{
 
-            drive.trackGoal(telemetry, forward, strafe, slow);
+            goalTracker.trackGoal(telemetry, forward, strafe, slow);
 
         }
 
@@ -169,13 +168,13 @@ public class DriveLaunchMode extends OpMode {
         if(gamepad1.dpadRightWasPressed()) shotsLeft = 3;
 
 
-        if (gamepad1.crossWasPressed()) {
+        if (gamepad1.crossWasPressed() && shotsLeft == 0) {
             launchSystem.liftUp();
             startWait = matchTime.milliseconds();
             liftDown = false;
         }
 
-        if (!liftDown && matchTime.milliseconds() >= startWait + 120) {
+        if (!liftDown && matchTime.milliseconds() >= startWait + Constants.liftServoFlickTimeMS) {
             launchSystem.liftDown();
             liftDown = true;
             launchSystem.intakeBlipReset();
@@ -183,7 +182,7 @@ public class DriveLaunchMode extends OpMode {
 
         telemetry.addData("shotsLeft", shotsLeft);
         if (shotsLeft != 0) {
-            if (liftDown && matchTime.milliseconds() >= startWait + 750) {
+            if (liftDown && matchTime.milliseconds() >= startWait + Constants.threeShotCycleBuffer) {
                 launchSystem.liftUp();
                 startWait = matchTime.milliseconds();
                 liftDown = false;
@@ -193,38 +192,35 @@ public class DriveLaunchMode extends OpMode {
 
         //Reset heading
         if (gamepad1.touchpadWasPressed()) {
-            drive.setPIDTargetHeading(0.0);
+            drive.resetOdoHeading(telemetry);
             lastHeading = 0;
+            drive.setPIDTargetHeading(lastHeading);
             gamepad1.rumbleBlips(2);
             recenterTime = matchTime.seconds();
-            drive.resetOdoHeading(telemetry);
             return;
         }
 
         if (gamepad1.dpadLeftWasPressed()) {
-            drive.setPIDTargetHeading(0.0);
-            lastHeading = 0;
-            gamepad1.rumbleBlips(2);
-            recenterTime = matchTime.seconds();
             drive.resetOdoPosition(telemetry);
+            lastHeading = 0;
+            drive.setPIDTargetHeading(lastHeading);
+            gamepad1.rumbleBlips(3);
+            recenterTime = matchTime.seconds();
             return;
         }
 
-        if (gamepad1.rightBumperWasPressed())
-            drive.toggleTrackGoal();
+        if (gamepad1.rightBumperWasPressed()) goalTracker.toggleTrackGoal();
 
-        if (gamepad1.leftBumperWasPressed())
-            launchSystem.toggleAutoPower();
-
+        if (gamepad1.leftBumperWasPressed()) launchSystem.toggleAutoPower();
 
         // Continuous subsystem updates
-        double dist = drive.getDistanceFromGoal();
-        telemetry.addData("Distance from goal", dist);
+        double dist = goalTracker.getDistanceFromGoal();
+
         launchSystem.intakeBlipLoop();
         launchSystem.updateLauncher(telemetry, dist, hardwareMap);
 
         //Telemetry
-        if (ConstantConfig.debug) {
+        if (Constants.debug) {
             telemetry.addLine("Debug Enabled");
             launchSystem.debugTelemetry(telemetry);
             drive.debugTelemetry(telemetry, slow);
@@ -233,7 +229,7 @@ public class DriveLaunchMode extends OpMode {
             drive.compTelemetry(telemetry, slow);
         }
 
-        telemetry.addData("BlueSide", ConstantConfig.blueSide);
+        telemetry.addData("BlueSide", Constants.blueSide);
 
         telemetry.update();
 
