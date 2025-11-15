@@ -17,9 +17,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
-import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.teleOp.util.DcMotorGroup;
+import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
 import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 
 import java.util.Locale;
@@ -48,7 +46,7 @@ public class MecanumDrive {
         backLeftMotor = hwMap.get(DcMotorEx.class, HWMap.BL_MOTOR);
         backRightMotor = hwMap.get(DcMotorEx.class, HWMap.BR_MOTOR);
 
-        odo = hwMap.get(GoBildaPinpointDriverRR.class, HWMap.ODO);
+        odo = hwMap.get(GoBildaPinpointDriverRR.class, "odo");
 
         imu = hwMap.get(IMU.class, HWMap.IMU);
 
@@ -80,8 +78,8 @@ public class MecanumDrive {
         //Calibrate ODO
         odo.resetPosAndIMU();
 
-        headingPID = new PIDController(DRIVE_KP, DRIVE_KI, DRIVE_KD);
-        headingPID.setTarget(Math.PI / 2.0);
+        headingPID = new PIDController(ConstantConfig.driveKp, ConstantConfig.driveKi, ConstantConfig.driveKd); // tune these values
+        headingPID.setTarget(Math.PI / 2.0); //default goalPose heading = 0 degrees
         headingPID.previousTime = System.nanoTime() / 1e9;
 
         String PIDData = String.format(Locale.US, "{KP: %.3f, KI: %.3f, KD: %.3f}",
@@ -183,32 +181,20 @@ public class MecanumDrive {
         tele.addLine();
     }
 
-    public void compTelemetry(Telemetry tele, double slow) {
-        tele.addData("Odo Status", odo.getDeviceStatus());
-        tele.addLine();
-        tele.addData("Position", botPose);
-        tele.addLine();
-        tele.addData("Speed Modifier", slow == Constants.SLOW_SPEED_LT
-                ? ("Slow(" + Constants.SLOW_SPEED_LT + ")")
-                : "Normal (1.0)");
-        tele.addLine();
-    }
-
     public void setPIDTargetHeading(double targetHeading) {
         headingPID.setTarget(targetHeading);
     }
 
-    public void resetOdoHeading(Telemetry tele) {
+    public void resetOdoHeading() {
 
         //Resets Heading and Position -STAY STILL FOR AT LEAST 0.25 SECONDS WHILE DOING SO FOR ACCURACY-
         odo.resetYaw();
-        updateOdoHeading();
-        tele.update();
+        odo.update(GoBildaPinpointDriverRR.ReadData.ONLY_UPDATE_HEADING);
 
     }
 
-    public void resetOdoPosition(Telemetry tele) {
-        odo.setPosition(new Pose2D(DistanceUnit.INCH, 0 , 0,
+    public void resetOdoPosition(Telemetry telemetry) {
+        odo.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0,
                 AngleUnit.RADIANS, 0));
         updateOdo();
         tele.update();
@@ -340,7 +326,6 @@ public class MecanumDrive {
     public static double smoothDrive(double input) {
         return 0.3 * Math.tan(input * 1.2792);
     }
-
     public void updateTelemetry(Telemetry telemetry, double slow) {
 
         TelemetryPacket packet = new TelemetryPacket();
