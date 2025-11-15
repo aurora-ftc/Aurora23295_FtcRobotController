@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 import org.firstinspires.ftc.teamcode.teleOp.Constants;
@@ -26,8 +25,16 @@ import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "DriveLaunchMode", group = "OpModes")
 public class DriveLaunchMode extends OpMode {
+
+// --- Trajectory & Drive Components ---
+
     private TrajectoryActionBuilder parkAction = null;
     private MecanumDrive drive = new MecanumDrive();
+    private PinpointDrive dwive;
+    private SmartPark smartPark;
+
+// --- Timers ---
+
     private ElapsedTime matchTime = new ElapsedTime();
     private ElapsedTime PIDTimer = new ElapsedTime();
     private Pose2d startPose = new Pose2d(initialPoseBlue.getX(DistanceUnit.INCH),
@@ -44,8 +51,12 @@ public class DriveLaunchMode extends OpMode {
     private double lastHeading = 0;;
     private final double[] powerSteps = POWER_STEPS;
     private double slow = 1;
+
+// --- Flags ---
+
     private boolean endgameRumbleDone, projHeadingCalculated;
     private boolean liftDown = true;
+
     private double startWait = 0.0;
     private double recenterTime = 0.0;
     int shotsLeft = 0;
@@ -109,7 +120,6 @@ public class DriveLaunchMode extends OpMode {
 
     @Override
     public void loop() {
-
         // Recenter freeze period (Unnecessary now but still useful)
         if (recenterTime > 0) {
             if (matchTime.seconds() - recenterTime >= 0.25) {
@@ -248,7 +258,7 @@ public class DriveLaunchMode extends OpMode {
             drive.debugTelemetry(telemetry, slow);
         } else {
             launchSystem.compTelemetry(telemetry);
-            drive.compTelemetry(telemetry, slow);
+            drive.updateTelemetry(telemetry, slow);
         }
 
         if (gamepad2.triangleWasPressed()) {
