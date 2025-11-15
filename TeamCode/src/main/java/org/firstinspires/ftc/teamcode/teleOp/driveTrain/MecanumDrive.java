@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.teleOp.driveTrain;
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriver;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
@@ -212,7 +214,9 @@ public class MecanumDrive {
         tele.update();
     }
 
-    public void updateOdo() {odo.update();}
+    public void updateOdo() {
+        odo.update();
+    }
 
     public void updateOdoHeading() {
         odo.update(GoBildaPinpointDriver.ReadData.ONLY_UPDATE_HEADING);
@@ -253,6 +257,34 @@ public class MecanumDrive {
     public void initTracker(Pose2D goalPose, boolean trackGoalOn) {
         this.goalPose = goalPose;
         this.trackGoalOn = trackGoalOn;
+    }
+
+    public void drawRobot(Canvas field) {
+        Pose2D pose = getOdoPosition();
+
+        double x = pose.getX(DistanceUnit.INCH);
+        double y = pose.getY(DistanceUnit.INCH);
+        double heading = pose.getHeading(AngleUnit.RADIANS);
+
+        double robotSize = 9;
+        double half = robotSize / 2;
+
+        double[][] points = {
+                {half, 0},
+                {half, half},
+                {half, -half},
+        };
+
+        double[][] transformed = new double[3][2];
+        for (int i = 0; i < 3; i++) {
+            transformed[i][0] = x + points[i][0] * Math.cos(heading) - points[i][1] * Math.sin(heading);
+            transformed[i][1] = y + points[i][0] * Math.sin(heading) + points[i][1] * Math.cos(heading);
+        }
+
+        field.strokePolyline(
+                new double[]{transformed[0][0], transformed[1][0], transformed[2][0], transformed[0][0]},
+                new double[]{transformed[0][1], transformed[1][1], transformed[2][1], transformed[0][1]}
+        );
     }
 
     public void trackGoal(Telemetry tele, double forward, double strafe, double slow) {
@@ -303,6 +335,47 @@ public class MecanumDrive {
 
     public static double smoothDrive(double input) {
         return 0.3 * Math.tan(input * 1.2792);
+    }
+    public void updateTelemetry(Telemetry telemetry, double slow) {
+
+        TelemetryPacket packet = new TelemetryPacket();
+        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        updateOdo();
+
+        Pose2D pos = odo.getPosition();
+        double headingDeg = getOdoHeading(AngleUnit.DEGREES);
+
+        multiTelemetry.addLine("===== Mecanum Drive Telemetry =====");
+        multiTelemetry.addData("OdoStatus", odo.getDeviceStatus());
+        multiTelemetry.addData("Pinpoint Frequency", odo.getFrequency());
+        multiTelemetry.addData("X (in)", pos.getX(DistanceUnit.INCH));
+        multiTelemetry.addData("Y (in)", pos.getY(DistanceUnit.INCH));
+        multiTelemetry.addData("Heading (deg)", headingDeg);
+
+        Canvas field = packet.fieldOverlay();
+
+        drawRobot(field);
+
+        multiTelemetry.addData("Speed Modifier",
+                slow == 0.35 ? "Slow (0.35)" : String.format(Locale.US, "Normal (%.2f)", slow));
+
+        multiTelemetry.addData("Forward (calc)", newForward);
+        multiTelemetry.addData("Strafe (calc)", newStrafe);
+        multiTelemetry.addData("Theta (rad)", theta);
+
+        multiTelemetry.addData("New Forward", newForward);
+        multiTelemetry.addData("New Strafe", newStrafe);
+        multiTelemetry.addData("Theta (Radians)", theta);
+
+        if (trackGoalOn && goalPose != null) {
+            multiTelemetry.addLine("--- Goal Tracking ---");
+            multiTelemetry.addData("Goal X (in)", goalPose.getX(DistanceUnit.INCH));
+            multiTelemetry.addData("Goal Y (in)", goalPose.getY(DistanceUnit.INCH));
+            multiTelemetry.addData("Distance to Goal (in)", getDistanceFromGoal());
+        }
+
+        multiTelemetry.update();
     }
 
 }

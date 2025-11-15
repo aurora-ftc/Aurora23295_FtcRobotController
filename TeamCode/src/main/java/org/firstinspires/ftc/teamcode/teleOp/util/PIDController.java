@@ -24,6 +24,7 @@ public class PIDController {
         integral = 0.0;
         previousError = 0.0;// Initialize with current time in actual implementation
     }
+
     public PIDController(double kp, double ki, double kd, double kv, double ks) {
         this.kp = kp;
         this.ki = ki;
@@ -47,7 +48,9 @@ public class PIDController {
         this.kd = kd;
     }
 
-    public void setKV(double kv) {this.kv = kv;}
+    public void setKV(double kv) {
+        this.kv = kv;
+    }
 
     public void setTarget(double target) {
         this.target = target;
@@ -55,9 +58,9 @@ public class PIDController {
 
     public double calculateOutputPID(double current, double time, boolean shouldRadianWrap) {
         this.current = current;
-        double error = shouldRadianWrap?
+        double error = shouldRadianWrap ?
                 AngleUnit.normalizeRadians(target - current)
-                :(target - current);
+                : (target - current);
         double deltaTime = time - previousTime;
 
         if (deltaTime <= 0) return output;
@@ -75,6 +78,7 @@ public class PIDController {
 
         return output;
     }
+
     public double calculateOutputFF(double targetVelocity, double kv) {
         double FeedForwardOutput = kv * targetVelocity + ks;
         return FeedForwardOutput;

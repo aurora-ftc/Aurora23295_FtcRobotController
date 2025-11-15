@@ -57,7 +57,7 @@ public class DriveOpModePIDTest extends OpMode {
 
         drive.setPIDTargetHeading(Math.PI / 2.0);
 
-        drive.resetOdoHeading(telemetry);
+        drive.resetOdoHeading();
 
         drive.deactivateTrackGoal();
 
@@ -125,7 +125,7 @@ public class DriveOpModePIDTest extends OpMode {
         if (gamepad1.touchpadWasPressed()) {
             drive.setPIDTargetHeading(0.0);
             lastHeading = 0;
-            drive.resetOdoHeading(telemetry);
+            drive.resetOdoHeading();
         }
 
         if (gamepad1.rightBumperWasPressed())
@@ -178,7 +178,7 @@ public class DriveOpModePIDTest extends OpMode {
             drive.debugTelemetry(telemetry, slow);
         } else {
             launcher.compTelemetry(telemetry);
-            drive.compTelemetry(telemetry, slow);
+            drive.updateTelemetry(telemetry, slow);
         }
 
     }
