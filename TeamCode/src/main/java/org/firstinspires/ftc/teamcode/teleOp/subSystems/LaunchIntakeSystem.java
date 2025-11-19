@@ -23,24 +23,18 @@ public class LaunchIntakeSystem {
     private DcMotor intakeMotor;
     private DcMotorEx launcherMotor;
     private Servo liftServo;
-
-    private Volts volts = new Volts();
-    private ElapsedTime intakeTimer = new ElapsedTime();
-    private PIDController flywheelPID;
-
-    private final int minStep = 0;
+    private final Volts volts = new Volts();
     private int maxStep = 0;
     private int currentStep = minStep + 1;
     private double[] powerSteps;
 
     private double power, batteryVolts, batteryCorrectedKv;
-
-    public boolean launcherOn = false;
-    public boolean intakeOn = false;
-    private final ElapsedTime time = new ElapsedTime();
-
+    private int currentStep = MIN_STEP + 1;
+    private double[] powerSteps;
+    private PIDController flywheelPID;
     private double intakeBlipReset = 0;
-    private boolean autoPowerOn = false;
+    private final int intakeSpinDirection = 1;
+    private boolean autoPower = false;
 
     public void init(double[] powerSteps, HardwareMap hwMap, Telemetry telemetry) {
         this.powerSteps = powerSteps;
@@ -66,9 +60,9 @@ public class LaunchIntakeSystem {
 
         liftServo.scaleRange(LIFT_SERVO_MIN, LIFT_SERVO_MAX);
 
-        flywheelPID = new PIDController(FLYWHEEL_KP,
-                FLYWHEEL_KI, FLYWHEEL_KD,
-                FLYWHEEL_KV, FLYWHEEL_KS);
+        flywheelPID = new PIDController(ConstantConfig.flywheelKp,
+                ConstantConfig.flywheelKi, ConstantConfig.flywheelKd,
+                ConstantConfig.flywheelKv, ConstantConfig.flywheelKs);
         flywheelPID.previousTime = System.nanoTime() / 1e9;
 
         //Set Servo Down
@@ -87,8 +81,8 @@ public class LaunchIntakeSystem {
         if (DEBUG) tele.addData("currentVelocity", currentVelocity);
 
         double time = System.nanoTime() / 1e9; //Seconds
-        batteryCorrectedKv = FLYWHEEL_KV * (12.5 / batteryVolts);
-        batteryCorrectedKv = Math.min(MAX_FLYWHEEL_KV, Math.max(batteryCorrectedKv, MIN_FLYWHEEL_KV));
+        batteryCorrectedKv = (ConstantConfig.flywheelKv * 12.5) / batteryVolts;
+        batteryCorrectedKv = Math.min(0.15, Math.max(batteryCorrectedKv, 0.05));
 
         double outputPID = flywheelPID.calculateOutputPID(currentVelocity, time, false);
         double outputFF = flywheelPID.calculateOutputFF(targetVelocity, batteryCorrectedKv);
@@ -132,9 +126,8 @@ public class LaunchIntakeSystem {
         double pow = calcAutoPower(dist);
 
         batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
-        batteryVolts = batteryVolts <= 15 && batteryVolts >= 9?
-                batteryVolts : VOLTS_NOMINAL;
-
+        batteryVolts = batteryVolts <= 15 && batteryVolts >= 9 ?
+                batteryVolts : 12.5;
         tele.addData("Battery Volts", batteryVolts);
 
         if (launcherOn) {
@@ -199,8 +192,8 @@ public class LaunchIntakeSystem {
         telemetry.addData("Launcher Status", launcherOn ? "On" : "Off");
         telemetry.addData("Intake Status", intakeOn ? "On" : "Off");
         telemetry.addLine();
-        telemetry.addData("Auto Power", autoPowerOn ? "On": "Off");
-        telemetry.addData("Launcher Power (%)", !autoPowerOn
+        telemetry.addData("Auto Power", autoPower ? "On" : "Off");
+        telemetry.addData("Launcher Power (%)", !autoPower
                 ? (int) (((powerSteps[currentStep] / 85.0) * 100) + 0.5)
                 : (int) (((power / 85.0) * 100) + 0.5)
                 + "%");
@@ -216,7 +209,8 @@ public class LaunchIntakeSystem {
         telemetry.addData("Lift Servo Position", liftServo.getPosition());
         telemetry.addLine();
         telemetry.addData("Outtake", launcherOn);
-        telemetry.addData("Auto Power", autoPowerOn ? "On": "Off");
+        telemetry.addData("Auto Power", autoPower ? "On" : "Off");
+        telemetry.addData("Launcher Power", autoPower ? power : powerSteps[currentStep]);
         telemetry.addLine();
         telemetry.addData("Launcher Power (%)", !autoPowerOn
                 ? (int) (((powerSteps[currentStep] / 85.0) * 100) + 0.5)

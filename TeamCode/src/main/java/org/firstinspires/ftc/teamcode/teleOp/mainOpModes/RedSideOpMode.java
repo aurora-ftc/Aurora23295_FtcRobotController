@@ -2,8 +2,9 @@ package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,29 +12,29 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
-import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
-import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightLocalization;
+import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
+import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @Config
 @TeleOp(name = "RedSideOpMode", group = "OpModes")
 public class RedSideOpMode extends OpMode {
-    private TrajectoryActionBuilder parkAction = null;
-    private MecanumDrive drive = new MecanumDrive();
-    private ElapsedTime matchTime = new ElapsedTime();
-    private ElapsedTime PIDTimer = new ElapsedTime();
-    private Pose2d startPose = new Pose2d(12, -63, Math.toRadians(90));
+    private final double[] powerSteps = ConstantConfig.powerVals;
+    private final TrajectoryActionBuilder parkAction = null;
+    private final MecanumDrive drive = new MecanumDrive();
+    private final ElapsedTime matchTime = new ElapsedTime();
+    private final ElapsedTime PIDTimer = new ElapsedTime();
+    private final Pose2d startPose = new Pose2d(12, -63, Math.toRadians(90));
     private PinpointDrive dwive;
     private SmartPark smartPark;
-    private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
-    private FtcDashboard dashboard = FtcDashboard.getInstance();
+    private final LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Pose2D initialPose, goalPose;
-    private LimelightLocalization limelight = new LimelightLocalization();
+    private final LimelightLocalization limelight = new LimelightLocalization();
     private double forward, strafe, rotate;
-    private double lastHeading = 0;;
-    private final double[] powerSteps = ConstantConfig.powerVals;
+    private double lastHeading = 0;
     private double slow = 1;
     private boolean endgameRumbleDone, projHeadingCalculated;
     private boolean liftDown = true;
@@ -60,6 +61,7 @@ public class RedSideOpMode extends OpMode {
         telemetry.addData("initialPose", initialPose);
 
         dashboard.isEnabled();
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         launchSystem.init(0.10, 0.24, powerSteps, hardwareMap, telemetry);
 
@@ -138,7 +140,7 @@ public class RedSideOpMode extends OpMode {
 
             drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
 
-        } else{
+        } else {
 
             drive.trackGoal(telemetry, forward, strafe, slow);
 

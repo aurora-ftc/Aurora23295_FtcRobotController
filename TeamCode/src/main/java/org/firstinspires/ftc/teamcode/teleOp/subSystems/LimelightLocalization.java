@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -53,5 +54,11 @@ public class LimelightLocalization {
         double scale = 30665.96; //change ts
         double distance = scale / ta;
         return distance;
+    }
+
+    public byte scanObelisk() {
+        LLResultTypes.FiducialResult tag = (LLResultTypes.FiducialResult) limelight.getLatestResult().getFiducialResults();
+
+        return (byte) tag.getFiducialId();
     }
 }
