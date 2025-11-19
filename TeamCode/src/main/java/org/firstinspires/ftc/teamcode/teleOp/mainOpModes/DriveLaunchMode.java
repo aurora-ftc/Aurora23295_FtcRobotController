@@ -11,10 +11,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
-import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightLocalization;
+import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
 import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "DriveLaunchMode", group = "OpModes")
@@ -22,49 +22,44 @@ public class DriveLaunchMode extends OpMode {
 
 // --- Trajectory & Drive Components ---
 
-    private TrajectoryActionBuilder parkAction = null;
-    private MecanumDrive drive = new MecanumDrive();
+    private final double[] powerSteps = ConstantConfig.powerVals;
+    int shotsLeft = 0;
+    private final TrajectoryActionBuilder parkAction = null;
+    private final MecanumDrive drive = new MecanumDrive();
+
+// --- Timers ---
     private PinpointDrive dwive;
     private SmartPark smartPark;
 
-// --- Timers ---
-
-    private ElapsedTime matchTime = new ElapsedTime();
-    private ElapsedTime PIDTimer = new ElapsedTime();
-
 // --- Pose Tracking ---
-
-    private Pose2d startPose = new Pose2d(12, -63, Math.toRadians(90));
-    private Pose2D initialPose, goalPose;
+    private final ElapsedTime matchTime = new ElapsedTime();
+    private final ElapsedTime PIDTimer = new ElapsedTime();
 
 // --- Subsystems ---
-
-    private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
-    private FtcDashboard dashboard = FtcDashboard.getInstance();
-    private MultipleTelemetry telemetry = new MultipleTelemetry();
-    private LimelightLocalization limelight = new LimelightLocalization();
+    private final Pose2d startPose = new Pose2d(12, -63, Math.toRadians(90));
+    private Pose2D initialPose, goalPose;
+    private final LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
 
 // --- Control State ---
-
+    private final LimelightLocalization limelight = new LimelightLocalization();
     private double forward, strafe, rotate;
     private double lastHeading = 0;
-    private final double[] powerSteps = ConstantConfig.powerVals;
-    private double slow = 1;
 
 // --- Flags ---
-
+    private double slow = 1;
     private boolean endgameRumbleDone, projHeadingCalculated;
     private boolean liftDown = true;
-
     private double startWait = 0.0;
     private double recenterTime = 0.0;
-    int shotsLeft = 0;
 
     @Override
     public void init() {
 
         dwive = new PinpointDrive(hardwareMap, startPose);
         smartPark = new SmartPark(drive, dwive);
+
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         //Drive Systems Init
         drive.init(hardwareMap, telemetry);
@@ -124,7 +119,7 @@ public class DriveLaunchMode extends OpMode {
                 drive.drive(0, 0, 0, 0);
                 telemetry.addLine("Recalibrating IMU...");
                 telemetry.update();
-                return;
+
             }
         }
 

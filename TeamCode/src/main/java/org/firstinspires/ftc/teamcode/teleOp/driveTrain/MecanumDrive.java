@@ -19,12 +19,12 @@ import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 import java.util.Locale;
 
 public class MecanumDrive {
+    public boolean trackGoalOn;
     String data;
     double newForward, newStrafe, theta;
     private DcMotor frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
     private GoBildaPinpointDriverRR odo;
     private Pose2D goalPose;
-    public boolean trackGoalOn;
     private IMU imu;
     private PIDController headingPID;  // PID controller for heading
 
@@ -164,17 +164,23 @@ public class MecanumDrive {
     }
 
     public void debugTelemetry(Telemetry telemetry, double slow) {
-        telemetry.addData("Speed Modifier", slow);
-        telemetry.addData("New Forward", newForward);
-        telemetry.addData("New Strafe", newStrafe);
-        telemetry.addData("Theta (Radians)", theta);
-        telemetry.addData("Odo Status", odo.getDeviceStatus());
-        telemetry.addData("Pinpoint Frequency", odo.getFrequency()); //prints the current refresh rate of the Pinpoint
-        telemetry.addLine();
-        telemetry.addData("Position", data);
-        telemetry.addLine();
-        telemetry.addData("Heading (deg)", odo.getPosition().getHeading(AngleUnit.DEGREES));
-        telemetry.addLine();
+        TelemetryPacket packet = new TelemetryPacket();
+        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        multiTelemetry.addData("Speed Modifier", slow);
+        multiTelemetry.addData("New Forward", newForward);
+        multiTelemetry.addData("New Strafe", newStrafe);
+        multiTelemetry.addData("Theta (Radians)", theta);
+        multiTelemetry.addData("Odo Status", odo.getDeviceStatus());
+        multiTelemetry.addData("Pinpoint Frequency", odo.getFrequency()); //prints the current refresh rate of the Pinpoint
+        multiTelemetry.addLine();
+        multiTelemetry.addData("Position", data);
+        multiTelemetry.addLine();
+        multiTelemetry.addData("Heading (deg)", odo.getPosition().getHeading(AngleUnit.DEGREES));
+        multiTelemetry.addLine();
+
+        Canvas field = packet.fieldOverlay();
+        drawRobot(field);
     }
 
     public void setPIDTargetHeading(double targetHeading) {
@@ -198,10 +204,6 @@ public class MecanumDrive {
         odo.update();
     }
 
-    public void setOdoPosition(Pose2D pose) {
-        odo.setPosition(pose);
-    }
-
     public double getOdoHeading(AngleUnit angleUnit) {
         odo.update(GoBildaPinpointDriverRR.ReadData.ONLY_UPDATE_HEADING);
         return odo.getPosition().getHeading(angleUnit);
@@ -210,6 +212,10 @@ public class MecanumDrive {
     public Pose2D getOdoPosition() {
         odo.update();
         return odo.getPosition();
+    }
+
+    public void setOdoPosition(Pose2D pose) {
+        odo.setPosition(pose);
     }
 
     public double getOdoX(DistanceUnit distanceUnit) {
@@ -308,6 +314,7 @@ public class MecanumDrive {
     public double smoothDrive(double input) {
         return 0.3 * Math.tan(input * 1.2792);
     }
+
     public void updateTelemetry(Telemetry telemetry, double slow) {
 
         TelemetryPacket packet = new TelemetryPacket();
