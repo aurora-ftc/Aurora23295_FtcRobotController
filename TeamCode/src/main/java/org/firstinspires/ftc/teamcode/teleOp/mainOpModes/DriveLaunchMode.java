@@ -28,8 +28,12 @@ public class DriveLaunchMode extends OpMode {
 
 // --- Trajectory & Drive Components ---
 
-    private TrajectoryActionBuilder parkAction = null;
-    private MecanumDrive drive = new MecanumDrive();
+    private final double[] powerSteps = ConstantConfig.powerVals;
+    int shotsLeft = 0;
+    private final TrajectoryActionBuilder parkAction = null;
+    private final MecanumDrive drive = new MecanumDrive();
+
+// --- Timers ---
     private PinpointDrive dwive;
     private SmartPark smartPark;
 
@@ -53,13 +57,11 @@ public class DriveLaunchMode extends OpMode {
     private double slow = 1;
 
 // --- Flags ---
-
+    private double slow = 1;
     private boolean endgameRumbleDone, projHeadingCalculated;
     private boolean liftDown = true;
-
     private double startWait = 0.0;
     private double recenterTime = 0.0;
-    int shotsLeft = 0;
 
     @Override
     public void init() {
@@ -128,7 +130,7 @@ public class DriveLaunchMode extends OpMode {
                 drive.drive(0, 0, 0, 0);
                 telemetry.addLine("Recalibrating IMU...");
                 telemetry.update();
-                return;
+
             }
         }
 

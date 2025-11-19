@@ -232,6 +232,10 @@ public class MecanumDrive {
         return odo.getPosition();
     }
 
+    public void setOdoPosition(Pose2D pose) {
+        odo.setPosition(pose);
+    }
+
     public double getOdoX(DistanceUnit distanceUnit) {
         odo.update();
         return odo.getPosition().getX(distanceUnit);
@@ -324,6 +328,7 @@ public class MecanumDrive {
     public static double smoothDrive(double input) {
         return 0.3 * Math.tan(input * 1.2792);
     }
+
     public void updateTelemetry(Telemetry telemetry, double slow) {
 
         TelemetryPacket packet = new TelemetryPacket();

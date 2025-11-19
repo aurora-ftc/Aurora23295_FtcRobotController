@@ -14,11 +14,8 @@ public class BallColorDetection {
     // These are approximate — tune with telemetry for your exact lighting setup
     // Hue range: 0–180 (since we divide hue/2 like OpenCV)
 
-    private float[] hsv = new float[3];
-
     private final double minProb = 0.001;
     private final double threshold = 3.0;
-
     // PURPLE BALL
     private final double meanH_purple = 110.83;
     private final double sigmaH_purple = 7.07;
@@ -26,7 +23,6 @@ public class BallColorDetection {
     private final double sigmaS_purple = 13.23;
     private final double meanV_purple = 128.43;
     private final double sigmaV_purple = 12.00;
-
     // GREEN BALL
     private final double meanH_green = 82.87;
     private final double sigmaH_green = 6.00;
@@ -34,7 +30,7 @@ public class BallColorDetection {
     private final double sigmaS_green = 15.33;
     private final double meanV_green = 120.73;
     private final double sigmaV_green = 12.00;
-
+    private final float[] hsv = new float[3];
     // Sensor instance
     private RevColorSensorV3 colorSensor;
 
@@ -44,12 +40,6 @@ public class BallColorDetection {
     private double p_purple, p_green;
     private double dPurple, dGreen;
     private DetectedColor detectedColor = DetectedColor.UNKNOWN;
-
-    public enum DetectedColor {
-        PURPLE,
-        GREEN,
-        UNKNOWN
-    }
 
     public void init(HardwareMap hwMap) {
         colorSensor = (RevColorSensorV3) hwMap.get(ColorSensor.class, Constants.HardwareConfig.colorSensor);
@@ -163,6 +153,12 @@ public class BallColorDetection {
         double ds = (s - meanS) / sigmaS;
         double dv = (v - meanV) / sigmaV;
         return Math.sqrt(dh * dh + ds * ds + dv * dv);
+    }
+
+    public enum DetectedColor {
+        PURPLE,
+        GREEN,
+        UNKNOWN
     }
 
 }

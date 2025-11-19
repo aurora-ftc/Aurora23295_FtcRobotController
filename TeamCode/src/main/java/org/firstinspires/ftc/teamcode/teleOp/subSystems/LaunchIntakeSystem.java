@@ -14,6 +14,10 @@ import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 import org.firstinspires.ftc.teamcode.teleOp.util.Volts;
 
 public class LaunchIntakeSystem {
+    private final int MIN_STEP = 0;
+    private final ElapsedTime time = new ElapsedTime();
+    public boolean launcherOn = false;
+    public boolean intakeOn = false;
     private DcMotor intakeMotor;
     private DcMotorEx launcherMotor;
     private Servo liftServo;
@@ -98,7 +102,7 @@ public class LaunchIntakeSystem {
 
         TelemetryPacket packet = new TelemetryPacket();
 
-        packet.put("target",flywheelPID.target);
+        packet.put("target", flywheelPID.target);
         packet.put("current", flywheelPID.current);
         packet.put("output", output);
 
@@ -119,11 +123,7 @@ public class LaunchIntakeSystem {
     }
 
     public void toggleLauncher() {
-        if (!launcherOn) {
-            launcherOn = true;
-        } else {
-            launcherOn = false;
-        }
+        launcherOn = !launcherOn;
     }
 
     public void updateLauncher(Telemetry tele, double dist, HardwareMap hwMap) {
@@ -194,8 +194,8 @@ public class LaunchIntakeSystem {
 
     public void compTelemetry(Telemetry telemetry) {
         telemetry.addLine();
-        telemetry.addData("Launcher Status", launcherOn? "On" : "Off");
-        telemetry.addData("Intake Status", intakeOn? "On" : "Off");
+        telemetry.addData("Launcher Status", launcherOn ? "On" : "Off");
+        telemetry.addData("Intake Status", intakeOn ? "On" : "Off");
         telemetry.addLine();
         telemetry.addData("Auto Power", autoPowerOn ? "On": "Off");
         telemetry.addData("Launcher Power (%)", !autoPowerOn
