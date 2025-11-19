@@ -23,6 +23,4 @@ public class Volts {
         vFiltered = alpha * vRead + (1.0 - alpha) * vFiltered;
         return vFiltered;
     }
-
-
 }
