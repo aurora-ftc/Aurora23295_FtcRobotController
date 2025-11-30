@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
+import static org.firstinspires.ftc.teamcode.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -32,9 +33,9 @@ public class LaunchIntakeSystem {
     public boolean launcherOn = false;
     public boolean intakeOn = false;
     private final ElapsedTime time = new ElapsedTime();
-    private PIDController flywheelPID;
+
     private double intakeBlipReset = 0;
-    private boolean autoPower = false;
+    private boolean autoPowerOn = false;
 
     public void init(double[] powerSteps, HardwareMap hwMap, Telemetry telemetry) {
         this.powerSteps = powerSteps;
@@ -109,8 +110,8 @@ public class LaunchIntakeSystem {
     private void setLauncherPower(int step, Telemetry tele, double autoPow, HardwareMap hwMap) {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
-                if (autoPowerOn) spinToVelocity(autoPow, tele, hwMap);
-                else spinToVelocity(powerSteps[step], tele, hwMap);
+                if (autoPowerOn) spinToVelocity(autoPow, tele);
+                else spinToVelocity(powerSteps[step], tele);
             } else {
                 //launcherMotor.setPower(0.0);
                 spinToVelocity(0, tele);
@@ -131,7 +132,7 @@ public class LaunchIntakeSystem {
 
         batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
         batteryVolts = batteryVolts <= 15 && batteryVolts >= 9?
-                batteryVolts : Constants.voltsNormal;
+                batteryVolts : VOLTS_NOMINAL;
 
         tele.addData("Battery Volts", batteryVolts);
 
@@ -175,8 +176,8 @@ public class LaunchIntakeSystem {
     }
 
     public void intakeBlipLoop() {
-        if (Constants.intakeBlipStart < intakeTimer.milliseconds() &&
-                intakeTimer.milliseconds() < Constants.intakeBlipEnd) {
+        if (200 < intakeTimer.milliseconds() &&
+                intakeTimer.milliseconds() < 600) {
             intakeMotor.setPower(1);
         } else {
             if (!intakeOn) intakeMotor.setPower(0);
@@ -238,8 +239,10 @@ public class LaunchIntakeSystem {
     }
 
     private double calcAutoPower(double distance) {
-        power = 0.09/65116 * distance + 53.81395;
-        power = Math.max(41, Math.min(44.5, power));
+        power = 0.189189 * distance +38.97297;
+        power = Math.max(55, Math.min(65, power));
+//        power = 0.09/65116 * distance + 53.81395;
+//        power = Math.max(41, Math.min(44.5, power));
         return power;
     }
 

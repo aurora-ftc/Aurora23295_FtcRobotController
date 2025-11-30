@@ -13,19 +13,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Limelight;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Mosaic;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
+import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
 @TeleOp(name = "LimelightTest", group = "TestModes")
 public class LimelightTest extends OpMode {
 
-    private Limelight limelight;
+    private LimelightControl limelightControl;
     private Mosaic detectedPattern;
     private MecanumDrive drive = new MecanumDrive();
 
     @Override
     public void init() {
-        limelight = new Limelight(hardwareMap, 0);
+        limelightControl = new LimelightControl(hardwareMap, 0);
         drive.init(hardwareMap, telemetry);
 
         telemetry.addLine("Initialization complete");
@@ -34,15 +34,15 @@ public class LimelightTest extends OpMode {
         SharedPreferences prefs = hardwareMap.appContext
                 .getSharedPreferences("RobotPrefs", Context.MODE_PRIVATE);
         String name = prefs.getString("detectedMosaic", "UNKNOWN");
-        detectedPattern = Mosaic.valueOf(name);
-
+        if (name != null && !name.equals("UNKNOWN"))
+            detectedPattern = Mosaic.valueOf(name);
     }
 
     @Override
     public void init_loop() {
         // Scan for obelisk pattern
         if (detectedPattern == Mosaic.UNKNOWN)
-            detectedPattern = limelight.scanObelisk();
+            detectedPattern = limelightControl.scanObelisk();
 
         switch (detectedPattern) {
             case UNKNOWN:
@@ -61,21 +61,21 @@ public class LimelightTest extends OpMode {
     @Override
     public void loop() {
         if (detectedPattern == Mosaic.UNKNOWN) {
-            detectedPattern = limelight.scanObelisk();
+            detectedPattern = limelightControl.scanObelisk();
             sleep(30);
         }
 
-        // Switch Limelight pipeline based on gamepad input
-        if (gamepad1.triangleWasPressed()) limelight.changePipeline(1);
-        if (gamepad1.squareWasPressed()) limelight.changePipeline(0);
+        // Switch LimelightControl pipeline based on gamepad input
+        if (gamepad1.triangleWasPressed()) limelightControl.changePipeline(1);
+        if (gamepad1.squareWasPressed()) limelightControl.changePipeline(0);
 
         // Get robot heading from odometry
         double heading = drive.getOdoHeading(AngleUnit.DEGREES);
 
         // Get robot poses
-        Pose2D botPoseMT1 = limelight.get2DLocationMT1();
-        Pose2D botPoseMT2 = limelight.get2DLocation(heading);
-        Pose3D botPoseMT2_3D = limelight.getLocation(heading);
+        Pose2D botPoseMT1 = limelightControl.get2DLocationMT1();
+        Pose2D botPoseMT2 = limelightControl.get2DLocationMT2(heading);
+        Pose3D botPoseMT2_3D = limelightControl.get3DLocationMT1(heading);
         Pose2D drivePose = drive.getOdoPosition();
 
         // Add nicely formatted telemetry

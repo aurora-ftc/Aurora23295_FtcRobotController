@@ -9,15 +9,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.util.Volts;
 
 public class Launcher {
     private final DcMotor launcherMotor;
-    private Volts volts = new Volts();
-
     private LaunchIntakeSystem launcher = new LaunchIntakeSystem();;
+    private Volts volts = new Volts();
 
 
     public Launcher(HardwareMap hwMap, Telemetry tele) {
@@ -26,9 +25,11 @@ public class Launcher {
         launcherMotor.setDirection(DcMotorEx.Direction.FORWARD);
         launcherMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
+        launcher.init(Constants.POWER_STEPS, hwMap, tele);
+
         launcherMotor.setPower(0);
         launcherMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        launcherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         launcher.init(Constants.POWER_STEPS, hwMap, tele);
     }
@@ -50,7 +51,7 @@ public class Launcher {
     }
 
     // ---------- Actions ----------
-    public Action spinForTime(double power, double duration) {
+    public Action spinForTime(double power, double duration, Telemetry tele) {
         return new Action() {
             private boolean init = false;
             private final ElapsedTime timer = new ElapsedTime();
@@ -62,9 +63,10 @@ public class Launcher {
                     packet.put("Timer", "Reset");
                 }
 
-                launcherMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
                 if (timer.seconds() < duration) {
-                    launcherMotor.setPower(power);
+                    launcher.spinToVelocity(power, tele);
                     packet.put("Power", power);
                     return true;
                 } else {

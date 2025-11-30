@@ -1,13 +1,15 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
+import static org.firstinspires.ftc.teamcode.Constants.*;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -16,70 +18,85 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.Storage;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Limelight;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
+import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "DriveLaunchMode", group = "OpModes")
 public class DriveLaunchMode extends OpMode {
     private TrajectoryActionBuilder parkAction = null;
     private MecanumDrive drive = new MecanumDrive();
+    //------Timers------
     private ElapsedTime matchTime = new ElapsedTime();
     private ElapsedTime PIDTimer = new ElapsedTime();
-    private Pose2d startPose = new Pose2d(initialPoseBlue.getX(DistanceUnit.INCH),
-            initialPoseBlue.getY(DistanceUnit.INCH),
-            initialPoseBlue.getHeading(AngleUnit.RADIANS));
+    private ElapsedTime cameraTimer = new ElapsedTime();
+    private ElapsedTime initTimer = new ElapsedTime();
+    private Pose2d startPose;
     private PinpointDrive driveRR;
     private SmartPark smartPark;
     private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
     private FtcDashboard dashboard = FtcDashboard.getInstance();
     private Pose2D initialPose, goalPose;
-    private Limelight limelight = new Limelight(hardwareMap,0);
+    private LimelightControl limelightControl;
+    private Mosaic mosaic;
     private double forward, strafe, rotate;
-    private double lastHeading = 0;;
-    private final double[] powerSteps = POWER_STEPS;
+    private double lastHeading = 0;
     private double slow = 1;
-    private boolean endgameRumbleDone, projHeadingCalculated;
+    private boolean endgameRumbleDone, projHeadingCalculated, poseCalculated = false;
     private boolean liftDown = true;
-    private double startWait = 0.0;
-    private double recenterTime = 0.0;
-    int shotsLeft = 0;
+    private double startWait, recenterTime = 0.0;
+    private int shotsLeft = 0;
 
     @Override
     public void init() {
 
-        driveRR = new PinpointDrive(hardwareMap, startPose);
+        poseCalculated = false;
 
-        Vector2d parkPose = new Vector2d(33, -39);
-
-        smartPark = new SmartPark(drive, driveRR, parkPose);
-
-        //Drive Systems Init
+        // Systems Init
         drive.init(hardwareMap, telemetry);
+        launchSystem.init(POWER_STEPS, hardwareMap, telemetry);
+        limelightControl = new LimelightControl(hardwareMap, llPipelines.LOCALIZATION);
 
-        if (BLUE_SIDE) {
-            goalPose = Constants.goalPoseBlue;
-        } else {
-            goalPose = Constants.goalPoseRed;
-        }
+        //drive.resetOdoPosition(telemetry);
+
+        initialPose = null;
+
+        goalPose = BLUE_SIDE ? GOAL_POSE_BLUE: GOAL_POSE_RED;
+
+        mosaic = (Storage.mosaic == Mosaic.UNKNOWN) ? Mosaic.PGP : Storage.mosaic;
+        // PGP is a lucky lucky guess, we need to have a default in case it doesn't work
+
         drive.initTracker(goalPose, false);
 
-        if (BLUE_SIDE) {
-            initialPose = Constants.initialPoseBlue;
-        } else {
-            initialPose = Constants.initialPoseRed;
-        }
-        drive.setOdoPosition(initialPose);
-        telemetry.addData("initialPose", initialPose);
-
         dashboard.isEnabled();
+        initTimer.reset();
 
-        launchSystem.init(powerSteps, hardwareMap, telemetry);
+    }
 
-        telemetry.addData("initialPoseGotten", drive.getOdoPosition());
+    @Override
+    public void init_loop() {
+
+        if (!poseCalculated && cameraTimer.milliseconds() >= 50) {
+            initialPose = limelightControl.get2DLocationMT1();
+            if (initialPose != null) {
+                drive.setOdoPosition(initialPose);
+                lastHeading = initialPose.getHeading(AngleUnit.RADIANS);
+                drive.setPIDTargetHeading(lastHeading);
+                poseCalculated = true;
+            }
+            cameraTimer.reset();
+        }
+
+        telemetry.addData("Mosaic", mosaic.name());
+        telemetry.addData("initialPoseGottenX", drive.getOdoX(DistanceUnit.INCH));
+        telemetry.addData("initialPoseGottenY", drive.getOdoY(DistanceUnit.INCH));
+        telemetry.addData("initialPoseGottenHeading", drive.getOdoHeading(AngleUnit.DEGREES));
+        telemetry.addData("initialPose", initialPose == null ? "null" : initialPose);
         telemetry.addLine("DriveLaunchMode Initialized");
         telemetry.update();
 
@@ -87,17 +104,29 @@ public class DriveLaunchMode extends OpMode {
 
     @Override
     public void start() {
-        drive.setOdoPosition(initialPose);
 
-        lastHeading = initialPose.getHeading(AngleUnit.RADIANS);
-        drive.setPIDTargetHeading(lastHeading);
+        if (!poseCalculated || initialPose == null){
+            if (Storage.endPose == null)
+                initialPose = BLUE_SIDE ? INITIAL_POSE_BLUE : INITIAL_POSE_RED;
+            else
+                initialPose = Storage.endPose;
+        } else {
+            startPose = new Pose2d(initialPose.getX(DistanceUnit.INCH),
+                    initialPose.getY(DistanceUnit.INCH),
+                    initialPose.getHeading(AngleUnit.RADIANS));
+            driveRR = new PinpointDrive(hardwareMap, startPose);
+            if (BLUE_SIDE)
+                smartPark = new SmartPark(drive, driveRR, PARK_POSE_BLUE);
+            else
+                smartPark = new SmartPark(drive, driveRR, PARK_POSE_RED);
+        }
+
+        drive.setOdoPosition(initialPose);
+        launchSystem.disableAutoPower();
 
         PIDTimer.reset();
         matchTime.reset();
-
-        launchSystem.disableAutoPower();
-
-        endgameRumbleDone = false;
+        cameraTimer.reset();
 
         gamepad1.resetEdgeDetection();
         gamepad2.resetEdgeDetection();
@@ -119,22 +148,54 @@ public class DriveLaunchMode extends OpMode {
             }
         }
 
-        // Speed modifiers
-        if (gamepad1.left_trigger > 0.4) slow = Constants.SLOW_SPEED_LT;
-        else slow = 1;
+        if (!poseCalculated) {
+            if (matchTime.seconds() < 10 && cameraTimer.milliseconds() >= 100 &&
+                    rotate + strafe + forward < 0.02 && drive.getOdoVelocity() < 0.05) {
+                initialPose = limelightControl.get2DLocationMT1();
+                if (initialPose != null) {
+                    drive.setOdoPosition(initialPose);
+                    poseCalculated = true;
+                    lastHeading = initialPose.getHeading(AngleUnit.RADIANS);
+                    drive.setPIDTargetHeading(lastHeading);
 
-        forward = MecanumDrive.smoothDrive(-gamepad1.left_stick_y);
-        strafe = MecanumDrive.smoothDrive(gamepad1.left_stick_x);
+                    startPose = new Pose2d(initialPose.getX(DistanceUnit.INCH),
+                            initialPose.getY(DistanceUnit.INCH),
+                            initialPose.getHeading(AngleUnit.RADIANS));
+                    driveRR = new PinpointDrive(hardwareMap, startPose);
+                    if (BLUE_SIDE)
+                        smartPark = new SmartPark(drive, driveRR, PARK_POSE_BLUE);
+                    else
+                        smartPark = new SmartPark(drive, driveRR, PARK_POSE_RED);
+                } // So it doesn't fry the camera sensor
+                cameraTimer.reset();
+            }
+        }
+
+
+        // Speed modifiers
+        if (gamepad1.left_trigger > LT_DEAD_ZONE)
+            slow = Constants.SLOW_SPEED_LT;
+        else
+            slow = 1;
+
+        if (BLUE_SIDE) {
+            forward = MecanumDrive.smoothDrive(gamepad1.left_stick_y);
+            strafe = MecanumDrive.smoothDrive(-gamepad1.left_stick_x);
+        } else {
+            forward = MecanumDrive.smoothDrive(-gamepad1.left_stick_y);
+            strafe = MecanumDrive.smoothDrive(gamepad1.left_stick_x);
+        }
 
         if (!drive.trackGoalOn) {
-            if (Math.abs(gamepad1.right_stick_x) > 0.03) {
+
+            if (Math.abs(gamepad1.right_stick_x) > RIGHT_STICK_DEAD_ZONE) {
 
                 rotate = MecanumDrive.smoothDrive(gamepad1.right_stick_x);
                 lastHeading = drive.getOdoHeading(AngleUnit.RADIANS);
                 projHeadingCalculated = false;
                 PIDTimer.reset();
 
-            } else if (PIDTimer.milliseconds() > 160) {
+            } else if (PIDTimer.milliseconds() > DRIVE_PID_BUFFER_MS) {
 
                 if (!projHeadingCalculated) {
                     lastHeading = drive.getOdoHeading(AngleUnit.RADIANS);
@@ -151,7 +212,7 @@ public class DriveLaunchMode extends OpMode {
 
             drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
 
-        } else{
+        } else {
 
             drive.trackGoal(telemetry, forward, strafe, slow);
 
@@ -164,18 +225,24 @@ public class DriveLaunchMode extends OpMode {
         }
 
         // Launcher controls
-        if (gamepad1.dpadUpWasPressed()) launchSystem.stepUpPower();
-        else if (gamepad1.dpadDownWasPressed()) launchSystem.stepDownPower();
+        if (gamepad1.dpadUpWasPressed())
+            launchSystem.stepUpPower();
+        else if (gamepad1.dpadDownWasPressed())
+            launchSystem.stepDownPower();
 
-        //Launcher on/off
-        if (gamepad1.triangleWasPressed()) launchSystem.toggleLauncher();
+        // Launcher on/off
+        if (gamepad1.triangleWasPressed())
+            launchSystem.toggleLauncher();
 
-        //Intake on/off + Reverse
-        if (gamepad1.squareWasPressed()) launchSystem.toggleIntake();
-        else if (gamepad1.circleWasPressed()) launchSystem.toggleIntakeReverse();
+        // Intake on/off + Reverse
+        if (gamepad1.squareWasPressed())
+            launchSystem.toggleIntake();
+        else if (gamepad1.circleWasPressed())
+            launchSystem.toggleIntakeReverse();
 
-        //Lift hit
-        if(gamepad1.dpadRightWasPressed()) shotsLeft = 3;
+        // Lift hit
+        if (gamepad1.dpadRightWasPressed())
+            shotsLeft = 3;
 
         if (gamepad1.crossWasPressed() && shotsLeft == 0) {
             launchSystem.liftUp();
@@ -189,7 +256,6 @@ public class DriveLaunchMode extends OpMode {
             launchSystem.intakeBlipReset();
         }
 
-        telemetry.addData("shotsLeft", shotsLeft);
         if (shotsLeft != 0) {
             if (liftDown && matchTime.milliseconds() >= startWait + 850) {
                 launchSystem.liftUp();
@@ -199,7 +265,7 @@ public class DriveLaunchMode extends OpMode {
             }
         }
 
-        //Reset heading
+        // Reset heading
         if (gamepad1.touchpadWasPressed()) {
             drive.resetOdoHeading(telemetry);
             lastHeading = 0;
@@ -209,6 +275,7 @@ public class DriveLaunchMode extends OpMode {
             return;
         }
 
+        // Reset position and heading
         if (gamepad1.dpadLeftWasPressed()) {
             drive.resetOdoPosition(telemetry);
             lastHeading = 0;
@@ -218,9 +285,19 @@ public class DriveLaunchMode extends OpMode {
             return;
         }
 
-        if (gamepad1.rightBumperWasPressed()) drive.toggleTrackGoal();
+        // Auto park?
+        if (gamepad2.leftBumperWasPressed()) {
+            Action parkAction = smartPark.buildParkAction();
+            Actions.runBlocking(
+                    new SequentialAction(
+                            parkAction));
+        }
 
-        if (gamepad1.leftBumperWasPressed()) launchSystem.toggleAutoPower();
+        if (gamepad1.rightBumperWasPressed())
+            drive.toggleTrackGoal();
+
+        if (gamepad1.leftBumperWasPressed())
+            launchSystem.toggleAutoPower();
 
         // Continuous subsystem updates
         double dist = drive.getDistanceFromGoal();
@@ -228,7 +305,16 @@ public class DriveLaunchMode extends OpMode {
         launchSystem.intakeBlipLoop();
         launchSystem.updateLauncher(telemetry, dist, hardwareMap);
 
-        //Telemetry
+        // Telemetry
+        if (!poseCalculated && matchTime.seconds() <= 10) {
+            telemetry.addLine("INITIAL POSE NOT YET FOUND");
+            telemetry.addData("SECONDS LEFT TO FIND POSE", (int) (10 - matchTime.seconds()));
+            telemetry.addData("VELOCITY", drive.getOdoVelocity());
+            telemetry.addLine();
+        } else if (!poseCalculated) {
+            telemetry.addLine("POSE FINDING FAILED");
+        }
+
         if (DEBUG) {
             telemetry.addLine("Debug Enabled");
             launchSystem.debugTelemetry(telemetry);
@@ -238,19 +324,17 @@ public class DriveLaunchMode extends OpMode {
             drive.compTelemetry(telemetry, slow);
         }
 
-        if (gamepad2.triangleWasPressed()) {
-            Action parkAction = smartPark.buildParkAction();
-            Actions.runBlocking(
-                    new SequentialAction(
-                            parkAction
-                    )
-            );
-        }
-
-
+        telemetry.addData("Mosaic", mosaic.name());
         telemetry.addData("BlueSide", BLUE_SIDE);
 
         telemetry.update();
 
     }
+
+    @Override
+    public void stop() {
+        limelightControl.close();
+        super.stop();
+    }
+
 }

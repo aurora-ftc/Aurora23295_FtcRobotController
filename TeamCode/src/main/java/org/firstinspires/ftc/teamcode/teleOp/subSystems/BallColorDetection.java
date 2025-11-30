@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
+import org.firstinspires.ftc.teamcode.Constants;
 
 public class BallColorDetection {
 
@@ -51,8 +51,8 @@ public class BallColorDetection {
     }
 
     public void init(HardwareMap hwMap) {
-        colorSensor = (RevColorSensorV3) hwMap.get(ColorSensor.class, Constants.HardwareConfig.colorSensor);
-        colorSensor.setGain(Constants.revColorSensorGain);
+        colorSensor = (RevColorSensorV3) hwMap.get(ColorSensor.class, Constants.HWMap.COLOR_SENSOR);
+        colorSensor.setGain(12);
     }
 
     public DetectedColor getDetectedColor() {
@@ -75,7 +75,7 @@ public class BallColorDetection {
         s = hsv[1] * 255.0;
         v = hsv[2] * 255.0;
 
-        if (!Constants.useMahalanobisDistance) {
+        if (!Constants.USE_MAHALANOBIS_DISTANCE) {
             // Compute Gaussian probabilities
             p_purple = gaussian3D(h, s, v,
                     meanH_purple, sigmaH_purple,
@@ -125,7 +125,7 @@ public class BallColorDetection {
         tele.addData("Raw RGB", "(%d, %d, %d)", r, g, b);
         tele.addData("HSV", "(%.1f, %.1f, %.1f)", h, s, v);
         tele.addLine();
-        tele.addData("Using Mahalanobis Distance", Constants.useMahalanobisDistance);
+        tele.addData("Using Mahalanobis Distance", Constants.USE_MAHALANOBIS_DISTANCE);
         tele.addData("Mahalanobis Purple Distance", "%.6f", dPurple);
         tele.addData("Mahalanobis Green Distance", "%.6f", dGreen);
         tele.addLine();

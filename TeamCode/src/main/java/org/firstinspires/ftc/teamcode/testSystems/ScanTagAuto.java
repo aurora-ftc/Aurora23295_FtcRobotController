@@ -6,19 +6,19 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Limelight;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Mosaic;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
+import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
 @Autonomous(name = "Scan Tag Auto")
 public class ScanTagAuto extends LinearOpMode {
 
-    private Limelight limelight;
+    private LimelightControl limelightControl;
 
     @Override
     public void runOpMode() {
 
-        // Initialize Limelight
-        limelight = new Limelight(hardwareMap, 1); // pipeline 0
+        // Initialize LimelightControl
+        limelightControl = new LimelightControl(hardwareMap, 1); // pipeline 0
 
         telemetry.addLine("Ready to start");
         telemetry.update();
@@ -29,7 +29,7 @@ public class ScanTagAuto extends LinearOpMode {
 
         // Scan until we get a valid pattern
         while (opModeIsActive() && pattern == Mosaic.UNKNOWN) {
-            pattern = limelight.scanObelisk();
+            pattern = limelightControl.scanObelisk();
             telemetry.addData("Pattern Detected", pattern.name());
             telemetry.update();
 

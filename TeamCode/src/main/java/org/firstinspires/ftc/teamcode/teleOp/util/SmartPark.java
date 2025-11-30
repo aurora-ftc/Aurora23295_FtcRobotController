@@ -24,6 +24,7 @@ public class SmartPark {
 
     public Action buildParkAction() {
         drive.updateOdo();
+
         Pose2D odoPos = drive.getOdoPosition();
 
         double robotX = odoPos.getX(DistanceUnit.INCH);

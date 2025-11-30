@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp.driveTrain;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
+import static org.firstinspires.ftc.teamcode.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -15,7 +15,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
+import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.util.DcMotorGroup;
 import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 
@@ -54,6 +55,9 @@ public class MecanumDrive {
         backLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotorEx.Direction.FORWARD);
         backRightMotor.setDirection(DcMotorEx.Direction.FORWARD);
+
+        driveMotors = new DcMotorGroup(frontLeftMotor, frontRightMotor,
+                backLeftMotor, backRightMotor);
 
         //Run W/out encoder
         driveMotors.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -215,12 +219,20 @@ public class MecanumDrive {
     }
 
     public void setOdoPosition(Pose2D pose) {
-        odo.setPosition(pose);
+        if (pose != null)
+            odo.setPosition(pose);
     }
 
     public double getOdoHeading(AngleUnit angleUnit) {
         odo.update(GoBildaPinpointDriverRR.ReadData.ONLY_UPDATE_HEADING);
         return odo.getPosition().getHeading(angleUnit);
+    }
+
+    public double getOdoVelocity() {
+        double velocity = Math.atan2(odo.getVelY(DistanceUnit.INCH),
+                odo.getVelX(DistanceUnit.INCH)) +
+                odo.getHeadingVelocity(UnnormalizedAngleUnit.RADIANS);
+        return velocity;
     }
 
     public Pose2D getOdoPosition() {
