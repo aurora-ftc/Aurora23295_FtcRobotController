@@ -33,18 +33,18 @@ public class Constants {
     public static double FLYWHEEL_KV = 0.01; //0.01
     public static double FLYWHEEL_KS = 0.0055; //0.004
 
-    public static double MAX_FLYWHEEL_KV = 0.014;
-    public static double MIN_FLYWHEEL_KV = 0.006;
+        public static double MAX_FLYWHEEL_KV = 0.014;
+        public static double MIN_FLYWHEEL_KV = 0.006;
 
-    public static double VOLTS_NOMINAL = 12.5;
+        public static double VOLTS_NOMINAL = 12.5;
 
-    public static double LAUNCHER_ENCODER_PER_REV = 28.0;
+        public static double LAUNCHER_ENCODER_PER_REV = 28.0;
 
-    public static double LIFT_SERVO_MIN = 0.1;
-    public static double LIFT_SERVO_MAX = 0.24;
-    public static double LIFT_SERVO_UP = 0.0;
-    public static double LIFT_SERVO_DOWN = 1.0;
-    public static double LIFT_SERVO_FLICK_TIME = 120.0;
+        public static double LIFT_SERVO_MIN = 0.1;
+        public static double LIFT_SERVO_MAX = 0.24;
+        public static double LIFT_SERVO_UP = 0.0;
+        public static double LIFT_SERVO_DOWN = 1.0;
+        public static double LIFT_SERVO_FLICK_TIME = 120.0;
 
     public static double[] POWER_STEPS = {56, 58, 63, 85}; //{40, 42, 44, 85} old one idk why no work
 
@@ -67,16 +67,15 @@ public class Constants {
         public static String BL_MOTOR = "back_left_motor";
         public static String BR_MOTOR = "back_right_motor";
 
-        public static String LAUNCHER_MOTOR = "launcher_motor";
-        public static String INTAKE_MOTOR = "intake_motor";
-        public static String LIFT_SERVO = "lift_servo";
+                public static String LAUNCHER_MOTOR = "launcher_motor";
+                public static String INTAKE_MOTOR = "intake_motor";
+                public static String LIFT_SERVO = "lift_servo";
 
-        public static String ODO = "odo";
-        public static String IMU = "imu";
+                public static String ODO = "odo";
+                public static String IMU = "imu";
 
-        public static String LIMELIGHT = "limelight";
-        public static String COLOR_SENSOR = "color_sensor";
-    }
+                public static String LIMELIGHT = "limelight";
+                public static String COLOR_SENSOR = "color_sensor";
 
     public static class llPipelines {
         public static int LOCALIZATION = 0;

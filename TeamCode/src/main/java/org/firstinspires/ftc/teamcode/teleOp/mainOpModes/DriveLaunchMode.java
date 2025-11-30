@@ -40,6 +40,7 @@ public class DriveLaunchMode extends OpMode {
     private PinpointDrive driveRR;
     private SmartPark smartPark;
     private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
+    private BallSelector ballSelector = new BallSelector();
     private FtcDashboard dashboard = FtcDashboard.getInstance();
     private Pose2D initialPose, goalPose;
     private LimelightControl limelightControl;
