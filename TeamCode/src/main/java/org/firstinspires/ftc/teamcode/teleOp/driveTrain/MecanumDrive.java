@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode.teleOp.driveTrain;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.DRIVE_KD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.DRIVE_KI;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.DRIVE_KP;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.IS_FIELD_CENTRIC;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
@@ -25,19 +29,20 @@ import java.util.Locale;
 
 public class MecanumDrive {
 
-    private DcMotorEx frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
-    private GoBildaPinpointDriverRR odo;
-    private IMU imu;
-
     public DcMotorGroup driveMotors;
+    private GoBildaPinpointDriverRR odoRR;
+    public boolean trackGoalOn = false;
+    public Pose2D goalPose;
+    GoBildaPinpointDriverRR odo;
+    private DcMotorEx frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
+    private IMU imu;
     private PIDController headingPID;
-
     private double newForward, newStrafe, theta;
     private String botPose;
 
-    public boolean trackGoalOn = false;
-    public Pose2D goalPose;
-
+    public static double smoothDrive(double input) {
+        return 0.3 * Math.tan(input * 1.2792);
+    }
 
     public void init(HardwareMap hwMap, Telemetry telemetry) {
 
@@ -204,7 +209,7 @@ public class MecanumDrive {
     }
 
     public void resetOdoPosition(Telemetry tele) {
-        odo.setPosition(new Pose2D(DistanceUnit.INCH, 0 , 0,
+        odo.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0,
                 AngleUnit.RADIANS, 0));
         updateOdo();
         tele.update();
@@ -216,10 +221,6 @@ public class MecanumDrive {
 
     public void updateOdoHeading() {
         odo.update(GoBildaPinpointDriver.ReadData.ONLY_UPDATE_HEADING);
-    }
-
-    public void setOdoPosition(Pose2D pose) {
-        odo.setPosition(pose);
     }
 
     public double getOdoHeading(AngleUnit angleUnit) {
@@ -323,10 +324,6 @@ public class MecanumDrive {
 
     public void toggleTrackGoal() {
         trackGoalOn = !trackGoalOn;
-    }
-
-    public static double smoothDrive(double input) {
-        return 0.3 * Math.tan(input * 1.2792);
     }
 
     public void updateTelemetry(Telemetry telemetry, double slow) {

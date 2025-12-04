@@ -1,149 +1,155 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
-import android.graphics.Color;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.POSITIONS;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_green;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_purple;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanS_green;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanS_purple;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanV_green;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanV_purple;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.minProb;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaH_green;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaH_purple;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaS_green;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaS_purple;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaV_green;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaV_purple;
 
+import com.acmerobotics.roadrunner.ftc.Encoder;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
+import org.firstinspires.ftc.teamcode.teleOp.util.MathUtils;
+import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 
 import java.util.Arrays;
 
 public class BallSelector {
+    double[] positions = new double[6];
+    float[] hsv = new float[3];
+    Colors[] stored;
+    double h, s, v;
+    double p_purple, p_green;
 
-    private DcMotorEx selectorMotor;
-    private Servo selectorServo;
-    private RevColorSensorV3[] colorSensors = new RevColorSensorV3[3];
 
-    // Constants
-    // TODO: Adjust these constants accordingly
-    private static final double SPIN_POWER = 0.5;
-    private static final double SPIN_TIME = 0.5;
-    private static final double PUSH_POSITION = 0.9; // Adjust as needed
-    private static final double RETRACT_POSITION = 0.5; // Adjust as needed
+    CRServo rotaryServo;
+    Servo pushServo;
+    RevColorSensorV3 colorBottom, colorLeft, colorRight;
+    Encoder encoder;
+    PIDController controller;
+    double time;
 
-    public enum BallColor {
-        PURPLE, GREEN, UNKNOWN
+    public BallSelector() {
+
     }
 
-    public void init(HardwareMap hwMap) {
-        selectorMotor = hwMap.get(DcMotorEx.class, Constants.HWMap.SELECTOR_MOTOR);
-        selectorMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        selectorMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    public void init(HardwareMap map) {
+        rotaryServo = map.get(CRServo.class, HWMap.ROTARY_SERVO);
+        pushServo = map.get(Servo.class, HWMap.PUSH_SERVO);
+        encoder = map.get(Encoder.class, HWMap.ENCODER);
+        colorBottom = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_BOTTOM);
+        colorLeft = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_LEFT);
+        colorRight = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_RIGHT);
 
-        selectorServo = hwMap.get(Servo.class, Constants.HWMap.SELECTOR_SERVO);
-        selectorServo.setPosition(RETRACT_POSITION);
+        positions = POSITIONS;
 
-        colorSensors[0] = hwMap.get(RevColorSensorV3.class, Constants.HWMap.COLOR_SENSOR_1);
-        colorSensors[1] = hwMap.get(RevColorSensorV3.class, Constants.HWMap.COLOR_SENSOR_2);
-        colorSensors[2] = hwMap.get(RevColorSensorV3.class, Constants.HWMap.COLOR_SENSOR_3);
+        controller = new PIDController(0.0, 0.0, 0.0);
     }
 
-    public void spin(double power) {
-        selectorMotor.setPower(power);
+    public void runToPosition(int position) {
+        time = System.nanoTime() / 1e9;
+        controller.setTarget(positions[position]);
+        rotaryServo.setPower(controller.calculateOutputPID(encoder.getPositionAndVelocity().position,
+                time, true));
     }
 
-    public void stopSpin() {
-        selectorMotor.setPower(0);
-    }
-
-    public void pushBall() {
-        selectorServo.setPosition(PUSH_POSITION);
-    }
-
-    public void resetPusher() {
-        selectorServo.setPosition(RETRACT_POSITION);
-    }
-
-    public BallColor[] readColors() {
-        BallColor[] colors = new BallColor[3];
-        for (int i = 0; i < 3; i++) {
-            colors[i] = detectColor(colorSensors[i]);
+    public Colors getColor(RevColorSensorV3 sensor) {
+        if (sensor == null) {
+            return Colors.Unknown;
         }
-        return colors;
+
+        double r = sensor.red();
+        double g = sensor.green();
+        double b = sensor.blue();
+
+        double sum = r + g + b;
+
+        double normalRed = r / sum * 255;
+        double normalGreen = g / sum * 255;
+        double normalBlue = b / sum * 255;
+
+        android.graphics.Color.RGBToHSV((int) normalRed, (int) normalGreen, (int) normalBlue, hsv);
+        h = hsv[0] / 2.0; // convert 0–360 → 0–180
+        s = hsv[1] * 255.0;
+        v = hsv[2] * 255.0;
+
+        p_purple = MathUtils.gaussian3D(h, s, v,
+                meanH_purple, sigmaH_purple,
+                meanS_purple, sigmaS_purple,
+                meanV_purple, sigmaV_purple);
+
+        p_green = MathUtils.gaussian3D(h, s, v,
+                meanH_green, sigmaH_green,
+                meanS_green, sigmaS_green,
+                meanV_green, sigmaV_green);
+
+        if (p_purple > p_green && p_purple < minProb) {
+            return Colors.Purple;
+        } else if (p_purple < p_green && p_green < minProb) {
+            return Colors.Green;
+        } else {
+            return Colors.Unknown;
+        }
     }
 
-    public Action spinForTime(double power, double duration) {
-        return new Action() {
-            private boolean init = false;
-            private final ElapsedTime timer = new ElapsedTime();
+    public void getColour() {
+        stored = new Colors[]{getColor(colorBottom), getColor(colorLeft), getColor(colorRight)};
+    }
 
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!init)
-                    timer.reset();
-                init = true;
-                selectorMotor.setPower(power);
-                return timer.seconds() < duration;
+    public void loadBall() {
+        getColour();
+        if (Arrays.asList(stored).contains(Colors.Unknown)) {
+            runToPosition(Arrays.asList(stored).indexOf(Colors.Unknown));
+        }
+    }
+
+    public void returnBall(Colors color) {
+        getColour();
+        if (Arrays.asList(stored).contains(color)) {
+            runToPosition(Arrays.asList(stored).indexOf(color) + 3);
+        }
+    }
+
+    public void push() {
+        pushServo.setPosition(1);
+        pushServo.setPosition(0);
+    }
+
+    public void output() {
+    }
+
+    public void outputInOrder(Mosaic mosaic) {
+        String mos = mosaic.toString();
+
+        if (Arrays.asList(stored).contains(Colors.Unknown)) {
+            return;
+        }
+
+        for (Character c : mos.toCharArray()) {
+            if (c.equals('p')) {
+                returnBall(Colors.Purple);
+            } else {
+                returnBall(Colors.Green);
             }
-        };
-    }
-
-    public void spinToColor(BallColor target, Telemetry telemetry) {
-        long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < 5000) { // 5 second timeout
-            BallColor[] currentColors = readColors();
-            // Assuming Sensor 1 (index 0) is the exit sensor
-            if (currentColors[0] == target) {
-                continue;
-            } else if (currentColors[1] == target) {
-                // TODO: Need to figure out the direction according to the sensor placement
-                spinForTime(SPIN_POWER, SPIN_TIME);
-                stopSpin();
-            } else if (currentColors[2] == target) {
-                spinForTime(-SPIN_POWER, SPIN_TIME);
-                stopSpin();
-            }
-            // telemetry.addData("Target", target);
-            // telemetry.addData("Seen", Arrays.toString(currentColors));
-            // telemetry.update();
         }
     }
 
-    private BallColor detectColor(RevColorSensorV3 sensor) {
-        int r = sensor.red();
-        int g = sensor.green();
-        int b = sensor.blue();
-
-        float[] hsv = new float[3];
-        Color.RGBToHSV(r * 8, g * 8, b * 8, hsv); // Scale up RGB for conversion if needed, or just use raw
-
-        // Simple thresholding based on Hue
-        // Purple Hue is around 270-300 (or 110-130 if 0-180 scale)
-        // Green Hue is around 120 (or 60-90 if 0-180 scale)
-
-        // Using the values from BallColorDetection as reference:
-        // Purple Mean H: 110 (0-180 scale) -> ~220 (0-360)
-        // Green Mean H: 82 (0-180 scale) -> ~164 (0-360)
-
-        float hue = hsv[0];
-
-        if (hue > 100 && hue < 140) { // Adjust these ranges based on calibration
-            return BallColor.GREEN; // 120 is pure green
-        } else if (hue > 200 && hue < 300) {
-            return BallColor.PURPLE; // 270 is pure purple
-        }
-
-        // Fallback or more complex logic can be added here
-        return BallColor.UNKNOWN;
-    }
-
-    public void telemetry(Telemetry telemetry) {
-        BallColor[] colors = readColors();
-        telemetry.addData("Ball Selector Colors", Arrays.toString(colors));
-        telemetry.addData("Sensor 1 H", getHue(colorSensors[0]));
-        telemetry.addData("Sensor 2 H", getHue(colorSensors[1]));
-        telemetry.addData("Sensor 3 H", getHue(colorSensors[2]));
-    }
-
-    private float getHue(RevColorSensorV3 sensor) {
-        float[] hsv = new float[3];
-        Color.RGBToHSV(sensor.red() * 8, sensor.green() * 8, sensor.blue() * 8, hsv);
-        return hsv[0];
+    public void updateTelemetry(Telemetry telemetry) {
+        telemetry.addData("Array stored", stored);
+        telemetry.addData("Current Position", positions);
     }
 }

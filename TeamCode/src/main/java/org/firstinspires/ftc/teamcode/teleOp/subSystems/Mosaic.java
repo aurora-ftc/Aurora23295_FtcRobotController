@@ -8,10 +8,14 @@ public enum Mosaic {
 
     public static Mosaic fromId(byte id) {
         switch (id) {
-            case 21: return GPP;  // example
-            case 22: return PPG;  // example
-            case 23: return PGP;  // example
-            default: return UNKNOWN;
+            case 21:
+                return GPP;  // example
+            case 22:
+                return PPG;  // example
+            case 23:
+                return PGP;  // example
+            default:
+                return UNKNOWN;
         }
     }
 }

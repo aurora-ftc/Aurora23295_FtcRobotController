@@ -12,9 +12,9 @@ public class PIDController {
     public double target;
     public double current;
     public double output;
-    private double integral;
     public double previousError;
     public double previousTime; // Using System.nanoTime() or ElapsedTime for more accurate timing
+    private double integral;
 
     public PIDController(double kp, double ki, double kd) {
         this.kp = kp;

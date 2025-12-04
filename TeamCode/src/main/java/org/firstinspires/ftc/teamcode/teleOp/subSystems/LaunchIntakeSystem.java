@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -16,28 +17,22 @@ import org.firstinspires.ftc.teamcode.teleOp.util.Volts;
 public class LaunchIntakeSystem {
     private final int MIN_STEP = 0;
     private final ElapsedTime time = new ElapsedTime();
+    private final int minStep = 0;
+    private final Volts volts = new Volts();
+    private final ElapsedTime intakeTimer = new ElapsedTime();
+    private final double intakeBlipReset = 0;
     public boolean launcherOn = false;
     public boolean intakeOn = false;
+
     private DcMotor intakeMotor;
     private DcMotorEx launcherMotor;
     private Servo liftServo;
 
-    private Volts volts = new Volts();
-    private ElapsedTime intakeTimer = new ElapsedTime();
     private PIDController flywheelPID;
-
-    private final int minStep = 0;
     private int maxStep = 0;
     private int currentStep = minStep + 1;
     private double[] powerSteps;
-
     private double power, batteryVolts, batteryCorrectedKv;
-
-    public boolean launcherOn = false;
-    public boolean intakeOn = false;
-    private final ElapsedTime time = new ElapsedTime();
-    private PIDController flywheelPID;
-    private double intakeBlipReset = 0;
     private boolean autoPower = false;
 
     public void init(double[] powerSteps, HardwareMap hwMap, Telemetry telemetry) {
@@ -113,8 +108,8 @@ public class LaunchIntakeSystem {
     private void setLauncherPower(int step, Telemetry tele, double autoPow, HardwareMap hwMap) {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
-                if (autoPowerOn) spinToVelocity(autoPow, tele, hwMap);
-                else spinToVelocity(powerSteps[step], tele, hwMap);
+                if (autoPower) spinToVelocity(autoPow, tele);
+                else spinToVelocity(powerSteps[step], tele);
             } else {
                 //launcherMotor.setPower(0.0);
                 spinToVelocity(0, tele);
@@ -130,8 +125,8 @@ public class LaunchIntakeSystem {
         double pow = calcAutoPower(dist);
 
         batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
-        batteryVolts = batteryVolts <= 15 && batteryVolts >= 9?
-                batteryVolts : Constants.voltsNormal;
+        batteryVolts = batteryVolts <= 15 && batteryVolts >= 9 ?
+                batteryVolts : VOLTS_NOMINAL;
 
         tele.addData("Battery Volts", batteryVolts);
 
@@ -175,8 +170,8 @@ public class LaunchIntakeSystem {
     }
 
     public void intakeBlipLoop() {
-        if (Constants.intakeBlipStart < intakeTimer.milliseconds() &&
-                intakeTimer.milliseconds() < Constants.intakeBlipEnd) {
+        if (intakeBlipStart < intakeTimer.milliseconds() &&
+                intakeTimer.milliseconds() < intakeBlipEnd) {
             intakeMotor.setPower(1);
         } else {
             if (!intakeOn) intakeMotor.setPower(0);
@@ -197,12 +192,12 @@ public class LaunchIntakeSystem {
         telemetry.addData("Launcher Status", launcherOn ? "On" : "Off");
         telemetry.addData("Intake Status", intakeOn ? "On" : "Off");
         telemetry.addLine();
-        telemetry.addData("Auto Power", autoPowerOn ? "On": "Off");
-        telemetry.addData("Launcher Power (%)", !autoPowerOn
+        telemetry.addData("Auto Power", autoPower ? "On" : "Off");
+        telemetry.addData("Launcher Power (%)", !autoPower
                 ? (int) (((powerSteps[currentStep] / 85.0) * 100) + 0.5)
                 : (int) (((power / 85.0) * 100) + 0.5)
                 + "%");
-        telemetry.addData("Power Step", !autoPowerOn
+        telemetry.addData("Power Step", !autoPower
                 ? powerSteps[currentStep]
                 : power);
         telemetry.addLine();
@@ -214,13 +209,13 @@ public class LaunchIntakeSystem {
         telemetry.addData("Lift Servo Position", liftServo.getPosition());
         telemetry.addLine();
         telemetry.addData("Outtake", launcherOn);
-        telemetry.addData("Auto Power", autoPowerOn ? "On": "Off");
+        telemetry.addData("Auto Power", autoPower ? "On" : "Off");
         telemetry.addLine();
-        telemetry.addData("Launcher Power (%)", !autoPowerOn
+        telemetry.addData("Launcher Power (%)", !autoPower
                 ? (int) (((powerSteps[currentStep] / 85.0) * 100) + 0.5)
                 : (int) (((power / 85.0) * 100) + 0.5)
                 + "%");
-        telemetry.addData("Power Step", !autoPowerOn
+        telemetry.addData("Power Step", !autoPower
                 ? powerSteps[currentStep]
                 : power);
         telemetry.addLine();
@@ -230,15 +225,15 @@ public class LaunchIntakeSystem {
     }
 
     public void disableAutoPower() {
-        autoPowerOn = false;
+        autoPower = false;
     }
 
     public void toggleAutoPower() {
-        autoPowerOn = !autoPowerOn;
+        autoPower = !autoPower;
     }
 
     private double calcAutoPower(double distance) {
-        power = 0.09/65116 * distance + 53.81395;
+        power = 0.09 / 65116 * distance + 53.81395;
         power = Math.max(41, Math.min(44.5, power));
         return power;
     }

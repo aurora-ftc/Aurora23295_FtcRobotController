@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode.testSystems;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.BallColorDetection;
-
 @TeleOp(name = "ColorSensorTest",group = "TestModes")
 public class ColorSensorTest extends OpMode {
     BallColorDetection colorSensor = new BallColorDetection();

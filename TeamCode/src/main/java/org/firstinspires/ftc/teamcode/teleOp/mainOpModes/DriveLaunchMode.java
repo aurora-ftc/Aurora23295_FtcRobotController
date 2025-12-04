@@ -1,12 +1,16 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.BLUE_SIDE;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.DEBUG;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.LIFT_SERVO_FLICK_TIME;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.POWER_STEPS;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.initialPoseBlue;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -14,13 +18,15 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.BallSelector;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.Limelight;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.Mosaic;
 import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "DriveLaunchMode", group = "OpModes")
@@ -28,36 +34,31 @@ public class DriveLaunchMode extends OpMode {
 
 // --- Trajectory & Drive Components ---
 
-    private final double[] powerSteps = ConstantConfig.powerVals;
-    int shotsLeft = 0;
+    private final double[] powerSteps = Constants.POWER_STEPS;
     private final TrajectoryActionBuilder parkAction = null;
     private final MecanumDrive drive = new MecanumDrive();
-
-// --- Timers ---
+    int shotsLeft = 0;
+    // --- Timers ---
     private PinpointDrive dwive;
-    private SmartPark smartPark;
 
 // --- Timers ---
-
-    private ElapsedTime matchTime = new ElapsedTime();
-    private ElapsedTime PIDTimer = new ElapsedTime();
-    private Pose2d startPose = new Pose2d(initialPoseBlue.getX(DistanceUnit.INCH),
+    private SmartPark smartPark;
+    private final ElapsedTime matchTime = new ElapsedTime();
+    private final ElapsedTime PIDTimer = new ElapsedTime();
+    private final Pose2d startPose = new Pose2d(initialPoseBlue.getX(DistanceUnit.INCH),
             initialPoseBlue.getY(DistanceUnit.INCH),
             initialPoseBlue.getHeading(AngleUnit.RADIANS));
     private PinpointDrive driveRR;
-    private SmartPark smartPark;
-    private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
-    private BallSelector ballSelector = new BallSelector();
-    private FtcDashboard dashboard = FtcDashboard.getInstance();
+    private final LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
+    private final BallSelector ballSelector = new BallSelector();
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Pose2D initialPose, goalPose;
-    private Limelight limelight = new Limelight(hardwareMap, 0);
+    private final Limelight limelight = new Limelight(hardwareMap, 0);
     private double forward, strafe, rotate;
-    private double lastHeading = 0;;
-    private final double[] powerSteps = POWER_STEPS;
+    private double lastHeading = 0;
     private double slow = 1;
 
-// --- Flags ---
-    private double slow = 1;
+    // --- Flags ---
     private boolean endgameRumbleDone, projHeadingCalculated;
     private boolean liftDown = true;
     private double startWait = 0.0;
@@ -272,17 +273,15 @@ public class DriveLaunchMode extends OpMode {
 
         // Ball Selector Controls
         // TODO: Set to the right button
-        if (gamepad1.sthWasPressed()) {
-            ballSelector.spinForTime(0.5, 0.5);
+        if (gamepad1.square) {
+            ballSelector.output();
         }
 
-        if (gamepad1.sthWasPressed()) {
-            ballSelector.pushBall();
-            sleep(500); // TODO: See if we need something like this
-            ballSelector.resetPusher();
+        if (gamepad1.squareWasPressed()) {
+            ballSelector.output();
         }
 
-        ballSelector.telemetry(telemetry);
+        ballSelector.updateTelemetry(telemetry);
 
         telemetry.addData("BlueSide", BLUE_SIDE);
 
