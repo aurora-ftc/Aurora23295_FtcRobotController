@@ -68,7 +68,7 @@ public class DriveOpMode extends OpMode {
         if (gamepad1.touchpad) {
             gamepad1.rumbleBlips(2);
             recenterTime = matchTimer.seconds();
-            drive.resetOdoHeading();
+            drive.resetOdoHeading(telemetry);
             return;
         }
 

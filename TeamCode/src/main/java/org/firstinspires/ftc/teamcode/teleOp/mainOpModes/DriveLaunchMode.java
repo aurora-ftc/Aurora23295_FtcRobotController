@@ -1,26 +1,35 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
-import static org.firstinspires.ftc.teamcode.Constants.*;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.BLUE_SIDE;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.DEBUG;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.LIFT_SERVO_FLICK_TIME;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.POWER_STEPS;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.initialPoseBlue;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Storage;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.BallSelector;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightLocalization;
-import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.Limelight;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.Mosaic;
 import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "DriveLaunchMode", group = "OpModes")
@@ -28,32 +37,31 @@ public class DriveLaunchMode extends OpMode {
 
 // --- Trajectory & Drive Components ---
 
-    private final double[] powerSteps = ConstantConfig.powerVals;
-    int shotsLeft = 0;
+    private final double[] powerSteps = Constants.POWER_STEPS;
     private final TrajectoryActionBuilder parkAction = null;
     private final MecanumDrive drive = new MecanumDrive();
+    int shotsLeft = 0;
+    // --- Timers ---
+    private PinpointDrive dwive;
 
 // --- Timers ---
-    private PinpointDrive dwive;
     private SmartPark smartPark;
-
-// --- Pose Tracking ---
     private final ElapsedTime matchTime = new ElapsedTime();
     private final ElapsedTime PIDTimer = new ElapsedTime();
-
-// --- Subsystems ---
-    private final Pose2d startPose = new Pose2d(12, -63, Math.toRadians(90));
-    private Pose2D initialPose, goalPose;
+    private final Pose2d startPose = new Pose2d(initialPoseBlue.getX(DistanceUnit.INCH),
+            initialPoseBlue.getY(DistanceUnit.INCH),
+            initialPoseBlue.getHeading(AngleUnit.RADIANS));
+    private PinpointDrive driveRR;
     private final LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
+    private final BallSelector ballSelector = new BallSelector();
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
-
-// --- Control State ---
-    private final LimelightLocalization limelight = new LimelightLocalization();
+    private Pose2D initialPose, goalPose;
+    private final Limelight limelight = new Limelight(hardwareMap, 0);
     private double forward, strafe, rotate;
     private double lastHeading = 0;
-
-// --- Flags ---
     private double slow = 1;
+
+    // --- Flags ---
     private boolean endgameRumbleDone, projHeadingCalculated;
     private boolean liftDown = true;
     private double startWait = 0.0;
@@ -338,4 +346,21 @@ public class DriveLaunchMode extends OpMode {
         super.stop();
     }
 
+        // Ball Selector Controls
+        // TODO: Set to the right button
+        if (gamepad1.square) {
+            ballSelector.output();
+        }
+
+        if (gamepad1.squareWasPressed()) {
+            ballSelector.output();
+        }
+
+        ballSelector.updateTelemetry(telemetry);
+
+        telemetry.addData("BlueSide", BLUE_SIDE);
+
+        telemetry.update();
+
+    }
 }

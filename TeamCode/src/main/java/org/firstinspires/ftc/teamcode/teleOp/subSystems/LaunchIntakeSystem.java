@@ -18,22 +18,22 @@ import org.firstinspires.ftc.teamcode.teleOp.util.Volts;
 public class LaunchIntakeSystem {
     private final int MIN_STEP = 0;
     private final ElapsedTime time = new ElapsedTime();
+    private final int minStep = 0;
+    private final Volts volts = new Volts();
+    private final ElapsedTime intakeTimer = new ElapsedTime();
+    private final double intakeBlipReset = 0;
     public boolean launcherOn = false;
     public boolean intakeOn = false;
+
     private DcMotor intakeMotor;
     private DcMotorEx launcherMotor;
     private Servo liftServo;
-    private final Volts volts = new Volts();
+
+    private PIDController flywheelPID;
     private int maxStep = 0;
     private int currentStep = minStep + 1;
     private double[] powerSteps;
-
     private double power, batteryVolts, batteryCorrectedKv;
-    private int currentStep = MIN_STEP + 1;
-    private double[] powerSteps;
-    private PIDController flywheelPID;
-    private double intakeBlipReset = 0;
-    private final int intakeSpinDirection = 1;
     private boolean autoPower = false;
 
     public void init(double[] powerSteps, HardwareMap hwMap, Telemetry telemetry) {
@@ -109,7 +109,7 @@ public class LaunchIntakeSystem {
     private void setLauncherPower(int step, Telemetry tele, double autoPow, HardwareMap hwMap) {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
-                if (autoPowerOn) spinToVelocity(autoPow, tele);
+                if (autoPower) spinToVelocity(autoPow, tele);
                 else spinToVelocity(powerSteps[step], tele);
             } else {
                 //launcherMotor.setPower(0.0);
@@ -127,7 +127,8 @@ public class LaunchIntakeSystem {
 
         batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
         batteryVolts = batteryVolts <= 15 && batteryVolts >= 9 ?
-                batteryVolts : 12.5;
+                batteryVolts : VOLTS_NOMINAL;
+
         tele.addData("Battery Volts", batteryVolts);
 
         if (launcherOn) {
@@ -170,8 +171,8 @@ public class LaunchIntakeSystem {
     }
 
     public void intakeBlipLoop() {
-        if (200 < intakeTimer.milliseconds() &&
-                intakeTimer.milliseconds() < 600) {
+        if (intakeBlipStart < intakeTimer.milliseconds() &&
+                intakeTimer.milliseconds() < intakeBlipEnd) {
             intakeMotor.setPower(1);
         } else {
             if (!intakeOn) intakeMotor.setPower(0);
@@ -197,7 +198,7 @@ public class LaunchIntakeSystem {
                 ? (int) (((powerSteps[currentStep] / 85.0) * 100) + 0.5)
                 : (int) (((power / 85.0) * 100) + 0.5)
                 + "%");
-        telemetry.addData("Power Step", !autoPowerOn
+        telemetry.addData("Power Step", !autoPower
                 ? powerSteps[currentStep]
                 : power);
         telemetry.addLine();
@@ -210,13 +211,12 @@ public class LaunchIntakeSystem {
         telemetry.addLine();
         telemetry.addData("Outtake", launcherOn);
         telemetry.addData("Auto Power", autoPower ? "On" : "Off");
-        telemetry.addData("Launcher Power", autoPower ? power : powerSteps[currentStep]);
         telemetry.addLine();
-        telemetry.addData("Launcher Power (%)", !autoPowerOn
+        telemetry.addData("Launcher Power (%)", !autoPower
                 ? (int) (((powerSteps[currentStep] / 85.0) * 100) + 0.5)
                 : (int) (((power / 85.0) * 100) + 0.5)
                 + "%");
-        telemetry.addData("Power Step", !autoPowerOn
+        telemetry.addData("Power Step", !autoPower
                 ? powerSteps[currentStep]
                 : power);
         telemetry.addLine();
@@ -226,18 +226,16 @@ public class LaunchIntakeSystem {
     }
 
     public void disableAutoPower() {
-        autoPowerOn = false;
+        autoPower = false;
     }
 
     public void toggleAutoPower() {
-        autoPowerOn = !autoPowerOn;
+        autoPower = !autoPower;
     }
 
     private double calcAutoPower(double distance) {
-        power = 0.189189 * distance +38.97297;
-        power = Math.max(55, Math.min(65, power));
-//        power = 0.09/65116 * distance + 53.81395;
-//        power = Math.max(41, Math.min(44.5, power));
+        power = 0.09 / 65116 * distance + 53.81395;
+        power = Math.max(41, Math.min(44.5, power));
         return power;
     }
 

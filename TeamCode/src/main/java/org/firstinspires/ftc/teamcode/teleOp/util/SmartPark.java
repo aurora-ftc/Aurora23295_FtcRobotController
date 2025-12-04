@@ -5,23 +5,28 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
-import  org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 
 public class SmartPark {
 
-    private MecanumDrive drive;
-    private PinpointDrive driveRR;
-    private Vector2d parkPose;
+    private final MecanumDrive drive;
+    private final PinpointDrive driveRR;
+    private final Vector2d parkPose;
 
     public SmartPark(MecanumDrive drive, PinpointDrive driveRR, Vector2d parkPose) {
         this.drive = drive;
         this.driveRR = driveRR;
         this.parkPose = parkPose;
+    }
+
+    private static double angleDiff(double target, double current) {
+        double diff = target - current;
+        diff = ((diff + 180) % 360) - 180;
+        return diff;
     }
 
     public Action buildParkAction() {
@@ -56,11 +61,5 @@ public class SmartPark {
         Action action = builder.build();
 
         return action;
-    }
-
-    private static double angleDiff(double target, double current) {
-        double diff = target - current;
-        diff = ((diff + 180) % 360) - 180;
-        return diff;
     }
 }

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -22,13 +23,13 @@ public class LimelightControl {
     /**
      * Plug LimelightControl into Computer and set values for offsets
      */
-    private Limelight3A limelight;
+    private final Limelight3A limelight;
     private byte obeliskID;
     private Mosaic mosaic;
     private List<LLResultTypes.FiducialResult> obeliskList = new ArrayList<>();
 
-    public LimelightControl(HardwareMap hwMap, int pipeline) {
-        limelight = hwMap.get(Limelight3A.class, HWMap.LIMELIGHT);
+    public Limelight(HardwareMap hwMap, int pipeline) {
+        limelight = hwMap.get(Limelight3A.class, Constants.HWMap.LIMELIGHT);
         limelight.pipelineSwitch(pipeline); //0 is the normal
         limelight.start();
     }
