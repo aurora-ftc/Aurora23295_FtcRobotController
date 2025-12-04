@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.POSITIONS;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KI;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KP;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_green;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_purple;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanS_green;
@@ -16,8 +19,9 @@ import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaS_purple;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaV_green;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaV_purple;
 
-import com.acmerobotics.roadrunner.ftc.Encoder;
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -28,18 +32,18 @@ import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 
 import java.util.Arrays;
 
-public class BallSelector {
+public class BallSelector extends SubsystemBase {
     double[] positions = new double[6];
     float[] hsv = new float[3];
     Colors[] stored;
     double h, s, v;
+    double angle;
     double p_purple, p_green;
-
 
     CRServo rotaryServo;
     Servo pushServo;
     RevColorSensorV3 colorBottom, colorLeft, colorRight;
-    Encoder encoder;
+    AnalogInput encoder;
     PIDController controller;
     double time;
 
@@ -50,21 +54,24 @@ public class BallSelector {
     public void init(HardwareMap map) {
         rotaryServo = map.get(CRServo.class, HWMap.ROTARY_SERVO);
         pushServo = map.get(Servo.class, HWMap.PUSH_SERVO);
-        encoder = map.get(Encoder.class, HWMap.ENCODER);
+        encoder = map.get(AnalogInput.class, HWMap.ENCODER);
         colorBottom = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_BOTTOM);
         colorLeft = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_LEFT);
         colorRight = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_RIGHT);
 
         positions = POSITIONS;
 
-        controller = new PIDController(0.0, 0.0, 0.0);
+        controller = new PIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD);
+    }
+    public void periodic() {
+        time = System.nanoTime() / 1e9;
+        rotaryServo.setPower(controller.calculateOutputPID(angle,
+                time, true));
+        angle = (encoder.getVoltage() / 3.3) / 360;
     }
 
-    public void runToPosition(int position) {
-        time = System.nanoTime() / 1e9;
+    public void setTargetPosition(int position) {
         controller.setTarget(positions[position]);
-        rotaryServo.setPower(controller.calculateOutputPID(encoder.getPositionAndVelocity().position,
-                time, true));
     }
 
     public Colors getColor(RevColorSensorV3 sensor) {
@@ -113,23 +120,20 @@ public class BallSelector {
     public void loadBall() {
         getColour();
         if (Arrays.asList(stored).contains(Colors.Unknown)) {
-            runToPosition(Arrays.asList(stored).indexOf(Colors.Unknown));
+            setTargetPosition(Arrays.asList(stored).indexOf(Colors.Unknown));
         }
     }
 
     public void returnBall(Colors color) {
         getColour();
         if (Arrays.asList(stored).contains(color)) {
-            runToPosition(Arrays.asList(stored).indexOf(color) + 3);
+            setTargetPosition(Arrays.asList(stored).indexOf(color) + 3);
         }
     }
 
     public void push() {
         pushServo.setPosition(1);
         pushServo.setPosition(0);
-    }
-
-    public void output() {
     }
 
     public void outputInOrder(Mosaic mosaic) {

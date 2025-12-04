@@ -9,18 +9,14 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 import org.firstinspires.ftc.teamcode.teleOp.util.Volts;
 
 public class LaunchIntakeSystem {
-    private final int MIN_STEP = 0;
-    private final ElapsedTime time = new ElapsedTime();
     private final int minStep = 0;
     private final Volts volts = new Volts();
     private final ElapsedTime intakeTimer = new ElapsedTime();
-    private final double intakeBlipReset = 0;
     public boolean launcherOn = false;
     public boolean intakeOn = false;
 
@@ -29,6 +25,7 @@ public class LaunchIntakeSystem {
     private Servo liftServo;
 
     private PIDController flywheelPID;
+    private final BallSelector ballselector = new BallSelector();
     private int maxStep = 0;
     private int currentStep = minStep + 1;
     private double[] powerSteps;
@@ -59,12 +56,11 @@ public class LaunchIntakeSystem {
 
         liftServo.scaleRange(LIFT_SERVO_MIN, LIFT_SERVO_MAX);
 
-        flywheelPID = new PIDController(FLYWHEEL_KP,
-                FLYWHEEL_KI, FLYWHEEL_KD,
-                FLYWHEEL_KV, FLYWHEEL_KS);
+        flywheelPID = new PIDController(FLYWHEEL_KP, FLYWHEEL_KI, FLYWHEEL_KD, FLYWHEEL_KV, FLYWHEEL_KS);
         flywheelPID.previousTime = System.nanoTime() / 1e9;
+        ballselector.init(hwMap);
 
-        //Set Servo Down
+        // Set Servo Down
         liftServo.setPosition(LIFT_SERVO_DOWN);
 
         debugTelemetry(telemetry);
@@ -77,9 +73,10 @@ public class LaunchIntakeSystem {
         flywheelPID.setTarget(targetVelocity);
 
         double currentVelocity = launcherMotor.getVelocity() / LAUNCHER_ENCODER_PER_REV;
-        if (DEBUG) tele.addData("currentVelocity", currentVelocity);
+        if (DEBUG)
+            tele.addData("currentVelocity", currentVelocity);
 
-        double time = System.nanoTime() / 1e9; //Seconds
+        double time = System.nanoTime() / 1e9; // Seconds
         batteryCorrectedKv = FLYWHEEL_KV * (12.5 / batteryVolts);
         batteryCorrectedKv = Math.min(MAX_FLYWHEEL_KV, Math.max(batteryCorrectedKv, MIN_FLYWHEEL_KV));
 
@@ -102,52 +99,47 @@ public class LaunchIntakeSystem {
         packet.put("output", output);
 
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
-
     }
 
-    private void setLauncherPower(int step, Telemetry tele, double autoPow, HardwareMap hwMap) {
+    private void setLauncherPower(int step, Telemetry tele, double autoPow) {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
-                if (autoPower) spinToVelocity(autoPow, tele);
-                else spinToVelocity(powerSteps[step], tele);
+                if (autoPower)
+                    spinToVelocity(autoPow, tele);
+                else
+                    spinToVelocity(powerSteps[step], tele);
             } else {
-                //launcherMotor.setPower(0.0);
+                // launcherMotor.setPower(0.0);
                 spinToVelocity(0, tele);
             }
         }
     }
 
-    public void toggleLauncher() {
-        launcherOn = !launcherOn;
-    }
+    public void toggleLauncher() { launcherOn = !launcherOn; }
 
     public void updateLauncher(Telemetry tele, double dist, HardwareMap hwMap) {
         double pow = calcAutoPower(dist);
 
         batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
-        batteryVolts = batteryVolts <= 15 && batteryVolts >= 9 ?
-                batteryVolts : VOLTS_NOMINAL;
+        batteryVolts = batteryVolts <= 15 && batteryVolts >= 9 ? batteryVolts : VOLTS_NOMINAL;
 
         tele.addData("Battery Volts", batteryVolts);
 
         if (launcherOn) {
-            setLauncherPower(currentStep, tele, pow, hwMap);
+            setLauncherPower(currentStep, tele, pow);
         } else {
             launcherMotor.setPower(0.0);
         }
     }
 
-    public void stepUpPower() {
-        currentStep = Math.min(currentStep + 1, maxStep);
-    }
+    public void stepUpPower() { currentStep = Math.min(currentStep + 1, maxStep); }
 
-    public void stepDownPower() {
-        currentStep = Math.max(currentStep - 1, minStep);
-    }
+    public void stepDownPower() { currentStep = Math.max(currentStep - 1, minStep); }
 
     public void toggleIntake() {
         if (!intakeOn) {
             intakeMotor.setPower(1);
+            ballselector.loadBall();
             intakeOn = true;
         } else {
             intakeMotor.setPower(0);
@@ -164,28 +156,10 @@ public class LaunchIntakeSystem {
             intakeOn = false;
         }
     }
+    public void liftUp() { liftServo.setPosition(LIFT_SERVO_UP); }
 
-    public void intakeBlipReset() {
-        intakeTimer.reset();
-    }
-
-    public void intakeBlipLoop() {
-        if (intakeBlipStart < intakeTimer.milliseconds() &&
-                intakeTimer.milliseconds() < intakeBlipEnd) {
-            intakeMotor.setPower(1);
-        } else {
-            if (!intakeOn) intakeMotor.setPower(0);
-        }
-    }
-
-    public void liftUp() {
-        liftServo.setPosition(LIFT_SERVO_UP);
-    }
-
-    //No, this is not wrong. The lower position is 1.0 and the upper position is 0.0
-    public void liftDown() {
-        liftServo.setPosition(LIFT_SERVO_DOWN);
-    }
+    // No, this is not wrong. The lower position is 1.0 and the upper position is 0.0
+    public void liftDown() { liftServo.setPosition(LIFT_SERVO_DOWN); }
 
     public void compTelemetry(Telemetry telemetry) {
         telemetry.addLine();
@@ -193,13 +167,9 @@ public class LaunchIntakeSystem {
         telemetry.addData("Intake Status", intakeOn ? "On" : "Off");
         telemetry.addLine();
         telemetry.addData("Auto Power", autoPower ? "On" : "Off");
-        telemetry.addData("Launcher Power (%)", !autoPower
-                ? (int) (((powerSteps[currentStep] / 85.0) * 100) + 0.5)
-                : (int) (((power / 85.0) * 100) + 0.5)
-                + "%");
-        telemetry.addData("Power Step", !autoPower
-                ? powerSteps[currentStep]
-                : power);
+        telemetry.addData("Launcher Power (%)", !autoPower ? (int)(((powerSteps[currentStep] / 85.0) * 100) + 0.5)
+                : (int)(((power / 85.0) * 100) + 0.5) + "%");
+        telemetry.addData("Power Step", !autoPower ? powerSteps[currentStep] : power);
         telemetry.addLine();
     }
 
@@ -211,31 +181,22 @@ public class LaunchIntakeSystem {
         telemetry.addData("Outtake", launcherOn);
         telemetry.addData("Auto Power", autoPower ? "On" : "Off");
         telemetry.addLine();
-        telemetry.addData("Launcher Power (%)", !autoPower
-                ? (int) (((powerSteps[currentStep] / 85.0) * 100) + 0.5)
-                : (int) (((power / 85.0) * 100) + 0.5)
-                + "%");
-        telemetry.addData("Power Step", !autoPower
-                ? powerSteps[currentStep]
-                : power);
+        telemetry.addData("Launcher Power (%)", !autoPower ? (int)(((powerSteps[currentStep] / 85.0) * 100) + 0.5)
+                : (int)(((power / 85.0) * 100) + 0.5) + "%");
+        telemetry.addData("Power Step", !autoPower ? powerSteps[currentStep] : power);
         telemetry.addLine();
         telemetry.addData("Battery Volts", batteryVolts);
         telemetry.addData("Battery Corrected Kv", batteryCorrectedKv);
         telemetry.addLine();
     }
 
-    public void disableAutoPower() {
-        autoPower = false;
-    }
+    public void disableAutoPower() { autoPower = false; }
 
-    public void toggleAutoPower() {
-        autoPower = !autoPower;
-    }
+    public void toggleAutoPower() { autoPower = !autoPower; }
 
     private double calcAutoPower(double distance) {
         power = 0.09 / 65116 * distance + 53.81395;
         power = Math.max(41, Math.min(44.5, power));
         return power;
     }
-
 }
