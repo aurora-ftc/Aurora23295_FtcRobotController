@@ -3,17 +3,8 @@ package org.firstinspires.ftc.teamcode.teleOp.util;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class PIDController {
-    public double kp;
-    public double ki;
-    public double kd;
-    public double kv;
-    public double ks;
-
-    public double target;
-    public double current;
-    public double output;
-    public double previousError;
-    public double previousTime; // Using System.nanoTime() or ElapsedTime for more accurate timing
+    public double kp, ki, kd, kv, ks;
+    public double target, current, output, previousError, previousTime; // Using System.nanoTime() or ElapsedTime for more accurate timing
     private double integral;
 
     public PIDController(double kp, double ki, double kd) {
@@ -80,8 +71,7 @@ public class PIDController {
     }
 
     public double calculateOutputFF(double targetVelocity, double kv) {
-        double FeedForwardOutput = kv * targetVelocity + ks;
-        return FeedForwardOutput;
+        return kv * targetVelocity + ks;
     }
 
 }
