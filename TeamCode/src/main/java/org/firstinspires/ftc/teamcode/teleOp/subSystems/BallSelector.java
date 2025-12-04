@@ -74,6 +74,10 @@ public class BallSelector extends SubsystemBase {
         controller.setTarget(positions[position]);
     }
 
+    public boolean isAtTarget() {
+        return Math.abs(angle - controller.getTarget()) < 0.01;
+    }
+
     public Colors getColor(RevColorSensorV3 sensor) {
         if (sensor == null) {
             return Colors.Unknown;
@@ -104,9 +108,9 @@ public class BallSelector extends SubsystemBase {
                 meanS_green, sigmaS_green,
                 meanV_green, sigmaV_green);
 
-        if (p_purple > p_green && p_purple < minProb) {
+        if (p_purple > p_green && p_purple > minProb) {
             return Colors.Purple;
-        } else if (p_purple < p_green && p_green < minProb) {
+        } else if (p_purple < p_green && p_green > minProb) {
             return Colors.Green;
         } else {
             return Colors.Unknown;
@@ -157,3 +161,4 @@ public class BallSelector extends SubsystemBase {
         telemetry.addData("Current Position", positions);
     }
 }
+

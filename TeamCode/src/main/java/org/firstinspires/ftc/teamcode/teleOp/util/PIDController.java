@@ -43,10 +43,6 @@ public class PIDController {
         this.kv = kv;
     }
 
-    public void setTarget(double target) {
-        this.target = target;
-    }
-
     public double calculateOutputPID(double current, double time, boolean shouldRadianWrap) {
         this.current = current;
         double error = shouldRadianWrap ?
@@ -74,4 +70,11 @@ public class PIDController {
         return kv * targetVelocity + ks;
     }
 
+    public double getTarget() {
+        return target;
+    }
+
+    public void setTarget(double target) {
+        this.target = target;
+    }
 }
