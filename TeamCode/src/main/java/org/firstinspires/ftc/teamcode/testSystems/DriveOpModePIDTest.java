@@ -27,7 +27,7 @@ public class DriveOpModePIDTest extends OpMode {
     boolean projHeadingCalculated;
     private final double[] powerSteps = {50, 57, 62, 85};
     boolean shooterOn, liftDown;
-    private ElapsedTime matchTime = new ElapsedTime();
+    private final ElapsedTime matchTime = new ElapsedTime();
 
     @Override
     public void init() {
@@ -57,7 +57,7 @@ public class DriveOpModePIDTest extends OpMode {
 
         drive.setPIDTargetHeading(Math.PI / 2.0);
 
-        drive.resetOdoHeading();
+        drive.resetOdoHeading(telemetry);
 
         drive.deactivateTrackGoal();
 
@@ -125,7 +125,7 @@ public class DriveOpModePIDTest extends OpMode {
         if (gamepad1.touchpadWasPressed()) {
             drive.setPIDTargetHeading(0.0);
             lastHeading = 0;
-            drive.resetOdoHeading();
+            drive.resetOdoHeading(telemetry);
         }
 
         if (gamepad1.rightBumperWasPressed())
@@ -160,11 +160,9 @@ public class DriveOpModePIDTest extends OpMode {
         if (!liftDown && matchTime.milliseconds() >= startWait + 100) {
             launcher.liftDown();
             liftDown = true;
-            launcher.intakeBlipReset();
         }
 
         double dist = drive.getDistanceFromGoal();
-        launcher.intakeBlipLoop();
         launcher.updateLauncher(telemetry, dist, hardwareMap);
 
         telemetry.addData("rotate", rotate);

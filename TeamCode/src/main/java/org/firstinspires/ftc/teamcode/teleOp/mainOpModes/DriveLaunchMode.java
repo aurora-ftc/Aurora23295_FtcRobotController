@@ -268,7 +268,7 @@ public class DriveLaunchMode extends OpMode {
         if (!liftDown && matchTime.milliseconds() >= startWait + LIFT_SERVO_FLICK_TIME) {
             launchSystem.liftDown();
             liftDown = true;
-            launchSystem.intakeBlipReset();
+//            launchSystem.intakeBlipReset();
         }
 
         if (shotsLeft != 0) {
@@ -317,7 +317,8 @@ public class DriveLaunchMode extends OpMode {
 
         // Continuous subsystem updates
         double dist = drive.getDistanceFromGoal();
-        launchSystem.intakeBlipLoop();
+
+//        launchSystem.intakeBlipLoop();
         launchSystem.updateLauncher(telemetry, dist, hardwareMap);
 
         updateAllTelemetry(dist, slow);
@@ -349,11 +350,11 @@ public class DriveLaunchMode extends OpMode {
         // Ball Selector Controls
         // TODO: Set to the right button
         if (gamepad1.square) {
-            ballSelector.output();
+
         }
 
         if (gamepad1.squareWasPressed()) {
-            ballSelector.output();
+
         }
 
         ballSelector.updateTelemetry(telemetry);
