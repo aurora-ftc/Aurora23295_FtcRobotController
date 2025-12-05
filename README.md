@@ -1,7 +1,5 @@
 # AURORA 2025 DECODE CODE REPO
 
-<a href="https://aurora-ftc.github.io" target="_blank">Check Out our website!</a>
-
 [Check Out our website!](https://aurora-ftc.github.io)
 
 ## Resources for our new coders:
