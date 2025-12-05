@@ -1,4 +1,4 @@
-# AURORA 2025 DECODE CODE REP0
+# AURORA 2025 DECODE CODE REPO
 
 [Check Out our website!](https://aurora-ftc.github.io)
 
