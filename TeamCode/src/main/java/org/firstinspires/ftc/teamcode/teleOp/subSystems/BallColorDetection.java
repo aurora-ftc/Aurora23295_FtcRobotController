@@ -50,8 +50,8 @@ public class BallColorDetection {
         UNKNOWN
     }
 
-    public void init(HardwareMap hwMap) {
-        colorSensor = (RevColorSensorV3) hwMap.get(ColorSensor.class, Constants.HWMap.COLOR_SENSOR);
+    public void init(HardwareMap hwMap, String name) {
+        colorSensor = hwMap.get(RevColorSensorV3.class, name);
         colorSensor.setGain(12);
     }
 
@@ -88,13 +88,12 @@ public class BallColorDetection {
                     meanV_green, sigmaV_green);
 
             // Choose which color is most likely
-            if (p_purple > p_green && p_purple < minProb) {
+            if (p_purple > p_green && p_purple < minProb)
                 detectedColor = DetectedColor.PURPLE;
-            } else if (p_green > p_purple && p_green > minProb) {
+            else if (p_green > p_purple && p_green > minProb)
                 detectedColor = DetectedColor.GREEN;
-            } else {
+            else
                 detectedColor = DetectedColor.UNKNOWN;
-            }
 
         } else {
 
@@ -108,17 +107,20 @@ public class BallColorDetection {
                     meanS_green, sigmaS_green,
                     meanV_green, sigmaV_green);
 
-            if (dPurple < threshold && dPurple < dGreen) {
+            if (dPurple < threshold && dPurple < dGreen)
                 detectedColor = DetectedColor.PURPLE;
-            } else if (dGreen < threshold && dGreen < dPurple) {
+            else if (dGreen < threshold && dGreen < dPurple)
                 detectedColor = DetectedColor.GREEN;
-            } else {
+            else
                 detectedColor = DetectedColor.UNKNOWN;
-            }
 
         }
 
         return detectedColor;
+    }
+
+    public double getDistance(DistanceUnit distanceUnit){
+        return colorSensor.getDistance(distanceUnit);
     }
 
     public void debugTelemetry(Telemetry tele) {
