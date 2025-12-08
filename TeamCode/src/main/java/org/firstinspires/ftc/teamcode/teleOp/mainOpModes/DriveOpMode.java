@@ -68,7 +68,7 @@ public class DriveOpMode extends OpMode {
         if (gamepad1.touchpad) {
             gamepad1.rumbleBlips(2);
             recenterTime = matchTimer.seconds();
-            drive.resetOdoHeading(telemetry);
+            drive.resetOdoHeading();
             return;
         }
 
@@ -79,16 +79,14 @@ public class DriveOpMode extends OpMode {
             endgameRumbleDone = true;
         }
 
-        telemetry.addData("forward", forward);
-        telemetry.addData("strafe", strafe);
-        telemetry.addData("rotate", rotate);
-        telemetry.addData("speed", slow);
-
         /*
         Use this for non field-centric code:
         drive.drive(forward, strafe, rotate, slow);
          */
         drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
+        
+        // All telemetry is now handled in updateTelemetry methods
+        drive.updateTelemetry(telemetry, slow);
 
     }
 }

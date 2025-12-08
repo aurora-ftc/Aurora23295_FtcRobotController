@@ -9,13 +9,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.teleOp.util.ConstantConfig;
+import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 
 @Config
 @TeleOp(name = "DriveOpModePIDTest", group = "TestModes")
 public class DriveOpModePIDTest extends OpMode {
+    private final double[] powerSteps = {50, 57, 62, 85};
+    private final ElapsedTime matchTime = new ElapsedTime();
     FtcDashboard dashboard = FtcDashboard.getInstance();
     MecanumDrive drive = new MecanumDrive();
     LaunchIntakeSystem launcher = new LaunchIntakeSystem();
@@ -25,9 +27,7 @@ public class DriveOpModePIDTest extends OpMode {
     double startWait;
     double lastHeading = 0;
     boolean projHeadingCalculated;
-    private final double[] powerSteps = {50, 57, 62, 85};
     boolean shooterOn, liftDown;
-    private final ElapsedTime matchTime = new ElapsedTime();
 
     @Override
     public void init() {
@@ -57,7 +57,7 @@ public class DriveOpModePIDTest extends OpMode {
 
         drive.setPIDTargetHeading(Math.PI / 2.0);
 
-        drive.resetOdoHeading(telemetry);
+        drive.resetOdoHeading();
 
         drive.deactivateTrackGoal();
 
@@ -116,7 +116,7 @@ public class DriveOpModePIDTest extends OpMode {
 
             drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
 
-        } else{
+        } else {
 
             drive.trackGoal(telemetry, forward, strafe, slow);
 
@@ -125,7 +125,7 @@ public class DriveOpModePIDTest extends OpMode {
         if (gamepad1.touchpadWasPressed()) {
             drive.setPIDTargetHeading(0.0);
             lastHeading = 0;
-            drive.resetOdoHeading(telemetry);
+            drive.resetOdoHeading();
         }
 
         if (gamepad1.rightBumperWasPressed())
@@ -172,10 +172,10 @@ public class DriveOpModePIDTest extends OpMode {
         telemetry.addLine();
 
         if (Constants.DEBUG) {
-            launcher.debugTelemetry(telemetry);
+            launcher.updateTelemetry(telemetry);
             drive.debugTelemetry(telemetry, slow);
         } else {
-            launcher.compTelemetry(telemetry);
+            launcher.updateTelemetry(telemetry);
             drive.updateTelemetry(telemetry, slow);
         }
 

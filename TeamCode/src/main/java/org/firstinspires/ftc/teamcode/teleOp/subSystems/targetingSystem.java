@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -30,9 +32,12 @@ public class targetingSystem {
     }
 
     public void updateTelemetry(Telemetry telemetry) {
-        telemetry.addData("Limelight Status", limelight.getStatus());
-        telemetry.addLine();
+        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        telemetry.addData("Obelisk", obelisk);
+        multiTelemetry.addLine("===== Targeting System Telemetry =====");
+        multiTelemetry.addData("Limelight Status", limelight.getStatus());
+        multiTelemetry.addData("Obelisk ID", obelisk);
+
+        multiTelemetry.update();
     }
 }

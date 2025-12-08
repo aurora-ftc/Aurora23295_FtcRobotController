@@ -19,6 +19,8 @@ import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaS_purple;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaV_green;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaV_purple;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.AnalogInput;
@@ -46,6 +48,7 @@ public class BallSelector extends SubsystemBase {
     AnalogInput encoder;
     PIDController controller;
     double time;
+    int currentPositionIndex = 0;
 
     public BallSelector() {
 
@@ -62,6 +65,10 @@ public class BallSelector extends SubsystemBase {
         positions = POSITIONS;
 
         controller = new PIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD);
+        
+        // Initialize to first position
+        currentPositionIndex = 0;
+        controller.setTarget(positions[0]);
     }
     public void periodic() {
         time = System.nanoTime() / 1e9;
@@ -71,7 +78,26 @@ public class BallSelector extends SubsystemBase {
     }
 
     public void setTargetPosition(int position) {
+        currentPositionIndex = position;
         controller.setTarget(positions[position]);
+    }
+
+    /**
+     * Moves the selector one step down the array (to the next higher index).
+     * Wraps around to the beginning if at the end.
+     */
+    public void moveDown() {
+        currentPositionIndex = (currentPositionIndex + 1) % positions.length;
+        controller.setTarget(positions[currentPositionIndex]);
+    }
+
+    /**
+     * Moves the selector one step up the array (to the previous lower index).
+     * Wraps around to the end if at the beginning.
+     */
+    public void moveUp() {
+        currentPositionIndex = (currentPositionIndex - 1 + positions.length) % positions.length;
+        controller.setTarget(positions[currentPositionIndex]);
     }
 
     public boolean isAtTarget() {
@@ -157,8 +183,16 @@ public class BallSelector extends SubsystemBase {
     }
 
     public void updateTelemetry(Telemetry telemetry) {
-        telemetry.addData("Array stored", stored);
-        telemetry.addData("Current Position", positions);
+        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        multiTelemetry.addLine("===== Ball Selector Telemetry =====");
+        multiTelemetry.addData("Array stored", stored);
+        multiTelemetry.addData("Current Position", positions);
+        multiTelemetry.addData("Current Angle", angle);
+        multiTelemetry.addData("Target Angle", controller.getTarget());
+        multiTelemetry.addData("At Target", isAtTarget());
+
+        multiTelemetry.update();
     }
 }
 

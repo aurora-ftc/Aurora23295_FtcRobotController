@@ -47,6 +47,7 @@ public class Constants {
     public static double LIFT_SERVO_FLICK_TIME = 120.0;
 
     public static double[] POWER_STEPS = {56, 58, 63, 85}; //{40, 42, 44, 85} old one idk why no work
+    public static double[] POSITIONS = {0, 120, 240, 60, 180, 300};
 
     public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62,
             AngleUnit.DEGREES, 0);

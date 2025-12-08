@@ -6,15 +6,13 @@ import static org.firstinspires.ftc.teamcode.teleOp.Constants.LIFT_SERVO_FLICK_T
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.initialPoseBlue;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -30,19 +28,17 @@ import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 public class DriveSortMode extends OpMode {
 
     // --- Trajectory & Drive Components ---
-
     private final double[] powerSteps = Constants.POWER_STEPS;
-    private final TrajectoryActionBuilder parkAction = null;
-    private final MecanumDrive drive = new MecanumDrive();
     private final ElapsedTime matchTime = new ElapsedTime();
     private final ElapsedTime PIDTimer = new ElapsedTime();
     private final Pose2d startPose =
             new Pose2d(initialPoseBlue.getX(DistanceUnit.INCH), initialPoseBlue.getY(DistanceUnit.INCH),
                     initialPoseBlue.getHeading(AngleUnit.RADIANS));
-    private final LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
-    private final BallSelector ballSelector = new BallSelector();
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
-    private final Limelight limelight = new Limelight(hardwareMap, 0);
+//    private Limelight limelight;
+    private MecanumDrive drive;
+    private LaunchIntakeSystem launchSystem;
+    private BallSelector ballSelector;
     private PinpointDrive dwive;
     // --- Timers ---
     private SmartPark smartPark;
@@ -58,11 +54,13 @@ public class DriveSortMode extends OpMode {
 
     @Override
     public void init() {
+        drive = new MecanumDrive();
+        ballSelector = new BallSelector();
+        launchSystem = new LaunchIntakeSystem();
+//        limelight = new Limelight(hardwareMap, 0);
         driveRR = new PinpointDrive(hardwareMap, startPose);
 
         Vector2d parkPose = new Vector2d(33, -39);
-
-        smartPark = new SmartPark(drive, driveRR, parkPose);
 
         // Drive Systems Init
         drive.init(hardwareMap, telemetry);
@@ -80,16 +78,17 @@ public class DriveSortMode extends OpMode {
             initialPose = Constants.initialPoseRed;
         }
         drive.setOdoPosition(initialPose);
-        telemetry.addData("initialPose", initialPose);
 
         dashboard.isEnabled();
 
         launchSystem.init(powerSteps, hardwareMap, telemetry);
         ballSelector.init(hardwareMap);
 
-        telemetry.addData("initialPoseGotten", drive.getOdoPosition());
-        telemetry.addLine("DriveLaunchMode Initialized");
-        telemetry.update();
+        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        multiTelemetry.addLine("===== Drive Sort Mode Initialized =====");
+        multiTelemetry.addData("Initial Pose", initialPose);
+        multiTelemetry.addData("Initial Pose (from drive)", drive.getOdoPosition());
+        multiTelemetry.update();
     }
 
     @Override
@@ -118,8 +117,10 @@ public class DriveSortMode extends OpMode {
                 recenterTime = 0;
             } else {
                 drive.drive(0, 0, 0, 0);
-                telemetry.addLine("Recalibrating IMU...");
-                telemetry.update();
+                MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+                multiTelemetry.addLine("Recalibrating IMU...");
+                multiTelemetry.update();
+                return;
             }
         }
 
@@ -166,6 +167,13 @@ public class DriveSortMode extends OpMode {
             launchSystem.stepDownPower();
         }
 
+        // Ball selector position controls
+        if (gamepad1.dpadLeftWasPressed()) {
+            ballSelector.moveUp();
+        } else if (gamepad1.dpadRightWasPressed()) {
+            ballSelector.moveDown();
+        }
+
         // Launcher on/off
         if (gamepad1.triangleWasPressed())
             launchSystem.toggleLauncher();
@@ -185,19 +193,10 @@ public class DriveSortMode extends OpMode {
 
         // Reset heading
         if (gamepad1.touchpadWasPressed()) {
-            drive.resetOdoHeading(telemetry);
+            drive.resetOdoHeading();
             lastHeading = 0;
             drive.setPIDTargetHeading(lastHeading);
             gamepad1.rumbleBlips(2);
-            recenterTime = matchTime.seconds();
-            return;
-        }
-
-        if (gamepad1.dpadLeftWasPressed()) {
-            drive.resetOdoPosition(telemetry);
-            lastHeading = 0;
-            drive.setPIDTargetHeading(lastHeading);
-            gamepad1.rumbleBlips(3);
             recenterTime = matchTime.seconds();
             return;
         }
@@ -213,31 +212,19 @@ public class DriveSortMode extends OpMode {
 
         launchSystem.updateLauncher(telemetry, dist, hardwareMap);
 
-        // Telemetry
-        if (DEBUG) {
-            telemetry.addLine("Debug Enabled");
-            launchSystem.debugTelemetry(telemetry);
-            drive.debugTelemetry(telemetry, slow);
-        } else {
-            launchSystem.compTelemetry(telemetry);
-            drive.updateTelemetry(telemetry, slow);
-        }
-
-        if (gamepad2.triangleWasPressed()) {
-            Action parkAction = smartPark.buildParkAction();
-            Actions.runBlocking(new SequentialAction(parkAction));
-        }
-
-        // Ball Selector Controls
-        if (gamepad1.squareWasPressed()) {
-
-        }
-
         ballSelector.periodic();
+
+        // Telemetry - all subsystems use updateTelemetry which sends to both Driver Station and FTC Dashboard
+        if (DEBUG) {
+            telemetry.addLine("===== Debug Mode Enabled =====");
+        }
+        drive.updateTelemetry(telemetry, slow);
+        launchSystem.updateTelemetry(telemetry);
         ballSelector.updateTelemetry(telemetry);
 
-        telemetry.addData("BlueSide", BLUE_SIDE);
-
-        telemetry.update();
+        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        multiTelemetry.addLine("===== OpMode Info =====");
+        multiTelemetry.addData("Blue Side", BLUE_SIDE);
+        multiTelemetry.update();
     }
 }

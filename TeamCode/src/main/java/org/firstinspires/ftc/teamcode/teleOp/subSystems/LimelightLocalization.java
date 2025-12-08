@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -60,5 +63,30 @@ public class LimelightLocalization {
         LLResultTypes.FiducialResult tag = (LLResultTypes.FiducialResult) limelight.getLatestResult().getFiducialResults();
 
         return (byte) tag.getFiducialId();
+    }
+
+    public void updateTelemetry(Telemetry telemetry) {
+        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        multiTelemetry.addLine("===== Limelight Localization Telemetry =====");
+        if (limelight != null) {
+            LLResult result = limelight.getLatestResult();
+            multiTelemetry.addData("Limelight Status", limelight.getStatus());
+            multiTelemetry.addData("Has Valid Result", result != null && result.isValid());
+            
+            if (result != null && result.isValid()) {
+                Pose3D pose3D = result.getBotpose_MT2();
+                if (pose3D != null) {
+                    Position pos = pose3D.getPosition();
+                    multiTelemetry.addData("X (in)", pos.x * 39.3701); // meters to inches
+                    multiTelemetry.addData("Y (in)", pos.y * 39.3701);
+                    multiTelemetry.addData("Z (in)", pos.z * 39.3701);
+                }
+            }
+        } else {
+            multiTelemetry.addData("Limelight Status", "NOT INITIALIZED");
+        }
+
+        multiTelemetry.update();
     }
 }
