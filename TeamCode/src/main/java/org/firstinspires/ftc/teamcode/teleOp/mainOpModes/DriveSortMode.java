@@ -9,6 +9,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -35,7 +36,7 @@ public class DriveSortMode extends OpMode {
             new Pose2d(initialPoseBlue.getX(DistanceUnit.INCH), initialPoseBlue.getY(DistanceUnit.INCH),
                     initialPoseBlue.getHeading(AngleUnit.RADIANS));
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
-//    private Limelight limelight;
+    private Limelight limelight;
     private MecanumDrive drive;
     private LaunchIntakeSystem launchSystem;
     private BallSelector ballSelector;
@@ -57,7 +58,7 @@ public class DriveSortMode extends OpMode {
         drive = new MecanumDrive();
         ballSelector = new BallSelector();
         launchSystem = new LaunchIntakeSystem();
-//        limelight = new Limelight(hardwareMap, 0);
+        limelight = new Limelight(hardwareMap, 0);
         driveRR = new PinpointDrive(hardwareMap, startPose);
 
         Vector2d parkPose = new Vector2d(33, -39);
@@ -81,7 +82,7 @@ public class DriveSortMode extends OpMode {
 
         dashboard.isEnabled();
 
-        launchSystem.init(powerSteps, hardwareMap, telemetry);
+        launchSystem.init(powerSteps, hardwareMap);
         ballSelector.init(hardwareMap);
 
         MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -107,6 +108,8 @@ public class DriveSortMode extends OpMode {
 
         gamepad1.resetEdgeDetection();
         gamepad2.resetEdgeDetection();
+
+        FtcDashboard.getInstance().startCameraStream(limelight.getInstance(), 30);
     }
 
     @Override
@@ -134,6 +137,7 @@ public class DriveSortMode extends OpMode {
         forward = MecanumDrive.smoothDrive(-gamepad1.left_stick_y);
         strafe = MecanumDrive.smoothDrive(gamepad1.left_stick_x);
 
+        //Rotate logic
         if (!drive.trackGoalOn) {
             if (Math.abs(gamepad1.right_stick_x) > 0.03) {
                 rotate = MecanumDrive.smoothDrive(gamepad1.right_stick_x);
@@ -185,6 +189,7 @@ public class DriveSortMode extends OpMode {
             launchSystem.toggleIntakeReverse();
         }
 
+        //OBSOLETE flick reset on start
         double startWait = 0.0;
         if (!liftDown && matchTime.milliseconds() >= startWait + LIFT_SERVO_FLICK_TIME) {
             launchSystem.liftDown();
@@ -201,9 +206,11 @@ public class DriveSortMode extends OpMode {
             return;
         }
 
+        //Track goal toggle
         if (gamepad1.rightBumperWasPressed())
             drive.toggleTrackGoal();
 
+        //Auto power toggle
         if (gamepad1.leftBumperWasPressed())
             launchSystem.toggleAutoPower();
 
@@ -213,6 +220,8 @@ public class DriveSortMode extends OpMode {
         launchSystem.updateLauncher(telemetry, dist, hardwareMap);
 
         ballSelector.periodic();
+
+        ballSelector.flashMosaicPattern();
 
         // Telemetry - all subsystems use updateTelemetry which sends to both Driver Station and FTC Dashboard
         if (DEBUG) {

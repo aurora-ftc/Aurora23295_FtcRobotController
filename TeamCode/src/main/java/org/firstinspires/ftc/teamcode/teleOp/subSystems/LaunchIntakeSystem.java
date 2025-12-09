@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
-import static org.firstinspires.ftc.teamcode.Constants.DEBUG;
-import static org.firstinspires.ftc.teamcode.Constants.FLYWHEEL_KD;
-import static org.firstinspires.ftc.teamcode.Constants.FLYWHEEL_KI;
-import static org.firstinspires.ftc.teamcode.Constants.FLYWHEEL_KP;
-import static org.firstinspires.ftc.teamcode.Constants.FLYWHEEL_KS;
-import static org.firstinspires.ftc.teamcode.Constants.FLYWHEEL_KV;
-import static org.firstinspires.ftc.teamcode.Constants.HWMap;
-import static org.firstinspires.ftc.teamcode.Constants.LAUNCHER_ENCODER_PER_REV;
-import static org.firstinspires.ftc.teamcode.Constants.MAX_FLYWHEEL_KV;
-import static org.firstinspires.ftc.teamcode.Constants.MIN_FLYWHEEL_KV;
-import static org.firstinspires.ftc.teamcode.Constants.VOLTS_NOMINAL;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.DEBUG;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KI;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KP;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KS;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KV;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.LAUNCHER_ENCODER_PER_REV;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.MAX_FLYWHEEL_KV;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.MIN_FLYWHEEL_KV;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.VOLTS_NOMINAL;
+
+import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -40,7 +42,7 @@ public class LaunchIntakeSystem {
     private double power, batteryVolts, batteryCorrectedKv;
     private boolean autoPower = false;
 
-    public void init(double[] powerSteps, HardwareMap hwMap, Telemetry telemetry) {
+    public void init(double[] powerSteps, @NonNull HardwareMap hwMap) {
         this.powerSteps = powerSteps;
         maxStep = this.powerSteps.length - 1;
 

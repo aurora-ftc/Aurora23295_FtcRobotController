@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.MOSAIC_FLASH_INTERVAL;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.POSITIONS;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KD;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KI;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KP;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.greenColor;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_green;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_purple;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanS_green;
@@ -12,6 +14,7 @@ import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanS_purple;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanV_green;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanV_purple;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.minProb;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.purpleColor;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaH_green;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaH_purple;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaS_green;
@@ -27,49 +30,60 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Storage;
+import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.util.MathUtils;
+import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 
 import java.util.Arrays;
 
 public class BallSelector extends SubsystemBase {
+    private static final double MOSAIC_WAIT = 1.0;
+    // Mosaic flashing variables
+    private final ElapsedTime mosaicFlashTimer = new ElapsedTime();
     double[] positions = new double[6];
     float[] hsv = new float[3];
     Colors[] stored;
     double h, s, v;
     double angle;
     double p_purple, p_green;
-
     CRServo rotaryServo;
     Servo pushServo;
     RevColorSensorV3 colorBottom, colorLeft, colorRight;
+    Servo light;
     AnalogInput encoder;
     PIDController controller;
     double time;
     int currentPositionIndex = 0;
+    private boolean complete = false;
+    private int currentMosaicColorIndex = 0;
 
     public BallSelector() {
 
     }
 
     public void init(HardwareMap map) {
-        rotaryServo = map.get(CRServo.class, HWMap.ROTARY_SERVO);
+        rotaryServo = map.get(CRServo.class, Constants.HWMap.ROTARY_SERVO);
         pushServo = map.get(Servo.class, HWMap.PUSH_SERVO);
         encoder = map.get(AnalogInput.class, HWMap.ENCODER);
         colorBottom = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_BOTTOM);
         colorLeft = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_LEFT);
         colorRight = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_RIGHT);
+        light = map.get(Servo.class, HWMap.LIGHT);
 
         positions = POSITIONS;
 
         controller = new PIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD);
-        
+
         // Initialize to first position
         currentPositionIndex = 0;
         controller.setTarget(positions[0]);
     }
+
     public void periodic() {
         time = System.nanoTime() / 1e9;
         rotaryServo.setPower(controller.calculateOutputPID(angle,
@@ -82,20 +96,12 @@ public class BallSelector extends SubsystemBase {
         controller.setTarget(positions[position]);
     }
 
-    /**
-     * Moves the selector one step down the array (to the next higher index).
-     * Wraps around to the beginning if at the end.
-     */
-    public void moveDown() {
+    public void moveUp() {
         currentPositionIndex = (currentPositionIndex + 1) % positions.length;
         controller.setTarget(positions[currentPositionIndex]);
     }
 
-    /**
-     * Moves the selector one step up the array (to the previous lower index).
-     * Wraps around to the end if at the beginning.
-     */
-    public void moveUp() {
+    public void moveDown() {
         currentPositionIndex = (currentPositionIndex - 1 + positions.length) % positions.length;
         controller.setTarget(positions[currentPositionIndex]);
     }
@@ -166,19 +172,46 @@ public class BallSelector extends SubsystemBase {
         pushServo.setPosition(0);
     }
 
-    public void outputInOrder(Mosaic mosaic) {
-        String mos = mosaic.toString();
+    /**
+     * Flashes the mosaic pattern periodically on the indicator light.
+     * The pattern cycles through the colors: Purple-Purple-Green, Green-Purple-Purple, or Purple-Green-Purple
+     * based on the detected mosaic pattern.
+     */
+    public void flashMosaicPattern() {
+        Mosaic mosaic = Storage.mosaic;
 
-        if (Arrays.asList(stored).contains(Colors.Unknown)) {
+        // If mosaic is unknown, don't flash
+        if (mosaic == null || mosaic == Mosaic.UNKNOWN) {
             return;
         }
+        if (mosaicFlashTimer.seconds() < MOSAIC_WAIT && !complete) {
+            // Check if it's time to advance to the next color
+            if (mosaicFlashTimer.seconds() >= MOSAIC_FLASH_INTERVAL) {
+                String mosaicString = mosaic.toString();
 
-        for (Character c : mos.toCharArray()) {
-            if (c.equals('p')) {
-                returnBall(Colors.Purple);
-            } else {
-                returnBall(Colors.Green);
+                // Get the current color character (P or G)
+                char currentColorChar = mosaicString.charAt(currentMosaicColorIndex);
+
+                // Set the light color based on the character
+                if (currentColorChar == 'p') {
+                    // Set to purple color
+                    light.setPosition(purpleColor);
+                } else {
+                    // Set to green color
+                    light.setPosition(greenColor);
+                }
+
+                // Move to next color in the sequence
+                if (currentMosaicColorIndex == mosaicString.length()) {
+                    complete = true;
+                }
+                currentMosaicColorIndex = (currentMosaicColorIndex + 1) % mosaicString.length();
+
+                // Reset timer for next flash
+                mosaicFlashTimer.reset();
             }
+        } else if (mosaicFlashTimer.seconds() > MOSAIC_WAIT) {
+            complete = false;
         }
     }
 

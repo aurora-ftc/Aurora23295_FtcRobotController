@@ -1,25 +1,24 @@
 package org.firstinspires.ftc.teamcode.roadrunner.subsystems;
 
-import static org.firstinspires.ftc.teamcode.Constants.*;
-
 import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-
+import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
 import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
 public class Limelight {
-    private LimelightControl limelightControl;
+    private final LimelightControl limelightControl;
 
     private Mosaic mosaic = Mosaic.UNKNOWN;
 
     public Limelight(HardwareMap hwMap, Telemetry tele) {
-        limelightControl = new LimelightControl(hwMap, llPipelines.APRIL_TAG_DETECTION);
+        limelightControl = new LimelightControl(hwMap, Constants.APRIL_TAG_DETECTION);
     }
 
     public Mosaic scanObelisk() {
@@ -40,9 +39,10 @@ public class Limelight {
     // ---------- Actions ----------
     public Action scanForTime(double duration, Telemetry tele) {
         return new Action() {
-            private boolean init = false;
             private final ElapsedTime timer = new ElapsedTime();
-            private ElapsedTime photoTimer = new ElapsedTime();
+            private final ElapsedTime photoTimer = new ElapsedTime();
+            private boolean init = false;
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!init) {

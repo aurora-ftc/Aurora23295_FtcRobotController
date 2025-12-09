@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode.roadrunner.autonomous;
 
-import static org.firstinspires.ftc.teamcode.Constants.*;
-
-import android.content.Context;
-import android.content.SharedPreferences;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.AccelConstraint;
@@ -49,7 +46,7 @@ public class SixBallBlue extends LinearOpMode {
                 // ---------------------- Initialize ----------------------
                 Pose2d initialPose = new Pose2d(63, -12, Math.toRadians(180));
                 PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
-                Launcher launcher = new Launcher(hardwareMap, telemetry);
+                Launcher launcher = new Launcher(hardwareMap);
                 Lift lift = new Lift(hardwareMap);
                 Limelight limelight = new Limelight(hardwareMap, telemetry);
                 Intake intake = new Intake(hardwareMap);
@@ -100,7 +97,7 @@ public class SixBallBlue extends LinearOpMode {
                                 new InstantAction(() -> lift.liftDown()),
 
                                 new RaceAction(
-                                        launcher.spinForTime(AUTO_FAR_POWER, 8, telemetry),
+                                        launcher.spinForTime(POWER_STEPS[0], 8, telemetry),
                                         new SequentialAction(
                                                 tab1.build(),
                                                 new SleepAction(1.0), // Spin u// p
@@ -118,7 +115,7 @@ public class SixBallBlue extends LinearOpMode {
                                 new SleepAction(0.5),
 
                                 new RaceAction(
-                                        launcher.spinForTime(AUTO_FAR_POWER, 14, telemetry),
+                                        launcher.spinForTime(POWER_STEPS[0], 14, telemetry),
                                         new SequentialAction(
                                                 tab4.build(),
                                                 new SleepAction(0.8), // allow time to reach velocity

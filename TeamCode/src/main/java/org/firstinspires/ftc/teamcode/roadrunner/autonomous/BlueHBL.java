@@ -24,7 +24,7 @@ public class BlueHBL extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         Pose2d initialPose = new Pose2d(-14, -62, Math.toRadians(115));
         PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
-        Launcher launcher = new Launcher(hardwareMap, telemetry);
+        Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
         Lift lift = new Lift(hardwareMap);
 

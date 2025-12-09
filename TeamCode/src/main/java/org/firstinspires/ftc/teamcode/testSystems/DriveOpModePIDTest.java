@@ -46,7 +46,7 @@ public class DriveOpModePIDTest extends OpMode {
 
         dashboard.isEnabled();
 
-        launcher.init(powerSteps, hardwareMap, telemetry);
+        launcher.init(powerSteps, hardwareMap);
 
         shooterOn = false;
 

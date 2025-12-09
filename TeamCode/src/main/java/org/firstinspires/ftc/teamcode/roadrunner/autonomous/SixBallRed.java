@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.roadrunner.autonomous;
 
-import static org.firstinspires.ftc.teamcode.Constants.AUTO_FAR_POWER;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.AccelConstraint;
@@ -8,22 +8,20 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.AngularVelConstraint;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.MinVelConstraint;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ProfileAccelConstraint;
 import com.acmerobotics.roadrunner.RaceAction;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.VelConstraint;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.VelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.acmerobotics.roadrunner.Pose2d;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -33,6 +31,7 @@ import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Lift;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Limelight;
+import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
 import java.util.Arrays;
@@ -47,7 +46,7 @@ public class SixBallRed extends LinearOpMode {
         // ---------------------- Initialize ----------------------
         Pose2d initialPose = new Pose2d(63, 12, Math.toRadians(180));
         PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
-        Launcher launcher = new Launcher(hardwareMap, telemetry);
+        Launcher launcher = new Launcher(hardwareMap);
         Lift lift = new Lift(hardwareMap);
         Limelight limelight = new Limelight(hardwareMap, telemetry);
         Intake intake = new Intake(hardwareMap);
@@ -103,7 +102,7 @@ public class SixBallRed extends LinearOpMode {
                         new InstantAction(() -> lift.liftDown()),
 
                         new RaceAction(
-                                launcher.spinForTime(AUTO_FAR_POWER, 8, telemetry),
+                                launcher.spinForTime(Constants.POWER_STEPS[10], 8, telemetry),
                                 new SequentialAction(
                                         tab1.build(),
                                         new SleepAction(1.0), // Spin u// p
@@ -125,7 +124,7 @@ public class SixBallRed extends LinearOpMode {
                         ),
 
                         new RaceAction(
-                                launcher.spinForTime(AUTO_FAR_POWER, 14, telemetry),
+                                launcher.spinForTime(POWER_STEPS[0], 14, telemetry),
                                 new SequentialAction(
                                         tab4.build(),
                                         new SleepAction(0.8), // allow time to reach velocity

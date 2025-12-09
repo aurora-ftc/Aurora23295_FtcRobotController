@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleOp;
 
 import com.acmerobotics.dashboard.config.Config;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -14,6 +15,7 @@ public class Constants {
     public static final Pose2D goalPoseRed = new Pose2D(DistanceUnit.INCH, 63, 62, AngleUnit.DEGREES, 0);
     public static final Pose2D initialPoseBlue = new Pose2D(DistanceUnit.INCH, -13, -35, AngleUnit.DEGREES, 90);
     public static final Pose2D initialPoseRed = new Pose2D(DistanceUnit.INCH, 13, -35, AngleUnit.DEGREES, 90);
+    public static final int APRIL_TAG_DETECTION = 0;
 
     /**
      * Mode switches
@@ -73,7 +75,7 @@ public class Constants {
     public static double sigmaV_green = 12.00;
 
     /**
-     *Launch System configuration
+     * Launch System configuration
      */
     public static double LIFT_SERVO_FLICK_TIME = 120.0;
     public static double[] POWER_STEPS = {40, 42, 44, 85};
@@ -83,18 +85,22 @@ public class Constants {
     /**
      * Rotary Selector System Configuration
      */
-    public static double ROTARY_KP = 1.0;
-    public static double ROTARY_KI = 0.5;
-    public static double ROTARY_KD = 0.01;
+    public static double ROTARY_KP = 0.0;
+    public static double ROTARY_KI = 0.0;
+    public static double ROTARY_KD = 0.0;
+    public static final double MOSAIC_FLASH_INTERVAL = 0.5;
+    public static double purpleColor = 0.0;
+    public static double greenColor = 0.0;
 
     public static class HWMap {
+        public static final String LIGHT = "illuminant_panel";
         public static String FL_MOTOR = "front_left_motor";
-        public static String FR_MOTOR = "front_right_motor";//+
+        public static String FR_MOTOR = "front_right_motor";
         public static String BL_MOTOR = "back_left_motor";
-        public static String BR_MOTOR = "back_right_motor";//+
+        public static String BR_MOTOR = "back_right_motor";
 
         public static String LAUNCHER_MOTOR = "launcher_motor";
-        public static String INTAKE_MOTOR = "intake_motor";//+
+        public static String INTAKE_MOTOR = "intake_motor";
         public static String LIFT_SERVO = "lift_servo";
 
         public static String ODO = "odo";
@@ -103,11 +109,11 @@ public class Constants {
         public static String LIMELIGHT = "limelight";
 
         // Ball Selector Hardware
-        public static String ROTARY_SERVO = "indexer_servo";
-        public static String PUSH_SERVO = "kicker_servo";
-        public static String ENCODER = "elc_analog";
-        public static String COLOR_SENSOR_BOTTOM = "cs_bottom";
-        public static String COLOR_SENSOR_LEFT = "cs_left";
-        public static String COLOR_SENSOR_RIGHT = "cs_right";
+        public static String ROTARY_SERVO = "selector_servo";
+        public static String PUSH_SERVO = "push_servo";
+        public static String ENCODER = "rotary_encoder";
+        public static String COLOR_SENSOR_BOTTOM = "color_sensor_1";
+        public static String COLOR_SENSOR_LEFT = "color_sensor_2";
+        public static String COLOR_SENSOR_RIGHT = "color_sensor_3";
     }
 }

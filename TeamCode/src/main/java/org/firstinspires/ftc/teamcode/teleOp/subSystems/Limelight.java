@@ -32,6 +32,11 @@ public class Limelight {
         limelight.start();
     }
 
+    public Limelight3A getInstance() {
+        return limelight;
+    }
+
+
     public Pose3D getLocation(Double heading) {
         limelight.updateRobotOrientation(heading);
         LLResult llResult = limelight.getLatestResult();
