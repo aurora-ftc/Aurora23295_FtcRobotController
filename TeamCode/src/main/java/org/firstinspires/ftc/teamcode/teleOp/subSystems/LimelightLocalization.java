@@ -73,7 +73,7 @@ public class LimelightLocalization {
             LLResult result = limelight.getLatestResult();
             multiTelemetry.addData("Limelight Status", limelight.getStatus());
             multiTelemetry.addData("Has Valid Result", result != null && result.isValid());
-            
+
             if (result != null && result.isValid()) {
                 Pose3D pose3D = result.getBotpose_MT2();
                 if (pose3D != null) {

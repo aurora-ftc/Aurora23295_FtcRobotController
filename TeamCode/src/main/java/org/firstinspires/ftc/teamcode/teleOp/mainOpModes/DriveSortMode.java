@@ -9,7 +9,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -30,6 +29,7 @@ public class DriveSortMode extends OpMode {
 
     // --- Trajectory & Drive Components ---
     private final double[] powerSteps = Constants.POWER_STEPS;
+    // --- Timers ---
     private final ElapsedTime matchTime = new ElapsedTime();
     private final ElapsedTime PIDTimer = new ElapsedTime();
     private final Pose2d startPose =
@@ -41,7 +41,6 @@ public class DriveSortMode extends OpMode {
     private LaunchIntakeSystem launchSystem;
     private BallSelector ballSelector;
     private PinpointDrive dwive;
-    // --- Timers ---
     private SmartPark smartPark;
     private PinpointDrive driveRR;
     private Pose2D initialPose, goalPose;
@@ -86,7 +85,7 @@ public class DriveSortMode extends OpMode {
         ballSelector.init(hardwareMap);
 
         MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        multiTelemetry.addLine("===== Drive Sort Mode Initialized =====");
+        multiTelemetry.addLine("━─━─━─━「₪ Drive Sort Mode Initialized ₪」━─━─━─━");
         multiTelemetry.addData("Initial Pose", initialPose);
         multiTelemetry.addData("Initial Pose (from drive)", drive.getOdoPosition());
         multiTelemetry.update();
@@ -153,9 +152,9 @@ public class DriveSortMode extends OpMode {
             } else {
                 rotate = 0;
             }
-            drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
+            drive.driveFieldOriented(forward, strafe, rotate, slow);
         } else {
-            drive.trackGoal(telemetry, forward, strafe, slow);
+            drive.trackGoal(forward, strafe, slow);
         }
 
         // Endgame rumble
@@ -217,7 +216,7 @@ public class DriveSortMode extends OpMode {
         // Continuous subsystem updates
         double dist = drive.getDistanceFromGoal();
 
-        launchSystem.updateLauncher(telemetry, dist, hardwareMap);
+        launchSystem.updateLauncher(dist, hardwareMap);
 
         ballSelector.periodic();
 
@@ -225,14 +224,15 @@ public class DriveSortMode extends OpMode {
 
         // Telemetry - all subsystems use updateTelemetry which sends to both Driver Station and FTC Dashboard
         if (DEBUG) {
-            telemetry.addLine("===== Debug Mode Enabled =====");
+            telemetry.addLine("!-!-!-!-! Debug Mode Enabled !-!-!-!-!");
         }
         drive.updateTelemetry(telemetry, slow);
         launchSystem.updateTelemetry(telemetry);
         ballSelector.updateTelemetry(telemetry);
+        limelight.updateTelemetry(telemetry);
 
         MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        multiTelemetry.addLine("===== OpMode Info =====");
+        multiTelemetry.addLine(".o0) OpMode Info (0o.");
         multiTelemetry.addData("Blue Side", BLUE_SIDE);
         multiTelemetry.update();
     }

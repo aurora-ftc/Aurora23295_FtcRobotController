@@ -42,6 +42,13 @@ public class LaunchIntakeSystem {
     private double power, batteryVolts, batteryCorrectedKv;
     private boolean autoPower = false;
 
+    /**
+     * init: initializes hardware, PID and a ballSelector
+     *
+     * @param powerSteps the array of power steps (may be unused soon)
+     * @param hwMap      hardware map
+     */
+
     public void init(double[] powerSteps, @NonNull HardwareMap hwMap) {
         this.powerSteps = powerSteps;
         maxStep = this.powerSteps.length - 1;
@@ -67,12 +74,15 @@ public class LaunchIntakeSystem {
         flywheelPID.previousTime = System.nanoTime() / 1e9;
         ballselector.init(hwMap);
 
-        // Set Servo Down
-
         intakeTimer.reset();
     }
 
-    public void spinToVelocity(double targetVelocity, Telemetry tele) {
+    /**
+     * spinToVelocity: sets the PID to a target velocity
+     *
+     * @param targetVelocity the target velocity
+     */
+    public void spinToVelocity(double targetVelocity) {
 
         flywheelPID.setTarget(targetVelocity);
 
@@ -97,45 +107,37 @@ public class LaunchIntakeSystem {
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
-    private void setLauncherPower(int step, Telemetry tele, double autoPow) {
+    /**
+     * setLauncherPower: sets the launcher power to a given power or automatically
+     * if autoPower is true
+     *
+     * @param step    the power step
+     * @param autoPow automatically generated power value
+     */
+    private void setLauncherPower(int step, double autoPow) {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
                 if (autoPower)
-                    spinToVelocity(autoPow, tele);
+                    spinToVelocity(autoPow);
                 else
-                    spinToVelocity(powerSteps[step], tele);
+                    spinToVelocity(powerSteps[step]);
             } else {
                 // launcherMotor.setPower(0.0);
-                spinToVelocity(0, tele);
+                spinToVelocity(0);
             }
         }
     }
 
+    /**
+     * toggleLauncher: toggles launcher state
+     */
     public void toggleLauncher() {
         launcherOn = !launcherOn;
     }
 
-    public void updateLauncher(Telemetry tele, double dist, HardwareMap hwMap) {
-        double pow = calcAutoPower(dist);
-
-        batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
-        batteryVolts = batteryVolts <= 15 && batteryVolts >= 9 ? batteryVolts : VOLTS_NOMINAL;
-
-        if (launcherOn) {
-            setLauncherPower(currentStep, tele, pow);
-        } else {
-            launcherMotor.setPower(0.0);
-        }
-    }
-
-    public void stepUpPower() {
-        currentStep = Math.min(currentStep + 1, maxStep);
-    }
-
-    public void stepDownPower() {
-        currentStep = Math.max(currentStep - 1, minStep);
-    }
-
+    /**
+     * toggleIntake: toggles the intake
+     */
     public void toggleIntake() {
         if (!intakeOn) {
             intakeMotor.setPower(1);
@@ -146,6 +148,36 @@ public class LaunchIntakeSystem {
             intakeOn = false;
         }
     }
+
+    /**
+     * updateLauncher: periodic update for the launch mechanism
+     */
+    public void updateLauncher(double dist, HardwareMap hwMap) {
+        double pow = calcAutoPower(dist);
+
+        batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
+        batteryVolts = batteryVolts <= 15 && batteryVolts >= 9 ? batteryVolts : VOLTS_NOMINAL;
+
+        if (launcherOn) {
+            setLauncherPower(currentStep, pow);
+        } else {
+            launcherMotor.setPower(0.0);
+        }
+    }
+
+    /**
+     * stepUpPower and stepDownPower: for use with d-pad controls
+     *
+     * @author james Beers
+     */
+    public void stepUpPower() {
+        currentStep = Math.min(currentStep + 1, maxStep);
+    }
+
+    public void stepDownPower() {
+        currentStep = Math.max(currentStep - 1, minStep);
+    }
+
 
     public void toggleIntakeReverse() {
         if (!intakeOn) {
@@ -167,7 +199,7 @@ public class LaunchIntakeSystem {
     public void updateTelemetry(Telemetry telemetry) {
         MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        multiTelemetry.addLine("===== Launch Intake System Telemetry =====");
+        multiTelemetry.addLine(">>----> Launch Intake System Telemetry <----<<");
         multiTelemetry.addData("Launcher Status", launcherOn ? "On" : "Off");
         multiTelemetry.addData("Intake Status", intakeOn ? "On" : "Off");
         multiTelemetry.addData("Auto Power", autoPower ? "On" : "Off");

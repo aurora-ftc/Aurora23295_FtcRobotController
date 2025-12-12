@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -109,10 +111,15 @@ public class Limelight {
 
 
     public void updateTelemetry(Telemetry telemetry) {
-        telemetry.addData("Limelight Status", limelight.getStatus());
-        telemetry.addLine();
+        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        telemetry.addData("Obelisk", obeliskID);
+        multiTelemetry.addLine("[---0-] Limelight Control Telemetry [-0---]");
+        multiTelemetry.addData("Limelight Status", limelight.getStatus());
+        multiTelemetry.addData("Obelisk ID", obeliskID);
+        multiTelemetry.addData("Mosaic", mosaic != null ? mosaic.name() : "UNKNOWN");
+        multiTelemetry.addData("Tags Detected", obeliskList != null ? obeliskList.size() : 0);
+
+        multiTelemetry.update();
     }
 
     public double getDistance(double ta) {

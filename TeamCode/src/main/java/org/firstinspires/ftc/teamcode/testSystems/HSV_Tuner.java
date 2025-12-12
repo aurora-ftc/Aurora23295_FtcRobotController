@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.testSystems;
 
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 @TeleOp(name = "HSV_Tuner", group = "TestModes")

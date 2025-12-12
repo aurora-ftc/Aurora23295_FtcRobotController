@@ -114,11 +114,11 @@ public class DriveOpModePIDTest extends OpMode {
 
             }
 
-            drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
+            drive.driveFieldOriented(forward, strafe, rotate, slow);
 
         } else {
 
-            drive.trackGoal(telemetry, forward, strafe, slow);
+            drive.trackGoal(forward, strafe, slow);
 
         }
 
@@ -134,7 +134,7 @@ public class DriveOpModePIDTest extends OpMode {
         if (gamepad1.dpadLeftWasPressed()) {
             drive.setPIDTargetHeading(0.0);
             lastHeading = 0;
-            drive.resetOdoPosition(telemetry);
+            drive.resetOdoPosition();
         }
 
         if (gamepad1.triangleWasPressed()) {
@@ -163,7 +163,7 @@ public class DriveOpModePIDTest extends OpMode {
         }
 
         double dist = drive.getDistanceFromGoal();
-        launcher.updateLauncher(telemetry, dist, hardwareMap);
+        launcher.updateLauncher(dist, hardwareMap);
 
         telemetry.addData("rotate", rotate);
         telemetry.addData("lastHeading", lastHeading);

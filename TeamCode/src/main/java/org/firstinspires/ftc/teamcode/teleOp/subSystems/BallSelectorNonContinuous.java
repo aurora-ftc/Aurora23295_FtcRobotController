@@ -3,11 +3,6 @@ package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.MOSAIC_FLASH_INTERVAL;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.POSITIONS;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KD;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KI;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KP;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_THRESHOLD;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_TICKS_PER_REVOLUTION;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.greenColor;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_green;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_purple;
@@ -28,24 +23,18 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Storage;
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.util.MathUtils;
 import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
-import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 
 import java.util.Arrays;
 
-public class BallSelector extends SubsystemBase {
+public class BallSelectorNonContinuous extends SubsystemBase {
     private static final double MOSAIC_WAIT = 1.0;
     // Mosaic flashing variables
     private final ElapsedTime mosaicFlashTimer = new ElapsedTime();
@@ -55,20 +44,17 @@ public class BallSelector extends SubsystemBase {
     double h, s, v;
     double angle;
     double p_purple, p_green;
-    CRServo rotaryServo;
+    Servo rotaryServo;
     Servo pushServo;
     RevColorSensorV3 colorBottom, colorLeft, colorRight;
     Servo light;
-    AnalogInput encoder;
-    DcMotor dcEncoder;
-    PIDController controller;
     double time;
     int currentPositionIndex = 0;
     double lightColor = greenColor;
     private boolean complete = false;
     private int currentMosaicColorIndex = 0;
 
-    public BallSelector() {
+    public BallSelectorNonContinuous() {
 
     }
 
@@ -82,25 +68,16 @@ public class BallSelector extends SubsystemBase {
     public void init(HardwareMap map) {
         positions = POSITIONS;
 
-        rotaryServo = map.get(CRServo.class, Constants.HWMap.ROTARY_SERVO);
+        rotaryServo = map.get(Servo.class, HWMap.ROTARY_SERVO);
         pushServo = map.get(Servo.class, HWMap.PUSH_SERVO);
-        encoder = map.get(AnalogInput.class, HWMap.ENCODER);
-        dcEncoder = map.get(DcMotor.class, HWMap.DC_ENCODER);
         colorBottom = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_BOTTOM);
         colorLeft = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_LEFT);
         colorRight = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_RIGHT);
         light = map.get(Servo.class, HWMap.LIGHT);
 
-        controller = new PIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD);
-
         // Initialize to first position
         currentPositionIndex = 0;
-        controller.setTarget(positions[0]);
-
-        dcEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        dcEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        dcEncoder.setDirection(DcMotorSimple.Direction.FORWARD);
-        rotaryServo.setDirection(DcMotorSimple.Direction.FORWARD);
+        rotaryServo.resetDeviceConfigurationForOpMode();
     }
 
     /**
@@ -110,49 +87,15 @@ public class BallSelector extends SubsystemBase {
      */
 
     public void periodic() {
-        time = System.nanoTime();
-        angle = ((double) dcEncoder.getCurrentPosition() / ROTARY_TICKS_PER_REVOLUTION * 360 % 360);
-        rotaryServo.setPower(
-                controller.calculateOutputPID(
-                        Math.toRadians(angle), time, true));
-
-        getColour();
+        rotaryServo.setPosition(currentPositionIndex);
     }
 
-    /**
-     * setTargetPosition: set the position of the indexer
-     *
-     * @param position the target position according to POSITIONS
-     * @author James Beers
-     */
-    public void setTargetPosition(int position) {
-        currentPositionIndex = position;
-        controller.setTarget(positions[position]);
-    }
-
-    /**
-     * moveUp and moveDown: for use with d-Pad controls.
-     *
-     * @author James Beers
-     */
     public void moveUp() {
-        currentPositionIndex = (currentPositionIndex + 1) % positions.length;
-        controller.setTarget(positions[currentPositionIndex]);
+        currentPositionIndex = Math.min(positions.length - 1, currentPositionIndex + 1);
     }
 
     public void moveDown() {
-        currentPositionIndex = (currentPositionIndex - 1 + positions.length) % positions.length;
-        controller.setTarget(positions[currentPositionIndex]);
-    }
-
-    /**
-     * isAtTarget: check if the system is close to the target value.
-     *
-     * @return <b><i>TRUE</i></b> if the indexer is close enough to the target
-     * @author James Beers
-     */
-    public boolean isAtTarget() {
-        return Math.abs(angle - controller.getTarget()) < ROTARY_THRESHOLD;
+        currentPositionIndex = Math.max(0, currentPositionIndex - 1);
     }
 
     /**
@@ -216,8 +159,9 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void loadBall() {
+        getColour();
         if (Arrays.asList(stored).contains(Colors.Unknown)) {
-            setTargetPosition(Arrays.asList(stored).indexOf(Colors.Unknown));
+            rotaryServo.setPosition(positions[Arrays.asList(stored).indexOf(Colors.Unknown)]);
         }
     }
 
@@ -228,8 +172,9 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void returnBall(Colors color) {
+        getColour();
         if (Arrays.asList(stored).contains(color)) {
-            setTargetPosition(Arrays.asList(stored).indexOf(color) + 3);
+            rotaryServo.setPosition(positions[Arrays.asList(stored).indexOf(color)]);
         }
     }
 
@@ -297,16 +242,9 @@ public class BallSelector extends SubsystemBase {
 
         multiTelemetry.addLine("==()== Ball Selector Telemetry ==()==");
         multiTelemetry.addData("Array stored", " bottom: " + stored[0] + ", left: " + stored[1] + ", right: " + stored[2]);
-        multiTelemetry.addData("Current Position", positions);
-        multiTelemetry.addData("DC Encoder data", dcEncoder.getCurrentPosition());
-        multiTelemetry.addData("Current Angle (RAD)", Math.toRadians(angle));
-        multiTelemetry.addData("Target Angle", controller.getTarget());
-        multiTelemetry.addData("Servo Power", MathUtils.sigmoid(controller.calculateOutputPID(
-                Math.toRadians(angle), time, true)));
-        multiTelemetry.addData("At Target", isAtTarget());
-        multiTelemetry.addLine();
-        multiTelemetry.addData("PID constants", controller.kp + ", " + controller.ki + ", " + controller.kd);
-
+        multiTelemetry.addData("Current Position Index", currentPositionIndex);
+        multiTelemetry.addData("Current Target:", positions[currentPositionIndex]);
+        multiTelemetry.addData("Current Position", rotaryServo.getPosition());
         multiTelemetry.update();
     }
 }

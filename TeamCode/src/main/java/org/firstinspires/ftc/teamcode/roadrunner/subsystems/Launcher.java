@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.util.Volts;
@@ -52,7 +51,7 @@ public class Launcher {
     }
 
     // ---------- Actions ----------
-    public Action spinForTime(double power, double duration, Telemetry tele) {
+    public Action spinForTime(double power, double duration) {
         return new Action() {
             private final ElapsedTime timer = new ElapsedTime();
             private boolean init = false;
@@ -68,7 +67,7 @@ public class Launcher {
                 launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
                 if (timer.seconds() < duration) {
-                    launcher.spinToVelocity(power, tele);
+                    launcher.spinToVelocity(power);
                     packet.put("Power", power);
                     return true;
                 } else {

@@ -102,7 +102,7 @@ public class SixBallRed extends LinearOpMode {
                         new InstantAction(() -> lift.liftDown()),
 
                         new RaceAction(
-                                launcher.spinForTime(Constants.POWER_STEPS[10], 8, telemetry),
+                                launcher.spinForTime(Constants.POWER_STEPS[10], 8),
                                 new SequentialAction(
                                         tab1.build(),
                                         new SleepAction(1.0), // Spin u// p
@@ -110,7 +110,7 @@ public class SixBallRed extends LinearOpMode {
                         new InstantAction(() -> launcher.stop()),
 
                         new RaceAction(
-                                launcher.spinForTime(0, 8, telemetry),
+                                launcher.spinForTime(0, 8),
                                 new SequentialAction(
                                         tab2.build(),
                                         new InstantAction(() -> intake.fullPower()),
@@ -124,7 +124,7 @@ public class SixBallRed extends LinearOpMode {
                         ),
 
                         new RaceAction(
-                                launcher.spinForTime(POWER_STEPS[0], 14, telemetry),
+                                launcher.spinForTime(POWER_STEPS[0], 14),
                                 new SequentialAction(
                                         tab4.build(),
                                         new SleepAction(0.8), // allow time to reach velocity

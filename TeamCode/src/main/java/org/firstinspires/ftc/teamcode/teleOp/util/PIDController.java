@@ -43,6 +43,22 @@ public class PIDController {
         this.kv = kv;
     }
 
+    public double getTarget() {
+        return target;
+    }
+
+    public void setTarget(double target) {
+        this.target = target;
+    }
+
+    /**
+     * calculateOutputPID: calculates the output for a given motor using feedback systems
+     *
+     * @param current          the current position of the actuator <b>IN RADIANS</b>
+     * @param time             the time elapsed since startup
+     * @param shouldRadianWrap should full 2pi radians be used
+     * @return the output power to use in the actuator
+     */
     public double calculateOutputPID(double current, double time, boolean shouldRadianWrap) {
         this.current = current;
         double error = shouldRadianWrap ?
@@ -66,15 +82,14 @@ public class PIDController {
         return output;
     }
 
+    /**
+     * calculateOutputFF: outputs power value from targetVelocity
+     *
+     * @param targetVelocity the target velocity to use
+     * @param kv             velocity dampener constant
+     * @return motor power output
+     */
     public double calculateOutputFF(double targetVelocity, double kv) {
         return kv * targetVelocity + ks;
-    }
-
-    public double getTarget() {
-        return target;
-    }
-
-    public void setTarget(double target) {
-        this.target = target;
     }
 }

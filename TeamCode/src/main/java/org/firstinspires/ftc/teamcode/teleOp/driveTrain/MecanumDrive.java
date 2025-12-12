@@ -22,7 +22,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.util.DcMotorGroup;
 import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 
@@ -41,6 +40,12 @@ public class MecanumDrive {
     private double newForward, newStrafe, theta;
     private String botPose;
 
+    /**
+     * smoothDrive: smooth out driving to ensure precise control
+     *
+     * @param input input value
+     * @return smoothed value
+     */
     public static double smoothDrive(double input) {
         return 0.3 * Math.tan(input * 1.2792);
     }
@@ -69,8 +74,7 @@ public class MecanumDrive {
         frontRightMotor.setDirection(DcMotorEx.Direction.FORWARD);
         backRightMotor.setDirection(DcMotorEx.Direction.FORWARD);
 
-        driveMotors = new DcMotorGroup(frontLeftMotor, frontRightMotor,
-                backLeftMotor, backRightMotor);
+        driveMotors = new DcMotorGroup(frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
 
         //Run W/out encoder
         driveMotors.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -115,6 +119,14 @@ public class MecanumDrive {
 
     }
 
+    /**
+     * drive: the primary drive method. Controls all drive motors together
+     *
+     * @param forward the target forward/reverse movement
+     * @param strafe  the target left/right movement
+     * @param rotate  the target turning movement
+     * @param slow    speed modifier
+     */
     public void drive(double forward, double strafe, double rotate, double slow) {
         double frontLeftPower = forward + strafe - rotate;
         double backLeftPower = forward - strafe - rotate;
@@ -135,7 +147,15 @@ public class MecanumDrive {
         backRightMotor.setPower(slow * maxSpeed * (backRightPower / maxPower));
     }
 
-    public void driveFieldOriented(double forward, double strafe, double rotate, double slow, Telemetry telemetry) {
+    /**
+     * driveFieldOriented: drive modified to be in a headless mode. Forward is always the same direction, regardless of rotation
+     *
+     * @param forward the target forward/reverse movement
+     * @param strafe  the target left/right movement
+     * @param rotate  the target turning movement
+     * @param slow    speed modifier
+     */
+    public void driveFieldOriented(double forward, double strafe, double rotate, double slow) {
 
         //Converts X, Y coordinates to polar coordinates
         theta = Math.atan2(forward, strafe);
@@ -167,6 +187,12 @@ public class MecanumDrive {
             drive(forward, strafe, rotate, slow);
     }
 
+    /**
+     * headingPID: rotational PID controller. Locks rotation unless otherwise commanded.
+     *
+     * @param targetHeading the target heading
+     * @return rotation movement
+     */
     public double headingPID(double targetHeading) {
 
         headingPID.setTarget(targetHeading);
@@ -191,6 +217,12 @@ public class MecanumDrive {
         return -output; //trust on the negative
     }
 
+    /**
+     * debugTelemetry: complex telemetry for debugging drive methods
+     *
+     * @param telemetry telemetry object
+     * @param slow      speed modifier. (no idea why this is here)
+     */
     public void debugTelemetry(Telemetry telemetry, double slow) {
         TelemetryPacket packet = new TelemetryPacket();
         MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -221,6 +253,10 @@ public class MecanumDrive {
         headingPID.setTarget(targetHeading);
     }
 
+    /**
+     * resetOdoHeading: reset the heading of odometry
+     * resetOdoPosition: reset the position of odometry
+     */
     public void resetOdoHeading() {
         if (odo != null) {
             //Resets Heading and Position -STAY STILL FOR AT LEAST 0.25 SECONDS WHILE DOING SO FOR ACCURACY-
@@ -229,15 +265,18 @@ public class MecanumDrive {
         }
     }
 
-    public void resetOdoPosition(Telemetry tele) {
+    public void resetOdoPosition() {
         if (odo != null) {
             odo.setPosition(new Pose2D(DistanceUnit.INCH, 0, 0,
                     AngleUnit.RADIANS, 0));
             updateOdo();
         }
-        tele.update();
     }
 
+    /**
+     * updateOdo: update the odometry pods with null safety catch<p>
+     * updateOdoHeading: update the odometry heading </p>
+     */
     public void updateOdo() {
         if (odo != null) {
             odo.update();
@@ -250,6 +289,11 @@ public class MecanumDrive {
         }
     }
 
+    /**
+     * getOdoHeading: get the odometry heading
+     *
+     * @return odo velocity
+     */
     public double getOdoHeading(AngleUnit angleUnit) {
         if (odo != null) {
             odo.update(GoBildaPinpointDriverRR.ReadData.ONLY_UPDATE_HEADING);
@@ -258,6 +302,11 @@ public class MecanumDrive {
         return 0.0;
     }
 
+    /**
+     * getOdoVelocity: get the odometry velocity
+     *
+     * @return odo velocity
+     */
     public double getOdoVelocity() {
         if (odo != null) {
             double velocity = Math.atan2(odo.getVelY(DistanceUnit.INCH),
@@ -268,6 +317,11 @@ public class MecanumDrive {
         return 0.0;
     }
 
+    /**
+     * getOdoPosition: get the position of the odometry
+     *
+     * @return position
+     */
     public Pose2D getOdoPosition() {
         if (odo != null) {
             odo.update();
@@ -282,6 +336,12 @@ public class MecanumDrive {
         }
     }
 
+    /**
+     * getOdoX: get the x value of the odometry
+     *
+     * @param distanceUnit the unit of distance to measure in
+     * @return x position
+     */
     public double getOdoX(DistanceUnit distanceUnit) {
         if (odo != null) {
             odo.update();
@@ -290,6 +350,12 @@ public class MecanumDrive {
         return 0.0;
     }
 
+    /**
+     * getOdoY: get the y value of the odometry
+     *
+     * @param distanceUnit the unit of distance to measure in
+     * @return y position
+     */
     public double getOdoY(DistanceUnit distanceUnit) {
         if (odo != null) {
             odo.update();
@@ -298,11 +364,22 @@ public class MecanumDrive {
         return 0.0;
     }
 
+    /**
+     * initTracker: initialize the goal tracker
+     *
+     * @param goalPose    the position of the goal
+     * @param trackGoalOn enable/disable goal tracking
+     */
     public void initTracker(Pose2D goalPose, boolean trackGoalOn) {
         this.goalPose = goalPose;
         this.trackGoalOn = trackGoalOn;
     }
 
+    /**
+     * <p>drawRobot: draw the robot to the FTC dashboard</p>
+     *
+     * @param field field map to use
+     */
     public void drawRobot(Canvas field) {
         Pose2D pose = getOdoPosition();
 
@@ -331,7 +408,14 @@ public class MecanumDrive {
         );
     }
 
-    public void trackGoal(Telemetry tele, double forward, double strafe, double slow) {
+    /**
+     * trackGoal: tracks the goal while moving on the field.
+     *
+     * @param forward target forward/reverse movement
+     * @param strafe  target left/right movement
+     * @param slow    speed modifier
+     */
+    public void trackGoal(double forward, double strafe, double slow) {
         updateOdo();
 
         double x = this.getOdoX(DistanceUnit.INCH);
@@ -345,9 +429,14 @@ public class MecanumDrive {
 
         double output = headingPID(thetaGoal);
 
-        driveFieldOriented(forward, strafe, output, slow, tele);
+        driveFieldOriented(forward, strafe, output, slow);
     }
 
+    /**
+     * getDistanceFromGoal: get the distance from the goal. Used in auto power calculations
+     *
+     * @return distance from goal
+     */
     public double getDistanceFromGoal() {
         updateOdo();
 
@@ -362,14 +451,24 @@ public class MecanumDrive {
         return distance;
     }
 
-    public void deactivateTrackGoal() {
-        trackGoalOn = false;
-    }
-
+    /**
+     * toggleTrackGoal: toggles goal tracker
+     * deactivateTrackGoal: deactivates goal tracker (used on init)
+     */
     public void toggleTrackGoal() {
         trackGoalOn = !trackGoalOn;
     }
 
+    public void deactivateTrackGoal() {
+        trackGoalOn = false;
+    }
+
+    /**
+     * updateTelemetry: standard telemetry update method.
+     *
+     * @param telemetry telemetry object
+     * @param slow      speed modifier (no idea why its here again)
+     */
     public void updateTelemetry(Telemetry telemetry, double slow) {
 
         TelemetryPacket packet = new TelemetryPacket();
@@ -377,7 +476,7 @@ public class MecanumDrive {
 
         updateOdo();
 
-        multiTelemetry.addLine("===== Mecanum Drive Telemetry =====");
+        multiTelemetry.addLine("--<== Mecanum Drive Telemetry ==>--");
         if (odo != null) {
             Pose2D pos = odo.getPosition();
             double headingDeg = getOdoHeading(AngleUnit.DEGREES);

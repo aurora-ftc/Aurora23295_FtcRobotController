@@ -38,10 +38,26 @@ public class TestMotorOrientation extends OpMode {
     @Override
     public void loop() {
 
-        if (gamepad1.square) {frontLeftMotor.setPower(1);} else {frontLeftMotor.setPower(0);}
-        if (gamepad1.triangle) {frontRightMotor.setPower(1);} else {frontRightMotor.setPower(0);}
-        if (gamepad1.circle) {backRightMotor.setPower(1);} else {backRightMotor.setPower(0);}
-        if (gamepad1.cross) {backLeftMotor.setPower(1);} else {backLeftMotor.setPower(0);}
+        if (gamepad1.square) {
+            frontLeftMotor.setPower(1);
+        } else {
+            frontLeftMotor.setPower(0);
+        }
+        if (gamepad1.triangle) {
+            frontRightMotor.setPower(1);
+        } else {
+            frontRightMotor.setPower(0);
+        }
+        if (gamepad1.circle) {
+            backRightMotor.setPower(1);
+        } else {
+            backRightMotor.setPower(0);
+        }
+        if (gamepad1.cross) {
+            backLeftMotor.setPower(1);
+        } else {
+            backLeftMotor.setPower(0);
+        }
 
         telemetry.addData("Square", "Front Left Motor");
         telemetry.addData("Triangle", "Front Right Motor");

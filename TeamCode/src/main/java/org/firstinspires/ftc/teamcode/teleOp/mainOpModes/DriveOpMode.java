@@ -10,9 +10,9 @@ import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 
 @TeleOp(name = "DriveOpMode", group = "OpModes")
 public class DriveOpMode extends OpMode {
+    private final ElapsedTime matchTimer = new ElapsedTime();
     MecanumDrive drive = new MecanumDrive();
     double forward, strafe, rotate, slow;
-    private final ElapsedTime matchTimer = new ElapsedTime();
     private boolean endgameRumbleDone;
     private double recenterTime = 0;
 
@@ -83,8 +83,8 @@ public class DriveOpMode extends OpMode {
         Use this for non field-centric code:
         drive.drive(forward, strafe, rotate, slow);
          */
-        drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
-        
+        drive.driveFieldOriented(forward, strafe, rotate, slow);
+
         // All telemetry is now handled in updateTelemetry methods
         drive.updateTelemetry(telemetry, slow);
 
