@@ -129,7 +129,8 @@ public class SixBallRed extends LinearOpMode {
                                 new SequentialAction(
                                         tab4.build(),
                                         new SleepAction(0.8), // allow time to reach velocity
-                                        shootThree(lift, intake))),
+                                        shootThree(lift, intake),
+                                        new SleepAction(0.4))),
                         new InstantAction(() -> launcher.stop()),
 
                         tab5.build()));
@@ -162,11 +163,11 @@ public class SixBallRed extends LinearOpMode {
                 new InstantAction(() -> intake.fullPower()),
                 new SleepAction(0.5),
                 new InstantAction(() -> intake.stop()),
-                new SleepAction(0.3),
+                new SleepAction(0.4),
 
                 lift.liftForTime(0, 0.15),
                 lift.liftForTime(1, 0.55),
-                new SleepAction(0.2));
+                new SleepAction(0.5));
         return newAction;
     }
 }

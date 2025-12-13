@@ -29,18 +29,17 @@ import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "DriveLaunchMode", group = "OpModes")
 public class DriveLaunchMode extends OpMode {
-    private TrajectoryActionBuilder parkAction = null;
     private MecanumDrive drive = new MecanumDrive();
     //------Timers------
-    private ElapsedTime matchTime = new ElapsedTime();
-    private ElapsedTime PIDTimer = new ElapsedTime();
-    private ElapsedTime cameraTimer = new ElapsedTime();
-    private ElapsedTime initTimer = new ElapsedTime();
+    private final ElapsedTime matchTime = new ElapsedTime();
+    private final ElapsedTime PIDTimer = new ElapsedTime();
+    private final ElapsedTime cameraTimer = new ElapsedTime();
+    private final ElapsedTime initTimer = new ElapsedTime();
     private Pose2d startPose;
     private PinpointDrive driveRR;
     private SmartPark smartPark;
     private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
-    private FtcDashboard dashboard = FtcDashboard.getInstance();
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Pose2D initialPose, goalPose;
     private LimelightControl limelightControl;
     private Mosaic mosaic;
@@ -135,7 +134,6 @@ public class DriveLaunchMode extends OpMode {
 
     @Override
     public void loop() {
-
         // Recenter freeze period (Unnecessary now but still useful)
         if (recenterTime > 0) {
             if (matchTime.seconds() - recenterTime >= 0.25) {
@@ -202,11 +200,17 @@ public class DriveLaunchMode extends OpMode {
                     projHeadingCalculated = true;
                 }
 
-                rotate = drive.headingPID(lastHeading);
+                if (USE_PID)
+                    rotate = drive.headingPID(lastHeading);
+                else
+                    rotate = gamepad1.right_stick_x;
 
             } else {
 
-                rotate = 0;
+                if (USE_PID)
+                    rotate = 0;
+                else
+                    rotate = MecanumDrive.smoothDrive(gamepad1.right_stick_x);
 
             }
 
@@ -220,7 +224,7 @@ public class DriveLaunchMode extends OpMode {
 
         // Endgame rumble
         if (matchTime.seconds() >= 100 && !endgameRumbleDone) {
-            gamepad1.rumble(1000);
+            gamepad1.rumble(2000);
             endgameRumbleDone = true;
         }
 
@@ -240,11 +244,7 @@ public class DriveLaunchMode extends OpMode {
         else if (gamepad1.circleWasPressed())
             launchSystem.toggleIntakeReverse();
 
-        // Lift hit
-        if (gamepad1.dpadRightWasPressed())
-            shotsLeft = 3;
-
-        if (gamepad1.crossWasPressed() && shotsLeft == 0) {
+        if (gamepad1.crossWasPressed()) {
             launchSystem.liftUp();
             startWait = matchTime.milliseconds();
             liftDown = false;
@@ -254,15 +254,6 @@ public class DriveLaunchMode extends OpMode {
             launchSystem.liftDown();
             liftDown = true;
             launchSystem.intakeBlipReset();
-        }
-
-        if (shotsLeft != 0) {
-            if (liftDown && matchTime.milliseconds() >= startWait + 850) {
-                launchSystem.liftUp();
-                startWait = matchTime.milliseconds();
-                liftDown = false;
-                shotsLeft--;
-            }
         }
 
         // Reset heading
@@ -285,13 +276,13 @@ public class DriveLaunchMode extends OpMode {
             return;
         }
 
-        // Auto park?
-        if (gamepad2.leftBumperWasPressed()) {
-            Action parkAction = smartPark.buildParkAction();
-            Actions.runBlocking(
-                    new SequentialAction(
-                            parkAction));
-        }
+//        //Auto park
+//        if (gamepad2.leftBumperWasPressed()) {
+//            Action parkAction = smartPark.buildParkAction();
+//            Actions.runBlocking(
+//                    new SequentialAction(
+//                            parkAction));
+//        }
 
         if (gamepad1.rightBumperWasPressed())
             drive.toggleTrackGoal();
@@ -333,7 +324,7 @@ public class DriveLaunchMode extends OpMode {
 
     @Override
     public void stop() {
-        limelightControl.close();
+        //limelightControl.close();
         super.stop();
     }
 

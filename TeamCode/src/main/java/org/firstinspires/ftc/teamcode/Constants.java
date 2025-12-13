@@ -13,6 +13,8 @@ public class Constants {
     public static boolean BLUE_SIDE = false;
     public static boolean IS_FIELD_CENTRIC = true;
     public static boolean USE_MAHALANOBIS_DISTANCE = false;
+    public static boolean USE_PID = true;
+
 
     public static double SLOW_SPEED_LT = 0.35;
     public static double LT_DEAD_ZONE = 0.4;
@@ -21,7 +23,7 @@ public class Constants {
 
     public static double AUTO_FAR_POWER = 63;
 
-    public static double DRIVE_KP = 2.3;
+    public static double DRIVE_KP = 1.76;
     public static double DRIVE_KI = 0.0;
     public static double DRIVE_KD = 0.003;
 
@@ -40,13 +42,13 @@ public class Constants {
 
     public static double LAUNCHER_ENCODER_PER_REV = 28.0;
 
-    public static double LIFT_SERVO_MIN = 0.1;
-    public static double LIFT_SERVO_MAX = 0.24;
+    public static double LIFT_SERVO_MIN = 0.082;
+    public static double LIFT_SERVO_MAX = 0.228;
     public static double LIFT_SERVO_UP = 0.0;
     public static double LIFT_SERVO_DOWN = 1.0;
     public static double LIFT_SERVO_FLICK_TIME = 120.0;
 
-    public static double[] POWER_STEPS = {56, 58, 63, 85}; //{40, 42, 44, 85} old one idk why no work
+    public static double[] POWER_STEPS = {56, 58, 63, 65, 67, 85}; //{40, 42, 44, 85} old one idk why no work
 
     public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62,
             AngleUnit.DEGREES, 0);

@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode.roadrunner.autonomous;
 
-import static org.firstinspires.ftc.teamcode.Constants.*;
-
-import android.content.Context;
-import android.content.SharedPreferences;
+import static org.firstinspires.ftc.teamcode.Constants.AUTO_FAR_POWER;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.AccelConstraint;
@@ -27,6 +24,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Storage;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Intake;
@@ -41,8 +41,6 @@ import java.util.Arrays;
 @Autonomous(name = "AUTONOMOUS_BLUE_SIX", group = "ChoppedAutos")
 public class SixBallBlue extends LinearOpMode {
 
-        Mosaic mosaic = Mosaic.UNKNOWN;
-
         @Override
         public void runOpMode() throws InterruptedException {
 
@@ -54,34 +52,38 @@ public class SixBallBlue extends LinearOpMode {
                 Limelight limelight = new Limelight(hardwareMap, telemetry);
                 Intake intake = new Intake(hardwareMap);
                 ElapsedTime limelightTime = new ElapsedTime();
+                Mosaic mosaic = Mosaic.UNKNOWN;
 
                 VelConstraint collectingBallsVel = new MinVelConstraint(Arrays.asList(
-                                new TranslationalVelConstraint(8.0),
-                                new AngularVelConstraint(Math.toRadians(5.0))));
+                        new TranslationalVelConstraint(8.0),
+                        new AngularVelConstraint(Math.toRadians(5.0))
+                ));
                 AccelConstraint collectingBallsAccel = new ProfileAccelConstraint(-8.0, 8.0);
 
                 // ---------------------- Trajectories ----------------------
                 TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                                .strafeToLinearHeading(new Vector2d(55, -12), Math.toRadians(-156.5));
+                        .strafeToLinearHeading(new Vector2d(55, -12), Math.toRadians(156.5 + 90));
 
-                TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(55, -13, Math.toRadians(-156.5)))
-                                .strafeToLinearHeading(new Vector2d(38, -30), Math.toRadians(-270));
+                TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(55, -13, Math.toRadians(156.5 -180)))
+                        .strafeToLinearHeading(new Vector2d(38, -30), Math.toRadians(0));
 
-                TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(38, -30, Math.toRadians(-270)))
-                                .lineToY(-54, collectingBallsVel, collectingBallsAccel);
+                TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(38, -30, Math.toRadians(0)))
+                        .lineToY(-54, collectingBallsVel, collectingBallsAccel);
 
-                TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(38, -54, Math.toRadians(-270)))
-                                .setReversed(true)
-                                .strafeToLinearHeading(new Vector2d(53, -13), Math.toRadians(-156.5));
+                TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(38, -54, Math.toRadians(0)))
+                        .setReversed(true)
+                        .strafeToLinearHeading(new Vector2d(53, -13), Math.toRadians(156.5 + 90));
 
-                TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(53, -13, Math.toRadians(-156.5)))
-                                .setReversed(false)
-                                .strafeToLinearHeading(new Vector2d(35, -13), Math.toRadians(-150));
+                TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(53, -13, Math.toRadians(156.5 + 90)))
+                        .setReversed(false)
+                        .strafeToLinearHeading(new Vector2d(35, -13), Math.toRadians(150 + 90));
+
+                limelightTime.reset();
 
                 // ---------------------- Wait for Start ----------------------
                 while (!opModeIsActive() && !isStopRequested()) {
-                        if (mosaic == Mosaic.UNKNOWN && limelightTime.milliseconds() >= 50) {
-                                mosaic = limelight.getLastDetectedMosaic();
+                        if ((mosaic == Mosaic.UNKNOWN || mosaic == null) && limelightTime.milliseconds() >= 50) {
+                                mosaic = limelight.scanObelisk();
                                 limelightTime.reset();
                         }
                         telemetry.addData("Mosaic", mosaic.name());
@@ -92,8 +94,9 @@ public class SixBallBlue extends LinearOpMode {
 
                 waitForStart();
 
-                if (isStopRequested())
-                        return;
+                Storage.mosaic = mosaic;
+
+                if (isStopRequested()) return;
 
                 Actions.runBlocking(
                         new SequentialAction(
@@ -104,26 +107,30 @@ public class SixBallBlue extends LinearOpMode {
                                         new SequentialAction(
                                                 tab1.build(),
                                                 new SleepAction(1.0), // Spin u// p
-                                                shootThree(lift, intake, launcher, telemetry))),
+                                                shootThree(lift, intake))),
                                 new InstantAction(() -> launcher.stop()),
 
-                                tab2.build(),
+                                new RaceAction(
+                                        launcher.spinForTime(0, 8, telemetry),
+                                        new SequentialAction(
+                                                tab2.build(),
+                                                new InstantAction(() -> intake.fullPower()),
+                                                new SleepAction(0.5),
 
-                                new InstantAction(() -> intake.fullPower()),
-                                new SleepAction(0.5),
+                                                tab3.build(),
 
-                                tab3.build(),
-
-                                new InstantAction(() -> intake.stop()),
-                                new SleepAction(0.5),
+                                                new InstantAction(() -> intake.stop()),
+                                                new SleepAction(0.5)
+                                        )
+                                ),
 
                                 new RaceAction(
                                         launcher.spinForTime(AUTO_FAR_POWER, 14, telemetry),
                                         new SequentialAction(
                                                 tab4.build(),
                                                 new SleepAction(0.8), // allow time to reach velocity
-                                                shootThree(lift, intake, launcher, telemetry) // Spin up
-                                        )),
+                                                shootThree(lift, intake),
+                                                new SleepAction(0.4))),
                                 new InstantAction(() -> launcher.stop()),
 
                                 tab5.build()));
@@ -132,33 +139,35 @@ public class SixBallBlue extends LinearOpMode {
                 telemetry.update();
 
                 Storage.endPoseRR = drive.pose;
+                Storage.endPose = new Pose2D(DistanceUnit.INCH, drive.pose.position.y, -drive.pose.position.x,
+                        AngleUnit.RADIANS, drive.pose.heading.toDouble());
 
         }
 
-    // Total time ~3.65 seconds
-    private Action shootThree(Lift lift, Intake intake, Launcher launcher, Telemetry tele) {
-        Action newAction = new SequentialAction(
-                lift.liftForTime(0, 0.1),
-                lift.liftForTime(1, 0.55),
-                new SleepAction(0.2),
+        // Total time ~3.65 seconds
+        private Action shootThree(Lift lift, Intake intake) {
+                Action newAction = new SequentialAction(
+                        lift.liftForTime(0, 0.15),
+                        lift.liftForTime(1, 0.55),
+                        new SleepAction(0.2),
 
-                new InstantAction(() -> intake.fullPower()),
-                new SleepAction(0.4),
-                new InstantAction(() -> intake.stop()),
-                new SleepAction(0.3),
+                        new InstantAction(() -> intake.fullPower()),
+                        new SleepAction(0.5),
+                        new InstantAction(() -> intake.stop()),
+                        new SleepAction(0.5),
 
-                lift.liftForTime(0, 0.1),
-                lift.liftForTime(1, 0.55),
-                new SleepAction(0.2),
+                        lift.liftForTime(0, 0.15),
+                        lift.liftForTime(1, 0.55),
+                        new SleepAction(0.2),
 
-                new InstantAction(() -> intake.fullPower()),
-                new SleepAction(0.4),
-                new InstantAction(() -> intake.stop()),
-                new SleepAction(0.3),
+                        new InstantAction(() -> intake.fullPower()),
+                        new SleepAction(0.5),
+                        new InstantAction(() -> intake.stop()),
+                        new SleepAction(0.4),
 
-                lift.liftForTime(0, 0.1),
-                lift.liftForTime(1, 0.55),
-                new SleepAction(0.2));
-        return newAction;
-    }
+                        lift.liftForTime(0, 0.15),
+                        lift.liftForTime(1, 0.55),
+                        new SleepAction(0.5));
+                return newAction;
+        }
 }

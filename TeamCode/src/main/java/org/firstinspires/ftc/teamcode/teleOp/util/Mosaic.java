@@ -14,4 +14,6 @@ public enum Mosaic {
             default: return UNKNOWN;
         }
     }
+
 }
+
