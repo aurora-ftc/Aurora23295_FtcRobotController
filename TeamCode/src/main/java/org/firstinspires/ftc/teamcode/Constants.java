@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 @Config
 public class Constants {
     public static boolean DEBUG = false;
-    public static boolean BLUE_SIDE = false;
+    public static boolean BLUE_SIDE = true;
     public static boolean IS_FIELD_CENTRIC = true;
     public static boolean USE_MAHALANOBIS_DISTANCE = false;
     public static boolean USE_PID = true;

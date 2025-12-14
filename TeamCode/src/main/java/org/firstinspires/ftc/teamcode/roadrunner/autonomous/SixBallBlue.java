@@ -52,6 +52,7 @@ public class SixBallBlue extends LinearOpMode {
                 Limelight limelight = new Limelight(hardwareMap, telemetry);
                 Intake intake = new Intake(hardwareMap);
                 ElapsedTime limelightTime = new ElapsedTime();
+
                 Mosaic mosaic = Mosaic.UNKNOWN;
 
                 VelConstraint collectingBallsVel = new MinVelConstraint(Arrays.asList(
@@ -65,7 +66,7 @@ public class SixBallBlue extends LinearOpMode {
                         .strafeToLinearHeading(new Vector2d(55, -12), Math.toRadians(-156.5));
 
                 TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(55, -13, Math.toRadians(-156.5)))
-                        .strafeToLinearHeading(new Vector2d(38, -30), Math.toRadians(0));
+                        .strafeToLinearHeading(new Vector2d(38, -30), Math.toRadians(90));
 
                 TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(38, -30, Math.toRadians(90)))
                         .lineToY(-54, collectingBallsVel, collectingBallsAccel);
