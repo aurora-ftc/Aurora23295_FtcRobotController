@@ -33,7 +33,7 @@ public class DriveSortMode extends OpMode {
             new Pose2d(INITIAL_POSE_BLUE.getX(DistanceUnit.INCH), INITIAL_POSE_BLUE.getY(DistanceUnit.INCH),
                     INITIAL_POSE_BLUE.getHeading(AngleUnit.RADIANS));
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
-    private LimelightControl limelight;
+//    private Limelight limelight;
     private MecanumDrive drive;
     private LaunchIntakeSystem launchSystem;
     private BallSelector ballSelector;
@@ -54,7 +54,7 @@ public class DriveSortMode extends OpMode {
         drive = new MecanumDrive();
         ballSelector = new BallSelector();
         launchSystem = new LaunchIntakeSystem();
-        limelight = new LimelightControl(hardwareMap, 0);
+//        limelight = new Limelight(hardwareMap, 0);
         driveRR = new PinpointDrive(hardwareMap, startPose);
 
         Vector2d parkPose = new Vector2d(33, -39);
@@ -105,7 +105,7 @@ public class DriveSortMode extends OpMode {
         gamepad1.resetEdgeDetection();
         gamepad2.resetEdgeDetection();
 
-        FtcDashboard.getInstance().startCameraStream(limelight.getInstance(), 30);
+//        FtcDashboard.getInstance().startCameraStream(limelight.getInstance(), 30);
     }
 
     @Override
@@ -185,6 +185,10 @@ public class DriveSortMode extends OpMode {
             launchSystem.toggleIntakeReverse();
         }
 
+        if (gamepad1.crossWasPressed()) {
+            ballSelector.push();
+        }
+
         //OBSOLETE flick reset on start
         double startWait = 0.0;
         if (!liftDown && matchTime.milliseconds() >= startWait + LIFT_SERVO_FLICK_TIME) {
@@ -226,7 +230,7 @@ public class DriveSortMode extends OpMode {
         drive.updateTelemetry(telemetry, slow);
         launchSystem.updateTelemetry(telemetry);
         ballSelector.updateTelemetry(telemetry);
-        limelight.updateTelemetry(telemetry);
+//        limelight.updateTelemetry(telemetry);
 
         MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         multiTelemetry.addLine(".o0) OpMode Info (0o.");

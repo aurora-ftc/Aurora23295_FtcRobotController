@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.roadrunner.autonomous;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.POWER_STEPS;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.AccelConstraint;

@@ -41,4 +41,5 @@ dependencies {
         exclude group: "com.acmerobotics.dashboard"
     }
     implementation "com.github.FTCLib:FTCLib:2.1.1"
+    implementation "org.solverslib:core:0.3.3"
 }
