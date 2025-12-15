@@ -21,6 +21,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -60,7 +61,7 @@ public class LaunchIntakeSystem {
 
 
         launcherMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        intakeMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
 
         launcherMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -143,7 +144,6 @@ public class LaunchIntakeSystem {
     public void toggleIntake() {
         if (!intakeOn) {
             intakeMotor.setPower(1);
-            ballselector.loadBall();
             intakeOn = true;
         } else {
             intakeMotor.setPower(0);

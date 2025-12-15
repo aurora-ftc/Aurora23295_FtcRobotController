@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.roadrunner.subsystems;
 
 import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Intake {
@@ -18,14 +19,20 @@ public class Intake {
         intakeMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public void stop() { intakeMotor.setPower(0); }
-    public void fullPower() { intakeMotor.setPower(1); }
+    public void stop() {
+        intakeMotor.setPower(0);
+    }
+
+    public void fullPower() {
+        intakeMotor.setPower(1);
+    }
 
     // ---------- Actions ----------
     public Action spinForTime(double power, double duration) {
         return new Action() {
-            private boolean init = false;
             private final ElapsedTime timer = new ElapsedTime();
+            private boolean init = false;
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!init) timer.reset();
@@ -37,10 +44,16 @@ public class Intake {
     }
 
     public Action stopAction() {
-        return packet -> { intakeMotor.setPower(0); return false; };
+        return packet -> {
+            intakeMotor.setPower(0);
+            return false;
+        };
     }
 
     public Action fullPowerAction() {
-        return packet -> { intakeMotor.setPower(1); return false; };
+        return packet -> {
+            intakeMotor.setPower(1);
+            return false;
+        };
     }
 }

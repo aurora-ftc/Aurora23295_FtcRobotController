@@ -83,10 +83,14 @@ public class Constants {
     }
 
     public static double[] POWER_STEPS = {40, 42, 44, 85};
-    public static double[] POSITIONS = {0, (double) 1 / 3, (double) 2 / 3, (double) 1 / 6, 0.5, 1};
-
-    public static float revColorSensorGain = 12f;
-    public static double LIFT_SERVO_FLICK_TIME = 120.0;
+    public static int[] POSITIONS = {0, 1333, 2666, 667, 2000, 3333};
+    public static float revColorSensorGain = 0.4f;
+    /**
+     * Rotary Selector System Configuration
+     */
+    public static double ROTARY_KP = 0.000055;
+    public static double ROTARY_KI = 0.000000000;
+    public static double ROTARY_KD = 0.000002;
     public static int ROTARY_TICKS_PER_REVOLUTION = 4000;
     public static double ROTARY_THRESHOLD = 0.2;
     public static double purpleColor = 0.7;

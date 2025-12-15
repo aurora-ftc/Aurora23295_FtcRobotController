@@ -13,13 +13,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+import com.seattlesolvers.solverslib.controller.PIDController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Storage;
 import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.util.MathUtils;
 import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
-import org.firstinspires.ftc.teamcode.teleOp.util.PIDController;
 
 import java.util.Arrays;
 
@@ -27,7 +28,8 @@ public class BallSelector extends SubsystemBase {
     private static final double MOSAIC_WAIT = 1.0;
     // Mosaic flashing variables
     private final ElapsedTime mosaicFlashTimer = new ElapsedTime();
-    double[] positions = new double[6];
+    boolean canMove = true;
+    int[] positions = new int[6];
     float[] hsv = new float[3];
     Colors[] stored;
     double h, s, v;
@@ -35,16 +37,18 @@ public class BallSelector extends SubsystemBase {
     double p_purple, p_green;
     CRServo rotaryServo;
     Servo pushServo;
+    double pushTime = 0.0;
     RevColorSensorV3 colorBottom, colorLeft, colorRight;
     Servo light;
     AnalogInput encoder;
     DcMotor dcEncoder;
     PIDController controller;
     double time;
-    int currentPositionIndex = 0;
     double lightColor = greenColor;
+    private int currentPositionIndex = 0;
     private boolean complete = false;
     private int currentMosaicColorIndex = 0;
+    private int target = 0;
 
     public BallSelector() {
 
@@ -75,14 +79,17 @@ public class BallSelector extends SubsystemBase {
 
         controller = new PIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD);
 
+        pushServo.scaleRange(0.0, 0.25);
+
         // Initialize to first position
         currentPositionIndex = 0;
-        controller.setTarget(positions[0]);
-
+        pushServo.setPosition(0);
         dcEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         dcEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         dcEncoder.setDirection(DcMotorSimple.Direction.FORWARD);
         rotaryServo.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        dcEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     /**
@@ -92,11 +99,24 @@ public class BallSelector extends SubsystemBase {
      */
 
     public void periodic() {
+        controller.setPID(ROTARY_KP, ROTARY_KI, ROTARY_KD);
+
         time = System.nanoTime();
-        angle = ((double) dcEncoder.getCurrentPosition() / ROTARY_TICKS_PER_REVOLUTION * 360 % 360);
-        rotaryServo.setPower(
-                controller.calculateOutputPID(
-                        Math.toRadians(angle), time, true));
+
+        double output = controller.calculate(dcEncoder.getCurrentPosition(), target);
+        int sign = 1;
+        if (output < 0) {
+            sign = -1;
+            output *= -1;
+        }
+        output = Math.sqrt(output);
+        output *= sign;
+//
+        rotaryServo.setPower(Range.clip(output, -1, 1));
+
+        if (time - pushTime >= PUSH_SERVO_FLICK_TIME) {
+            pushServo.setPosition(0);
+        }
 
         getColour();
     }
@@ -108,8 +128,9 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void setTargetPosition(int position) {
-        currentPositionIndex = position;
-        controller.setTarget(positions[position]);
+        if (canMove) {
+            target = position;
+        }
     }
 
     /**
@@ -119,12 +140,12 @@ public class BallSelector extends SubsystemBase {
      */
     public void moveUp() {
         currentPositionIndex = (currentPositionIndex + 1) % positions.length;
-        controller.setTarget(positions[currentPositionIndex]);
+        target = positions[currentPositionIndex];
     }
 
     public void moveDown() {
         currentPositionIndex = (currentPositionIndex - 1 + positions.length) % positions.length;
-        controller.setTarget(positions[currentPositionIndex]);
+        target = positions[currentPositionIndex];
     }
 
     /**
@@ -134,7 +155,7 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public boolean isAtTarget() {
-        return Math.abs(angle - controller.getTarget()) < ROTARY_THRESHOLD;
+        return Math.abs(dcEncoder.getCurrentPosition() - target) < ROTARY_THRESHOLD;
     }
 
     /**
@@ -152,8 +173,8 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void loadBall() {
-        if (Arrays.asList(stored).contains(Colors.UNKNOWN)) {
-            setTargetPosition(Arrays.asList(stored).indexOf(Colors.UNKNOWN));
+        if (Arrays.asList(stored).contains(Colors.Unknown) && getColor(colorBottom) != Colors.Unknown) {
+            setTargetPosition(Arrays.asList(stored).indexOf(Colors.Unknown));
         }
     }
 
@@ -175,8 +196,10 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void push() {
-        pushServo.setPosition(1);
-        pushServo.setPosition(0);
+        if (isAtTarget()) {
+            pushServo.setPosition(1);
+            pushTime = time;
+        }
     }
 
     public void lampOn() {
@@ -236,13 +259,10 @@ public class BallSelector extends SubsystemBase {
         multiTelemetry.addData("Current Position", positions);
         multiTelemetry.addData("DC Encoder data", dcEncoder.getCurrentPosition());
         multiTelemetry.addData("Current Angle (RAD)", Math.toRadians(angle));
-        multiTelemetry.addData("Target Angle", controller.getTarget());
-        multiTelemetry.addData("Servo Power", MathUtils.sigmoid(controller.calculateOutputPID(
-                Math.toRadians(angle), time, true)));
+        multiTelemetry.addData("Target Angle", target);
+        multiTelemetry.addData("Servo Power", rotaryServo.getPower());
         multiTelemetry.addData("At Target", isAtTarget());
         multiTelemetry.addLine();
-        multiTelemetry.addData("PID constants", controller.kp + ", " + controller.ki + ", " + controller.kd);
-
         multiTelemetry.update();
     }
 }
