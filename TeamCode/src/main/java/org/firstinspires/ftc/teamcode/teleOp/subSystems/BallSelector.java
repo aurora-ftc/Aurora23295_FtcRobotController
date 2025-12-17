@@ -1,28 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.MOSAIC_FLASH_INTERVAL;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.POSITIONS;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KD;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KI;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KP;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_THRESHOLD;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_TICKS_PER_REVOLUTION;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.greenColor;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_green;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanH_purple;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanS_green;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanS_purple;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanV_green;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.meanV_purple;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.minProb;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.purpleColor;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaH_green;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaH_purple;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaS_green;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaS_purple;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaV_green;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.sigmaV_purple;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -82,14 +60,18 @@ public class BallSelector extends SubsystemBase {
     public void init(HardwareMap map) {
         positions = POSITIONS;
 
-        rotaryServo = map.get(CRServo.class, Constants.HWMap.ROTARY_SERVO);
+        rotaryServo = map.get(CRServo.class, HWMap.ROTARY_SERVO);
         pushServo = map.get(Servo.class, HWMap.PUSH_SERVO);
-        encoder = map.get(AnalogInput.class, HWMap.ENCODER);
-        dcEncoder = map.get(DcMotor.class, HWMap.DC_ENCODER);
+        encoder = map.get(AnalogInput.class, HWMap.ELC_ANALOG);
+        dcEncoder = map.get(DcMotor.class, HWMap.ELC_DIGITAL);
         colorBottom = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_BOTTOM);
         colorLeft = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_LEFT);
         colorRight = map.get(RevColorSensorV3.class, HWMap.COLOR_SENSOR_RIGHT);
         light = map.get(Servo.class, HWMap.LIGHT);
+
+        colorBottom.setGain(revColorSensorGain);
+        colorRight.setGain(revColorSensorGain);
+        colorLeft.setGain(revColorSensorGain);
 
         controller = new PIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD);
 
@@ -156,58 +138,12 @@ public class BallSelector extends SubsystemBase {
     }
 
     /**
-     * getColor: gets the color read by a color sensor using gaussian probability.
-     *
-     * @param sensor the color sensor to read
-     * @return color most likely detected
-     * @author James Beers
-     */
-    public Colors getColor(RevColorSensorV3 sensor) {
-        if (sensor == null) {
-            return Colors.Unknown;
-        }
-
-        double r = sensor.red();
-        double g = sensor.green();
-        double b = sensor.blue();
-
-        double sum = r + g + b;
-
-        double normalRed = r / sum * 255;
-        double normalGreen = g / sum * 255;
-        double normalBlue = b / sum * 255;
-
-        android.graphics.Color.RGBToHSV((int) normalRed, (int) normalGreen, (int) normalBlue, hsv);
-        h = hsv[0] / 2.0; // convert 0–360 → 0–180
-        s = hsv[1] * 255.0;
-        v = hsv[2] * 255.0;
-
-        p_purple = MathUtils.gaussian3D(h, s, v,
-                meanH_purple, sigmaH_purple,
-                meanS_purple, sigmaS_purple,
-                meanV_purple, sigmaV_purple);
-
-        p_green = MathUtils.gaussian3D(h, s, v,
-                meanH_green, sigmaH_green,
-                meanS_green, sigmaS_green,
-                meanV_green, sigmaV_green);
-
-        if (p_purple > p_green && p_purple > minProb) {
-            return Colors.Purple;
-        } else if (p_purple < p_green && p_green > minProb) {
-            return Colors.Green;
-        } else {
-            return Colors.Unknown;
-        }
-    }
-
-    /**
      * getColour: write the values to the <b>stored</b> array
      *
      * @author James Beers
      */
     public void getColour() {
-        stored = new Colors[]{getColor(colorBottom), getColor(colorLeft), getColor(colorRight)};
+        stored = new Colors[]{Colors.getColor(colorBottom), Colors.getColor(colorLeft), Colors.getColor(colorRight)};
     }
 
     /**
@@ -216,8 +152,8 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void loadBall() {
-        if (Arrays.asList(stored).contains(Colors.Unknown)) {
-            setTargetPosition(Arrays.asList(stored).indexOf(Colors.Unknown));
+        if (Arrays.asList(stored).contains(Colors.UNKNOWN)) {
+            setTargetPosition(Arrays.asList(stored).indexOf(Colors.UNKNOWN));
         }
     }
 

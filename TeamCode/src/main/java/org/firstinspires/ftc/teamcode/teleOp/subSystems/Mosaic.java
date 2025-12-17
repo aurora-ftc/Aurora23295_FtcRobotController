@@ -6,14 +6,20 @@ public enum Mosaic {
     PGP,
     UNKNOWN;
 
+    /**
+     *
+     * @param id April Tag fiducial ID
+     * @return Mosaic pattern
+     * @author Harry Wiencek
+     */
     public static Mosaic fromId(byte id) {
         switch (id) {
             case 21:
-                return GPP;  // example
+                return GPP;
             case 22:
-                return PPG;  // example
+                return PPG;
             case 23:
-                return PGP;  // example
+                return PGP;
             default:
                 return UNKNOWN;
         }

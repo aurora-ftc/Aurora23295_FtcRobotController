@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.teleOp.subSystems.Mosaic;
 public class OutputInOrderCommand extends SequentialCommandGroup {
     public OutputInOrderCommand(BallSelector selector, Mosaic mosaic) {
         for (char c : mosaic.toString().toCharArray()) {
-            Colors color = (c == 'p') ? Colors.Purple : Colors.Green;
+            Colors color = (c == 'p') ? Colors.PURPLE : Colors.GREEN;
             addCommands(
                     new InstantCommand(selector::getColour),
                     new InstantCommand(() -> selector.returnBall(color)),
