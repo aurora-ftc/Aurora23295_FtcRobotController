@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class targetingSystem {
+public class TargetingSystem {
     Limelight3A limelight;
     byte obelisk;
 

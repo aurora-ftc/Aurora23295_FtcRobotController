@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.BLUE_SIDE;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.DEBUG;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.LIFT_SERVO_FLICK_TIME;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.initialPoseBlue;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -21,7 +18,7 @@ import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.BallSelector;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Limelight;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
 import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "Drive Sort Mode", group = "OpModes")
@@ -33,10 +30,10 @@ public class DriveSortMode extends OpMode {
     private final ElapsedTime matchTime = new ElapsedTime();
     private final ElapsedTime PIDTimer = new ElapsedTime();
     private final Pose2d startPose =
-            new Pose2d(initialPoseBlue.getX(DistanceUnit.INCH), initialPoseBlue.getY(DistanceUnit.INCH),
-                    initialPoseBlue.getHeading(AngleUnit.RADIANS));
+            new Pose2d(INITIAL_POSE_BLUE.getX(DistanceUnit.INCH), INITIAL_POSE_BLUE.getY(DistanceUnit.INCH),
+                    INITIAL_POSE_BLUE.getHeading(AngleUnit.RADIANS));
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
-    private Limelight limelight;
+    private LimelightControl limelight;
     private MecanumDrive drive;
     private LaunchIntakeSystem launchSystem;
     private BallSelector ballSelector;
@@ -57,7 +54,7 @@ public class DriveSortMode extends OpMode {
         drive = new MecanumDrive();
         ballSelector = new BallSelector();
         launchSystem = new LaunchIntakeSystem();
-        limelight = new Limelight(hardwareMap, 0);
+        limelight = new LimelightControl(hardwareMap, 0);
         driveRR = new PinpointDrive(hardwareMap, startPose);
 
         Vector2d parkPose = new Vector2d(33, -39);
@@ -66,16 +63,16 @@ public class DriveSortMode extends OpMode {
         drive.init(hardwareMap, telemetry);
 
         if (BLUE_SIDE) {
-            goalPose = Constants.goalPoseBlue;
+            goalPose = Constants.GOAL_POSE_BLUE;
         } else {
-            goalPose = Constants.goalPoseRed;
+            goalPose = Constants.GOAL_POSE_RED;
         }
         drive.initTracker(goalPose, false);
 
         if (BLUE_SIDE) {
-            initialPose = Constants.initialPoseBlue;
+            initialPose = Constants.INITIAL_POSE_BLUE;
         } else {
-            initialPose = Constants.initialPoseRed;
+            initialPose = Constants.INITIAL_POSE_RED;
         }
         drive.setOdoPosition(initialPose);
 
@@ -128,7 +125,7 @@ public class DriveSortMode extends OpMode {
 
         // Speed modifiers
         if (gamepad1.left_trigger > 0.4) {
-            slow = Constants.SLOW_SPEED_LT;
+            slow = SLOW_SPEED_LT;
         } else {
             slow = 1;
         }

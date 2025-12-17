@@ -30,13 +30,13 @@ public class LimelightControl {
     private List<LLResultTypes.FiducialResult> obeliskList = new ArrayList<>();
 
     public LimelightControl(HardwareMap hwMap, int pipeline) {
-        Limelight(hwMap, pipeline);
-    }
-
-    public void Limelight(HardwareMap hwMap, int pipeline) {
         limelight = hwMap.get(Limelight3A.class, Constants.HWMap.LIMELIGHT);
         limelight.pipelineSwitch(pipeline); //0 is the normal
         limelight.start();
+    }
+
+    public Limelight3A getInstance() {
+        return limelight;
     }
 
     public static Pose2D fixCoordinates(Pose2D pose) {
@@ -131,6 +131,12 @@ public class LimelightControl {
         multiTelemetry.addData("Tags Detected", obeliskList != null ? obeliskList.size() : 0);
 
         multiTelemetry.update();
+    }
+
+    public double getDistance(double ta) {
+        double scale = 30665.96; //change ts
+        double distance = scale / ta;
+        return distance;
     }
 
 }
