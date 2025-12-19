@@ -243,7 +243,13 @@ public class BallSelector extends SubsystemBase {
         multiTelemetry.addLine();
         multiTelemetry.addData("PID constants", controller.kp + ", " + controller.ki + ", " + controller.kd);
 
+        multiTelemetry.addData("Bottom Color", Colors.getColor(colorBottom));
+        multiTelemetry.addData("Right Color", Colors.getColor(colorRight));
+        multiTelemetry.addData("Left Color", Colors.getColor(colorLeft));
+
         multiTelemetry.update();
+
+
     }
 }
 

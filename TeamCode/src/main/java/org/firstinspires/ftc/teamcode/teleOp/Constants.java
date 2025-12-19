@@ -18,7 +18,7 @@ public class Constants {
     public static final int APRIL_TAG_DETECTION = 0;
 
     // Drive PID
-    public static double DRIVE_KP = 2.3;
+    public static double DRIVE_KP = 1.8;
     public static double DRIVE_KI = 0.0;
     public static double DRIVE_KD = 0.003;
 
@@ -34,7 +34,7 @@ public class Constants {
     public static double MIN_FLYWHEEL_KV = 0.006;
 
     // Rotary PID
-    public static double ROTARY_KP = 0.1;
+    public static double ROTARY_KP = 0.08;
     public static double ROTARY_KI = 0.095;
     public static double ROTARY_KD = 0.003;
 
@@ -53,7 +53,7 @@ public class Constants {
     public static double LAUNCHER_ENCODER_PER_REV = 28.0;
 
     // Slow Speed Modifier
-    public static double SLOW_SPEED_LT = 0.35;
+    public static final double SLOW_SPEED_LT = 0.35;
     public static final double MOSAIC_FLASH_INTERVAL = 0.5;
 
     public static final class Colors {
