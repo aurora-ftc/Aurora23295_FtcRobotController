@@ -87,6 +87,5 @@ public class DriveOpMode extends OpMode {
 
         // All telemetry is now handled in updateTelemetry methods
         drive.updateTelemetry(telemetry, slow);
-
     }
 }

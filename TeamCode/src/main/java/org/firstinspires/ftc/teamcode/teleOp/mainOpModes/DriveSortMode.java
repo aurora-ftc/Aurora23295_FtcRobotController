@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.BLUE_SIDE;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.DEBUG;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.INITIAL_POSE_BLUE;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.SLOW_SPEED_LT;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -18,7 +21,6 @@ import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.BallSelector;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
 import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "Drive Sort Mode", group = "OpModes")
@@ -33,7 +35,7 @@ public class DriveSortMode extends OpMode {
             new Pose2d(INITIAL_POSE_BLUE.getX(DistanceUnit.INCH), INITIAL_POSE_BLUE.getY(DistanceUnit.INCH),
                     INITIAL_POSE_BLUE.getHeading(AngleUnit.RADIANS));
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
-//    private Limelight limelight;
+    //    private Limelight limelight;
     private MecanumDrive drive;
     private LaunchIntakeSystem launchSystem;
     private BallSelector ballSelector;
@@ -185,13 +187,13 @@ public class DriveSortMode extends OpMode {
             launchSystem.toggleIntakeReverse();
         }
 
-        if (gamepad1.crossWasPressed()) {
+        if (gamepad1.cross) {
             ballSelector.push();
         }
 
         //OBSOLETE flick reset on start
         double startWait = 0.0;
-        if (!liftDown && matchTime.milliseconds() >= startWait + LIFT_SERVO_FLICK_TIME) {
+        if (!liftDown && matchTime.milliseconds() >= startWait) {
             launchSystem.liftDown();
             liftDown = true;
         }
@@ -234,6 +236,7 @@ public class DriveSortMode extends OpMode {
 
         MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         multiTelemetry.addLine(".o0) OpMode Info (0o.");
+        multiTelemetry.addData("Cross", gamepad1.cross);
         multiTelemetry.addData("Blue Side", BLUE_SIDE);
         multiTelemetry.update();
     }

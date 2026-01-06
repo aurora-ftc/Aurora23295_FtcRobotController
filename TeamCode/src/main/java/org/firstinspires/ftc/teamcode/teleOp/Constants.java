@@ -8,53 +8,52 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 @Config
 public class Constants {
-
+    // Limelight Pipelines
+    public static final int APRIL_TAG_DETECTION = 0;
+    // Points for Auto-Lock
+    public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62, AngleUnit.DEGREES, 0);
+    public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 63, 62, AngleUnit.DEGREES, 0);
+    // Default Start Positions
+    public static final Pose2D INITIAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -13, -35, AngleUnit.DEGREES, 90);
+    public static final Pose2D INITIAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 13, -35, AngleUnit.DEGREES, 90);
+    public static final double MOSAIC_FLASH_INTERVAL = 0.5;
+    public static int PUSH_SERVO_FLICK_TIME = 250; //IN MS
     // Easy Mode Switches
     public static boolean DEBUG = false;
     public static boolean BLUE_SIDE = false;
     public static boolean IS_FIELD_CENTRIC = true;
-
-    // Limelight Pipelines
-    public static final int APRIL_TAG_DETECTION = 0;
-
     // Drive PID
     public static double DRIVE_KP = 2.3;
     public static double DRIVE_KI = 0.0;
     public static double DRIVE_KD = 0.003;
-
     // Flywheel PID
     public static double FLYWHEEL_KP = 0.08;   // 0.08
     public static double FLYWHEEL_KI = 0.05;   // 0.05
     public static double FLYWHEEL_KD = 0.002;  // 0.002
     public static double FLYWHEEL_KV = 0.01;   // 0.01
     public static double FLYWHEEL_KS = 0.0055; // 0.004
-
     // Range for Battery Adjusted Kv
     public static double MAX_FLYWHEEL_KV = 0.014;
     public static double MIN_FLYWHEEL_KV = 0.006;
-
-    // Rotary PID
-    public static double ROTARY_KP = 0.1;
-    public static double ROTARY_KI = 0.095;
-    public static double ROTARY_KD = 0.003;
-
-    // Points for Auto-Lock
-    public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62, AngleUnit.DEGREES, 0);
-    public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 63, 62, AngleUnit.DEGREES, 0);
-
-    // Default Start Positions
-    public static final Pose2D INITIAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -13, -35, AngleUnit.DEGREES, 90);
-    public static final Pose2D INITIAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 13, -35, AngleUnit.DEGREES, 90);
-
     // Ideal Volts
     public static double VOLTS_NOMINAL = 12.5;
-
     // Launcher Ticks Per Rev
     public static double LAUNCHER_ENCODER_PER_REV = 28.0;
-
     // Slow Speed Modifier
     public static double SLOW_SPEED_LT = 0.35;
-    public static final double MOSAIC_FLASH_INTERVAL = 0.5;
+    public static double[] POWER_STEPS = {25, 40, 42, 44, 85};
+    public static int[] POSITIONS = {0, 1333, 2666, 667, 2000, 3333};
+    public static float revColorSensorGain = 0.4f;
+    /**
+     * Rotary Selector System Configuration
+     */
+    public static double ROTARY_KP = 0.000055;
+    public static double ROTARY_KI = 0.000000000;
+    public static double ROTARY_KD = 0.000002;
+    public static int ROTARY_TICKS_PER_REVOLUTION = 4000;
+    public static double ROTARY_THRESHOLD = 0.2;
+    public static double purpleColor = 0.7;
+    public static double greenColor = 0.5;
 
     public static final class Colors {
         // Color sensor cut offs for UNKNOWN
@@ -82,19 +81,6 @@ public class Constants {
         }
     }
 
-    public static double[] POWER_STEPS = {40, 42, 44, 85};
-    public static int[] POSITIONS = {0, 1333, 2666, 667, 2000, 3333};
-    public static float revColorSensorGain = 0.4f;
-    /**
-     * Rotary Selector System Configuration
-     */
-    public static double ROTARY_KP = 0.000055;
-    public static double ROTARY_KI = 0.000000000;
-    public static double ROTARY_KD = 0.000002;
-    public static int ROTARY_TICKS_PER_REVOLUTION = 4000;
-    public static double ROTARY_THRESHOLD = 0.2;
-    public static double purpleColor = 0.7;
-    public static double greenColor = 0.5;
     public static final class HWMap {
 
         // Drive Motors

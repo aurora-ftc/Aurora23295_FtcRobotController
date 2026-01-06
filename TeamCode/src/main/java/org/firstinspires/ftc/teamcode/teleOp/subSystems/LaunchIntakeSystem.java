@@ -12,8 +12,6 @@ import static org.firstinspires.ftc.teamcode.teleOp.Constants.MAX_FLYWHEEL_KV;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.MIN_FLYWHEEL_KV;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.VOLTS_NOMINAL;
 
-import android.service.controls.actions.ModeAction;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -21,7 +19,6 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -34,16 +31,13 @@ public class LaunchIntakeSystem {
     private final Volts volts = new Volts();
     private final ElapsedTime intakeTimer = new ElapsedTime();
     private final BallSelector ballselector = new BallSelector();
-    public boolean launcherOn = false;
-    public boolean intakeOn = false;
+    public boolean launcherOn = false, intakeOn = false, autoPower = false;
     private DcMotor intakeMotor;
     private DcMotorEx launcherMotor;
     private PIDController flywheelPID;
-    private int maxStep = 0;
-    private int currentStep = minStep + 1;
+    private int maxStep = 0, currentStep = minStep + 1;
     private double[] powerSteps;
     private double power, batteryVolts, batteryCorrectedKv;
-    private boolean autoPower = false;
 
     /**
      * init: initializes hardware, PID and a ballSelector
@@ -192,10 +186,12 @@ public class LaunchIntakeSystem {
     }
 
     public void liftUp() {
+        //Disabled
     }
 
     // No, this is not wrong. The lower position is 1.0 and the upper position is 0.0
     public void liftDown() {
+        //Disabled
     }
 
     public void updateTelemetry(Telemetry telemetry) {
@@ -216,8 +212,6 @@ public class LaunchIntakeSystem {
             multiTelemetry.addData("Intake Power", intakeMotor.getPower());
             multiTelemetry.addData("Battery Corrected Kv", batteryCorrectedKv);
         }
-
-        multiTelemetry.update();
     }
 
     public void disableAutoPower() {

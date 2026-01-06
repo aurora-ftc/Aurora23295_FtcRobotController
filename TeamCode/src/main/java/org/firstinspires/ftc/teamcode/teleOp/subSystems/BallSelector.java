@@ -1,6 +1,16 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.POSITIONS;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PUSH_SERVO_FLICK_TIME;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KI;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KP;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.greenColor;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.revColorSensorGain;
+import static org.firstinspires.ftc.teamcode.teleOp.util.Colors.UNKNOWN;
+import static org.firstinspires.ftc.teamcode.teleOp.util.Colors.getColor;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -17,9 +27,7 @@ import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.controller.PIDController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Storage;
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
-import org.firstinspires.ftc.teamcode.teleOp.util.MathUtils;
+import org.firstinspires.ftc.teamcode.teleOp.util.Colors;
 import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
 import java.util.Arrays;
@@ -28,6 +36,8 @@ public class BallSelector extends SubsystemBase {
     private static final double MOSAIC_WAIT = 1.0;
     // Mosaic flashing variables
     private final ElapsedTime mosaicFlashTimer = new ElapsedTime();
+    private final boolean complete = false;
+    private final int currentMosaicColorIndex = 0;
     boolean canMove = true;
     int[] positions = new int[6];
     float[] hsv = new float[3];
@@ -43,11 +53,10 @@ public class BallSelector extends SubsystemBase {
     AnalogInput encoder;
     DcMotor dcEncoder;
     PIDController controller;
-    double time;
+    ElapsedTime pushTimer = new ElapsedTime();
     double lightColor = greenColor;
+    boolean isPurple = true;
     private int currentPositionIndex = 0;
-    private boolean complete = false;
-    private int currentMosaicColorIndex = 0;
     private int target = 0;
 
     public BallSelector() {
@@ -101,8 +110,6 @@ public class BallSelector extends SubsystemBase {
     public void periodic() {
         controller.setPID(ROTARY_KP, ROTARY_KI, ROTARY_KD);
 
-        time = System.nanoTime();
-
         double output = controller.calculate(dcEncoder.getCurrentPosition(), target);
         int sign = 1;
         if (output < 0) {
@@ -111,14 +118,18 @@ public class BallSelector extends SubsystemBase {
         }
         output = Math.sqrt(output);
         output *= sign;
-//
+
         rotaryServo.setPower(Range.clip(output, -1, 1));
 
-        if (time - pushTime >= PUSH_SERVO_FLICK_TIME) {
+        if (pushTimer.milliseconds() >= PUSH_SERVO_FLICK_TIME) {
             pushServo.setPosition(0);
         }
 
         getColour();
+
+        if (stored[0] != UNKNOWN && currentPositionIndex < 2) {
+            setTargetPosition(3);
+        }
     }
 
     /**
@@ -128,9 +139,7 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void setTargetPosition(int position) {
-        if (canMove) {
-            target = position;
-        }
+        target = position;
     }
 
     /**
@@ -164,7 +173,7 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void getColour() {
-        stored = new Colors[]{Colors.getColor(colorBottom), Colors.getColor(colorLeft), Colors.getColor(colorRight)};
+        stored = new Colors[]{getColor(colorBottom), getColor(colorLeft), getColor(colorRight)};
     }
 
     /**
@@ -173,8 +182,8 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void loadBall() {
-        if (Arrays.asList(stored).contains(Colors.Unknown) && getColor(colorBottom) != Colors.Unknown) {
-            setTargetPosition(Arrays.asList(stored).indexOf(Colors.Unknown));
+        if (Arrays.asList(stored).contains(Colors.UNKNOWN) && getColor(colorBottom) != Colors.UNKNOWN) {
+            setTargetPosition(Arrays.asList(stored).indexOf(Colors.UNKNOWN));
         }
     }
 
@@ -196,10 +205,8 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void push() {
-        if (isAtTarget()) {
-            pushServo.setPosition(1);
-            pushTime = time;
-        }
+        pushServo.setPosition(1);
+        pushTimer.reset();
     }
 
     public void lampOn() {
@@ -216,32 +223,20 @@ public class BallSelector extends SubsystemBase {
      * @author James Beers
      */
     public void flashMosaicPattern() {
-        Mosaic mosaic = Storage.mosaic;
+        Mosaic mosaic = Mosaic.GPP;
 
         if (mosaic == null || mosaic == Mosaic.UNKNOWN) {
             return;
         }
-        if (mosaicFlashTimer.seconds() < MOSAIC_WAIT && !complete) {
-            if (mosaicFlashTimer.seconds() >= MOSAIC_FLASH_INTERVAL) {
-                String mosaicString = mosaic.toString();
 
-                char currentColorChar = mosaicString.charAt(currentMosaicColorIndex);
-
-                if (currentColorChar == 'p') {
-                    light.setPosition(purpleColor);
-                } else {
-                    light.setPosition(greenColor);
-                }
-
-                if (currentMosaicColorIndex == mosaicString.length()) {
-                    complete = true;
-                }
-                currentMosaicColorIndex = (currentMosaicColorIndex + 1) % mosaicString.length();
-
+        if (mosaicFlashTimer.seconds() > 2) {
+            if (isPurple) {
+                light.setPosition(0.5);
+                mosaicFlashTimer.reset();
+            } else {
+                light.setPosition(0.7);
                 mosaicFlashTimer.reset();
             }
-        } else if (mosaicFlashTimer.seconds() > MOSAIC_WAIT) {
-            complete = false;
         }
     }
 
@@ -262,8 +257,9 @@ public class BallSelector extends SubsystemBase {
         multiTelemetry.addData("Target Angle", target);
         multiTelemetry.addData("Servo Power", rotaryServo.getPower());
         multiTelemetry.addData("At Target", isAtTarget());
+        multiTelemetry.addData("Push Position", pushServo.getPosition());
+
         multiTelemetry.addLine();
-        multiTelemetry.update();
     }
 }
 
