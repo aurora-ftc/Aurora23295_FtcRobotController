@@ -531,7 +531,7 @@ public class MecanumDrive {
             multiTelemetry.addData("Bot Pose String", botPose);
         }
 
-        multiTelemetry.update();
+//        multiTelemetry.update();
     }
 
 }

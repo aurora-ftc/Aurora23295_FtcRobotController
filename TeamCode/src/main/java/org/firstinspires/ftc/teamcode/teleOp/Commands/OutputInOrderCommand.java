@@ -1,12 +1,12 @@
-package org.firstinspires.ftc.teamcode.teleOp.commands;
+package org.firstinspires.ftc.teamcode.teleOp.Commands;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.BallSelector;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Colors;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Mosaic;
+import org.firstinspires.ftc.teamcode.teleOp.util.Colors;
+import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
 public class OutputInOrderCommand extends SequentialCommandGroup {
     public OutputInOrderCommand(BallSelector selector, Mosaic mosaic) {

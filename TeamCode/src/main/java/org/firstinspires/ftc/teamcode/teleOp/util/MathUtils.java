@@ -24,10 +24,4 @@ public class MathUtils {
         double dv = (v - meanV) / sigmaV;
         return Math.sqrt(dh * dh + ds * ds + dv * dv);
     }
-
-    public static double sigmoid(double x) {
-        // 1 / (1 + e^(-x))
-
-        return 1 / (1 + Math.exp(-x));
-    }
 }

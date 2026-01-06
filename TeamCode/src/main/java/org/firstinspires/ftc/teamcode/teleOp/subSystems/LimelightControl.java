@@ -24,7 +24,7 @@ public class LimelightControl {
     /**
      * Plug LimelightControl into Computer and set values for offsets
      */
-    private Limelight3A limelight;
+    private final Limelight3A limelight;
     private byte obeliskID;
     private Mosaic mosaic;
     private List<LLResultTypes.FiducialResult> obeliskList = new ArrayList<>();
@@ -35,16 +35,16 @@ public class LimelightControl {
         limelight.start();
     }
 
-    public Limelight3A getInstance() {
-        return limelight;
-    }
-
     public static Pose2D fixCoordinates(Pose2D pose) {
         double x = pose.getX(DistanceUnit.INCH);
         double y = pose.getY(DistanceUnit.INCH);
         double theta = pose.getHeading(AngleUnit.DEGREES);
-        Pose2D newPose = new Pose2D(DistanceUnit.INCH, y, -x, AngleUnit.DEGREES, theta);
-        return newPose;
+        // Reverse x and y
+        return new Pose2D(DistanceUnit.INCH, y, -x, AngleUnit.DEGREES, theta);
+    }
+
+    public Limelight3A getInstance() {
+        return limelight;
     }
 
     public void changePipeline(int index) {
@@ -59,8 +59,7 @@ public class LimelightControl {
         limelight.updateRobotOrientation(heading);
         LLResult llResult = limelight.getLatestResult();
         if (llResult != null && llResult.isValid()) {
-            Pose3D botPose = llResult.getBotpose_MT2();
-            return botPose;
+            return llResult.getBotpose_MT2();
         } else {
             return null;
         }
@@ -83,12 +82,15 @@ public class LimelightControl {
     public Pose2D get2DLocationMT2(Double heading) {
         limelight.updateRobotOrientation(heading);
         LLResult llResult = limelight.getLatestResult();
+
         if (llResult != null && llResult.isValid()) {
             Pose3D botPose3D = llResult.getBotpose_MT2();
             Position pose = botPose3D.getPosition();
+
             YawPitchRollAngles yawPitchRollAngles = botPose3D.getOrientation();
             Pose2D botPose2D = new Pose2D(DistanceUnit.METER, pose.x, pose.y,
                     AngleUnit.RADIANS, yawPitchRollAngles.getYaw(AngleUnit.RADIANS));
+
             return fixCoordinates(botPose2D);
         } else {
             return null;
@@ -135,8 +137,7 @@ public class LimelightControl {
 
     public double getDistance(double ta) {
         double scale = 30665.96; //change ts
-        double distance = scale / ta;
-        return distance;
+        return scale / ta;
     }
 
 }

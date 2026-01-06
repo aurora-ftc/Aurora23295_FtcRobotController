@@ -27,26 +27,6 @@ public class PIDController {
         previousError = 0.0;// Initialize with current time in actual implementation
     }
 
-    public void setKP(double kp) {
-        this.kp = kp;
-    }
-
-    public void setKI(double ki) {
-        this.ki = ki;
-    }
-
-    public void setKD(double kd) {
-        this.kd = kd;
-    }
-
-    public void setKV(double kv) {
-        this.kv = kv;
-    }
-
-    public double getTarget() {
-        return target;
-    }
-
     public void setTarget(double target) {
         this.target = target;
     }

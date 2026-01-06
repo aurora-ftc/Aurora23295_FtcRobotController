@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode.teleOp.commands;
+package org.firstinspires.ftc.teamcode.teleOp.Commands;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.BallSelector;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Colors;
+import org.firstinspires.ftc.teamcode.teleOp.util.Colors;
 
 public class ReturnBallCommand extends SequentialCommandGroup {
     public ReturnBallCommand(BallSelector selector, Colors color) {
