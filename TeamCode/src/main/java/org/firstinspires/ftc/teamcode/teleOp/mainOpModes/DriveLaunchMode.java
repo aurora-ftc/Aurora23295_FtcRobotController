@@ -173,8 +173,10 @@ public class DriveLaunchMode extends OpMode {
         // Speed modifiers
         if (gamepad1.left_trigger > LT_DEAD_ZONE)
             slow = Constants.SLOW_SPEED_LT;
+        if (gamepad1.right_trigger > LT_DEAD_ZONE)
+            slow = 1.0;
         else
-            slow = 1;
+            slow = 0.78;
 
         if (BLUE_SIDE) {
             forward = MecanumDrive.smoothDrive(gamepad1.left_stick_y);

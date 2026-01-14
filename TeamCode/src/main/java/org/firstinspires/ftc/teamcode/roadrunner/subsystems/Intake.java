@@ -19,7 +19,7 @@ public class Intake {
     }
 
     public void stop() { intakeMotor.setPower(0); }
-    public void fullPower() { intakeMotor.setPower(1); }
+    public void fullPower() { intakeMotor.setPower(0.67); }
 
     // ---------- Actions ----------
     public Action spinForTime(double power, double duration) {

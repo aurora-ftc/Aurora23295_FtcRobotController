@@ -64,13 +64,13 @@ public class SixBallRed extends LinearOpMode {
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
                 .strafeToLinearHeading(new Vector2d(55, 12), Math.toRadians(156.5));
 
-        TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(55, 13, Math.toRadians(156.5)))
-                .strafeToLinearHeading(new Vector2d(38, 30), Math.toRadians(270));
+        TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(55, 12, Math.toRadians(156.5)))
+                .strafeToLinearHeading(new Vector2d(35, 26), Math.toRadians(270));
 
-        TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(38, 30, Math.toRadians(270)))
+        TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(35, 26, Math.toRadians(270)))
                 .lineToY(54, collectingBallsVel, collectingBallsAccel);
 
-        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(38, 54, Math.toRadians(270)))
+        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(35, 54, Math.toRadians(270)))
                 .setReversed(true)
                 .strafeToLinearHeading(new Vector2d(53, 13), Math.toRadians(156.5));
 
@@ -124,10 +124,11 @@ public class SixBallRed extends LinearOpMode {
                                 )
                         ),
 
+                        tab4.build(),
+
                         new RaceAction(
                                 launcher.spinForTime(AUTO_FAR_POWER, 14, telemetry),
                                 new SequentialAction(
-                                        tab4.build(),
                                         new SleepAction(0.8), // allow time to reach velocity
                                         shootThree(lift, intake),
                                         new SleepAction(0.4))),

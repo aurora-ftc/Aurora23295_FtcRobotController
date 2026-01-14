@@ -239,8 +239,10 @@ public class LaunchIntakeSystem {
     }
 
     private double calcAutoPower(double distance) {
-        power = 0.189189 * distance +38.97297;
-        power = Math.max(55, Math.min(65, power));
+        power = 0.22 * distance + 48;
+        power = Math.max(61, Math.min(75, power));
+//        power = 0.189189 * distance +38.97297;
+//        power = Math.max(55, Math.min(65, power));
 //        power = 0.09/65116 * distance + 53.81395;
 //        power = Math.max(41, Math.min(44.5, power));
         return power;

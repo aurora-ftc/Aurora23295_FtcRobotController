@@ -10,9 +10,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 @Config
 public class Constants {
     public static boolean DEBUG = false;
-    public static boolean BLUE_SIDE = true;
+    public static boolean BLUE_SIDE = false;
     public static boolean IS_FIELD_CENTRIC = true;
-    public static boolean USE_MAHALANOBIS_DISTANCE = false;
+    public static boolean USE_MAHALANOBIS_DISTANCE = true;
     public static boolean USE_PID = true;
 
 
@@ -21,7 +21,7 @@ public class Constants {
 
     public static double RIGHT_STICK_DEAD_ZONE = 0.03;
 
-    public static double AUTO_FAR_POWER = 63;
+    public static double AUTO_FAR_POWER = 73; //formerly 63 and TC is SOOO cute
 
     public static double DRIVE_KP = 1.76;
     public static double DRIVE_KI = 0.0;
@@ -48,11 +48,11 @@ public class Constants {
     public static double LIFT_SERVO_DOWN = 1.0;
     public static double LIFT_SERVO_FLICK_TIME = 120.0;
 
-    public static double[] POWER_STEPS = {56, 58, 63, 65, 67, 85}; //{40, 42, 44, 85} old one idk why no work
+    public static double[] POWER_STEPS = {56, 58, 63, 65, 67, 73.2, 85}; //{40, 42, 44, 85} old one idk why no work
 
-    public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62,
+    public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 59,
             AngleUnit.DEGREES, 0);
-    public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 63, 62,
+    public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 63, 59,
             AngleUnit.DEGREES, 0);
 
     public static final Pose2D INITIAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -13, -35,
