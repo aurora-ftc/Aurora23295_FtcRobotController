@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.teleOp.util;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.Colors.Green;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.Colors.MIN_PROB;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.Colors.Purple;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.Colors.THRESHOLD;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.Colors.USE_MAHALANOBIS_DISTANCE;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ColorConfig.Green;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ColorConfig.MIN_PROB;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ColorConfig.Purple;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ColorConfig.THRESHOLD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ColorConfig.USE_MAHALANOBIS_DISTANCE;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 

@@ -42,20 +42,26 @@ public class Constants {
     // Slow Speed Modifier
     public static double SLOW_SPEED_LT = 0.35;
     public static double[] POWER_STEPS = {25, 40, 42, 44, 85};
-    public static int[] POSITIONS = {0, 1333, 2666, 667, 2000, 3333};
+    public static int[] POSITIONS = {0, 667, 1333, 2000, 2666, 3333};
     public static float revColorSensorGain = 0.4f;
     /**
      * Rotary Selector System Configuration
      */
     public static double ROTARY_KP = 0.000055;
-    public static double ROTARY_KI = 0.000000000;
+    public static double ROTARY_KI = 0.00000001;
     public static double ROTARY_KD = 0.000002;
     public static int ROTARY_TICKS_PER_REVOLUTION = 4000;
     public static double ROTARY_THRESHOLD = 0.2;
     public static double purpleColor = 0.7;
     public static double greenColor = 0.5;
 
-    public static final class Colors {
+    public static final double GATE_OPEN = 0;
+    public static final double GATE_CLOSE = 1;
+
+    public static final double PUSH_PUSH = 1;
+    public static final double PUSH_IDLE = 0;
+
+    public static final class ColorConfig {
         // Color sensor cut offs for UNKNOWN
         public static double MIN_PROB = 0.001;
         public static double THRESHOLD = 3.0;
@@ -103,6 +109,7 @@ public class Constants {
         // Ball Selector Hardware
         public static final String ROTARY_SERVO = "selector_servo";
         public static final String PUSH_SERVO = "push_servo";
+        public static final String GATE_SERVO = "gate_servo";
 
         // Selector Pos Sensors
         public static final String ELC_ANALOG = "rotary_encoder";
