@@ -11,11 +11,6 @@ public class Constants {
     // Limelight Pipelines
     public static final int APRIL_TAG_DETECTION = 0;
     // Points for Auto-Lock
-    public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62, AngleUnit.DEGREES, 0);
-    public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 63, 62, AngleUnit.DEGREES, 0);
-    // Default Start Positions
-    public static final Pose2D INITIAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -13, -35, AngleUnit.DEGREES, 90);
-    public static final Pose2D INITIAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 13, -35, AngleUnit.DEGREES, 90);
     public static final double MOSAIC_FLASH_INTERVAL = 0.5;
     public static int PUSH_SERVO_FLICK_TIME = 250; //IN MS
     // Easy Mode Switches
@@ -35,11 +30,6 @@ public class Constants {
     // Range for Battery Adjusted Kv
     public static double MAX_FLYWHEEL_KV = 0.014;
     public static double MIN_FLYWHEEL_KV = 0.006;
-
-    // Rotary PID
-    public static double ROTARY_KP = 0.08;
-    public static double ROTARY_KI = 0.095;
-    public static double ROTARY_KD = 0.003;
 
     // Points for Auto-Lock
     public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62, AngleUnit.DEGREES, 0);
@@ -61,7 +51,7 @@ public class Constants {
     /**
      * Rotary Selector System Configuration
      */
-    public static double ROTARY_KP = 0.000055;
+    public static double ROTARY_KP = 0.000025;
     public static double ROTARY_KI = 0.000000000;
     public static double ROTARY_KD = 0.000002;
     public static int ROTARY_TICKS_PER_REVOLUTION = 4000;

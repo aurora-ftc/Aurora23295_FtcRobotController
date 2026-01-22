@@ -88,10 +88,11 @@ public class BallSelector extends SubsystemBase {
 
         controller = new PIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD);
 
-        pushServo.scaleRange(0.0, 0.25);
+        pushServo.scaleRange(0.05, 0.25);
 
         // Initialize to first position
         currentPositionIndex = 0;
+        pushServo.setDirection(Servo.Direction.FORWARD);
         pushServo.setPosition(0);
         dcEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         dcEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -258,17 +259,16 @@ public class BallSelector extends SubsystemBase {
         multiTelemetry.addData("Servo Power", rotaryServo.getPower());
         multiTelemetry.addData("At Target", isAtTarget());
         multiTelemetry.addData("Push Position", pushServo.getPosition());
-
         multiTelemetry.addLine();
-        multiTelemetry.addData("PID constants", controller.kp + ", " + controller.ki + ", " + controller.kd);
+
+        multiTelemetry.addData("PID Coefficients", controller.getCoefficients());
+        multiTelemetry.addLine();
 
         multiTelemetry.addData("Bottom Color", Colors.getColor(colorBottom));
         multiTelemetry.addData("Right Color", Colors.getColor(colorRight));
         multiTelemetry.addData("Left Color", Colors.getColor(colorLeft));
 
         multiTelemetry.update();
-
-
     }
 }
 
