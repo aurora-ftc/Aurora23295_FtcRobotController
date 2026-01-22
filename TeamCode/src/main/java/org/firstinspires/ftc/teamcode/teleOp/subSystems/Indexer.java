@@ -3,6 +3,10 @@ package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
 import static org.firstinspires.ftc.teamcode.teleOp.util.Colors.*;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -12,42 +16,60 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.controller.PIDController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.teleOp.util.Colors;
+import org.firstinspires.ftc.teamcode.teleOp.util.MathUtils;
 
 public class Indexer {
     protected enum State {
         INTAKE,
         OUTTAKE
     }
-    protected enum Control {
-        MANUAL,
-        AUTO
+
+    protected enum Status {
+        SORTING,
+        IDLE;
     }
 
     //Sorting System
-    private Colors[] intakeDynamic, intakeStatic, outtakeDynamic, outtakeStatic;
     private int[] intakePositions = {POSITIONS[1], POSITIONS[3], POSITIONS[5]};
     private int[] outtakePositions = {POSITIONS[0], POSITIONS[2], POSITIONS[4]};
     private int currentPositionIndex = 0;
     private int target = 0;
     private State currentState = State.INTAKE;
-    private Control currentControl = Control.MANUAL;
+    private Status currentStatus = Status.IDLE;
+    private int zero = 0;
+    private boolean newBall = true;
+    private boolean empty = false;
+    private ElapsedTime emptyTimer = new ElapsedTime();
 
     //Hardware
-    Servo pushServo, gateServo;
+    private Servo pushServo, gateServo;
     private CRServo rotaryServo;
     private AnalogInput elcAnalog;
     private DcMotorEx elcDigital;
     private RevColorSensorV3 cBottom, cLeft, cRight;
     private Servo indicator;
-    private byte currentPos = 0;
 
     //Classes
     private PIDController controller;
+
+    public static boolean isEmpty(@NonNull RevColorSensorV3 cs) {
+        if (cs == null) return true;
+
+        double dist = cs.getDistance(DistanceUnit.INCH);
+        Colors color = getColor(cs);
+
+        if (color == UNKNOWN && dist >= 1.0)
+            return true;
+
+        return false;
+    }
 
     public void init(HardwareMap map) {
         rotaryServo = map.get(CRServo.class, HWMap.ROTARY_SERVO);
@@ -77,72 +99,69 @@ public class Indexer {
         pushServo.setPosition(PUSH_IDLE); //down
         gateServo.setPosition(GATE_CLOSE);
 
+        //zero = (int) ((elcAnalog.getVoltage() / 3.3) * 4000);
+        zero = 0;
+
         elcDigital.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elcDigital.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        elcDigital.setDirection(DcMotorSimple.Direction.FORWARD);
+        elcDigital.setDirection(DcMotor.Direction.FORWARD);
 
         rotaryServo.setDirection(DcMotorSimple.Direction.FORWARD);
 
+        emptyTimer.reset();
+
         determineState();
-        detectBalls();
     }
 
-    public void turnCC(byte rotations) {
-        currentPos = (byte) ((currentPos + rotations) % 6);
+    public void periodic() {
+        gatekeeper();
+        determineStatus();
+
+        if (!isEmpty(cBottom) && currentState == State.INTAKE && emptyTimer.seconds() >= 0.5) {
+            if (isEmpty(cRight))
+                moveUp();
+            else if (isEmpty(cLeft))
+                moveDown();
+            else
+                currentState = State.OUTTAKE;
+            emptyTimer.reset();
+        }
+
+        if (isEmpty(cBottom))
+            indicator.setPosition(0.7);
+        else
+            indicator.setPosition(0.4);
+
+        //idk bout this zero thing rn
+        double output = controller.calculate(elcDigital.getCurrentPosition() - zero, target);
+        rotaryServo.setPower(Range.clip(MathUtils.safeSqrt(output), -1, 1));
+        //rotaryServo.setPower(Range.clip(output, -1, 1));
     }
 
-    public void turnC(byte pose) {
-        if (pose >= 0 && pose <6)
-            currentPos = pose;
+    public void detectNewBall() {
+        if (emptyTimer.seconds() >= 0.2)
+            empty = isEmpty(cBottom);
+        if (isEmpty(cBottom) != empty) {
+            emptyTimer.reset();
+            newBall = true;
+        } else {
+            newBall = false;
+        }
+    }
+
+    public void determineStatus() {
+        double velocity = elcDigital.getVelocity();
+        if (Math.abs(velocity) <= VELOCITY_THRESHOLD)
+            currentStatus = Status.IDLE;
+        else
+            currentStatus = Status.SORTING;
     }
 
     public void determineState() {
-        if(getColor(cBottom) != UNKNOWN &&
-           getColor(cLeft) != UNKNOWN &&
-           getColor(cRight) != UNKNOWN)
-        {
+        if(isEmpty(cBottom) && isEmpty(cLeft) && isEmpty(cRight))
             currentState = State.OUTTAKE;
-        } else {
-            currentState = State.INTAKE;
-        }
-    }
-
-    public void detectBalls() {
-        if (currentState == State.INTAKE) {
-            intakeStatic = new Colors[] {getColor(cBottom), getColor(cLeft), getColor(cRight)};
-            intakeDynamic = new Colors[] {getColor(cBottom), getColor(cLeft), getColor(cRight)};
-        }
-    }
-
-    public void wholeCounterclockwise(){
-        if (currentState == State.INTAKE) {
-            Colors i0 = intakeStatic[0];
-            Colors i1 = intakeStatic[1];
-            Colors i2 = intakeStatic[2];
-
-            //rotation code
-
-            intakeStatic = new Colors[] {i1, i2, i0};
-        }
-    }
-
-    public void wholeClockwise(){
-        if (currentState == State.INTAKE) {
-            Colors i0 = intakeStatic[0];
-            Colors i1 = intakeStatic[1];
-            Colors i2 = intakeStatic[2];
-
-            //rotation code
-
-            intakeStatic = new Colors[] {i2, i0, i1};
-        }
-    }
-
-    public void toggleControl() {
-        if (currentControl == Control.MANUAL)
-            currentControl = Control.AUTO;
         else
-            currentControl = Control.MANUAL;
+            currentState = State.INTAKE;
     }
 
     public void toggleState() {
@@ -153,63 +172,49 @@ public class Indexer {
     }
 
     public void moveUp() {
-        if (currentControl == Control.MANUAL) {
-            currentPositionIndex = (currentPositionIndex + 1) % 3;
-            if (currentState == State.OUTTAKE)
-                target = outtakePositions[currentPositionIndex];
-            else
-                target = intakePositions[currentPositionIndex];
-        }
+        currentPositionIndex = (currentPositionIndex + 1) % 3;
+        if (currentState == State.OUTTAKE)
+            target = outtakePositions[currentPositionIndex];
+        else
+            target = intakePositions[currentPositionIndex];
     }
 
     public void moveDown() {
-        if (currentControl == Control.MANUAL) {
-            currentPositionIndex = (currentPositionIndex + 2) % 3;
-            if (currentState == State.OUTTAKE)
-                target = outtakePositions[currentPositionIndex];
-            else
-                target = intakePositions[currentPositionIndex];
-        }
+        currentPositionIndex = (currentPositionIndex + 2) % 3;
+        if (currentState == State.OUTTAKE)
+            target = outtakePositions[currentPositionIndex];
+        else
+            target = intakePositions[currentPositionIndex];
     }
 
-    public void periodic() {
-        double output = controller.calculate(elcDigital.getCurrentPosition(), target);
-
-        int sign = 1;
-
-        if (output < 0) {
-            sign = -1;
-            output *= -1;
-        }
-
-        output = Math.sqrt(output);
-        output *= sign;
-
-        if (currentControl == Control.AUTO) {
-            if (currentState == State.INTAKE)
-                determineState();
-        }
-
+    public void gatekeeper() {
         if (currentState == State.INTAKE)
             gateServo.setPosition(GATE_OPEN);
         else
             gateServo.setPosition(GATE_CLOSE);
-
-        rotaryServo.setPower(Range.clip(output, -1, 1));
     }
 
-    public void log(Telemetry tele) {
+    public void log(Telemetry telemetry) {
+        MultipleTelemetry tele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         tele.addData("State", currentState.toString());
-        tele.addData("Control", currentControl.toString());
         tele.addData("Position Index", currentPositionIndex);
         tele.addData("Target", target);
+        tele.addData("Zero", zero);
         tele.addData("GatePos", gateServo.getPosition());
+        tele.addData("Indexer Servo Power", rotaryServo.getPower());
+        tele.addData("Empty Timer", emptyTimer.seconds());
+        tele.addData("Status", currentStatus.toString());
+        tele.addData("Rotary Velocity", elcDigital.getVelocity());
+
+        tele.addLine();
+
+        tele.addData("Bottom Color", getColor(cBottom).toString());
+        tele.addData("Right Color", getColor(cRight).toString());
+        tele.addData("Left Color", getColor(cLeft).toString());
+
+        tele.addData("Bottom Color", isEmpty(cBottom));
+        tele.addData("Right Color", isEmpty(cRight));
+        tele.addData("Left Color", isEmpty(cLeft));
     }
-
-    public void goToGreen() {}
-
-    public void gateGoTo(double pos) {
-        gateServo.setPosition(pos);
-    }
-
 }

@@ -61,28 +61,30 @@ public class Constants {
     public static final double PUSH_PUSH = 1;
     public static final double PUSH_IDLE = 0;
 
+    public static double VELOCITY_THRESHOLD = 1;
+
     public static final class ColorConfig {
         // Color sensor cut offs for UNKNOWN
         public static double MIN_PROB = 0.001;
-        public static double THRESHOLD = 3.0;
-        public static boolean USE_MAHALANOBIS_DISTANCE = false;
+        public static double THRESHOLD = 2.0;
+        public static boolean USE_MAHALANOBIS_DISTANCE = true;
 
-        public static final class Purple {
-            public static final double MEAN_H = 110.83;
-            public static final double SIGMA_H = 7.07;
-            public static final double MEAN_S = 151.81;
-            public static final double SIGMA_S = 13.23;
-            public static final double MEAN_V = 128.43;
+        public static final class Green {
+            public static final double MEAN_H = 77.97;
+            public static final double SIGMA_H = 6.00;
+            public static final double MEAN_S = 183.07;
+            public static final double SIGMA_S = 12.00;
+            public static final double MEAN_V = 127.27;
             public static final double SIGMA_V = 12.00;
         }
 
-        public static final class Green {
+        public static final class Purple {
             // GREEN BALL
-            public static final double MEAN_H = 82.87;
-            public static final double SIGMA_H = 6.00;
-            public static final double MEAN_S = 185.37;
-            public static final double SIGMA_S = 15.33;
-            public static final double MEAN_V = 120.73;
+            public static final double MEAN_H = 111.35;
+            public static final double SIGMA_H = 7.83;
+            public static final double MEAN_S = 114.48;
+            public static final double SIGMA_S = 12.00;
+            public static final double MEAN_V = 114.45;
             public static final double SIGMA_V = 12.00;
         }
     }

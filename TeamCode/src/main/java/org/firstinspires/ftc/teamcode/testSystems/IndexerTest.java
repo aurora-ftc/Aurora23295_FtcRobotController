@@ -16,19 +16,13 @@ public class IndexerTest extends OpMode {
     }
     @Override
     public void loop() {
-        if (gamepad1.dpadLeftWasPressed()) {
+        if (gamepad1.dpadLeftWasPressed())
             indexer.moveUp();
-        } else if (gamepad1.dpadRightWasPressed()) {
+        else if (gamepad1.dpadRightWasPressed())
             indexer.moveDown();
-        }
 
-        if (gamepad1.squareWasPressed()) {
+        if (gamepad1.squareWasPressed())
             indexer.toggleState();
-        }
-
-        if (gamepad1.triangleWasPressed()) {
-            indexer.toggleControl();
-        }
 
         indexer.log(telemetry);
         indexer.periodic();
