@@ -24,4 +24,18 @@ public class MathUtils {
         double dv = (v - meanV) / sigmaV;
         return Math.sqrt(dh * dh + ds * ds + dv * dv);
     }
+
+    public static double safeSqrt(double n) {
+        int sign = 1;
+
+        if (n < 0) {
+            sign = -1;
+            n *= -1;
+        }
+
+        n = Math.sqrt(n);
+        n *= sign;
+
+        return n;
+    }
 }

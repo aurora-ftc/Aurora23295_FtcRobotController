@@ -37,8 +37,8 @@ public class MecanumDrive {
     private DcMotorEx frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
     private IMU imu;
     private PIDController headingPID;
-    private double newForward, newStrafe, theta;
     private String botPose;
+    private double newForward, newStrafe, theta;
 
     /**
      * smoothDrive: smooth out driving to ensure precise control
@@ -426,7 +426,6 @@ public class MecanumDrive {
         double deltaX = goalPose.getX(DistanceUnit.INCH) - x;
 
         double thetaGoal = AngleUnit.normalizeRadians(Math.atan2(deltaY, deltaX));
-
 
         double output = headingPID(thetaGoal);
 

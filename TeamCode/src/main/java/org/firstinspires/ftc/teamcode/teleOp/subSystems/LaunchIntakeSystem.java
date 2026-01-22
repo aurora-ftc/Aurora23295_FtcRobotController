@@ -86,7 +86,9 @@ public class LaunchIntakeSystem {
         double currentVelocity = launcherMotor.getVelocity() / LAUNCHER_ENCODER_PER_REV;
 
         double time = System.nanoTime() / 1e9; // Seconds
-        batteryCorrectedKv = FLYWHEEL_KV * (12.5 / batteryVolts);
+
+        //Adjusts the necessary kV of the wheel based on
+        batteryCorrectedKv = FLYWHEEL_KV * (VOLTS_NOMINAL / batteryVolts);
         batteryCorrectedKv = Math.min(MAX_FLYWHEEL_KV, Math.max(batteryCorrectedKv, MIN_FLYWHEEL_KV));
 
         double outputPID = flywheelPID.calculateOutputPID(currentVelocity, time, false);
@@ -154,11 +156,10 @@ public class LaunchIntakeSystem {
         batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
         batteryVolts = batteryVolts <= 15 && batteryVolts >= 9 ? batteryVolts : VOLTS_NOMINAL;
 
-        if (launcherOn) {
+        if (launcherOn)
             setLauncherPower(currentStep, pow);
-        } else {
+        else
             launcherMotor.setPower(0.0);
-        }
     }
 
     /**
