@@ -223,8 +223,6 @@ public class DriveSortMode extends OpMode {
 
         ballSelector.periodic();
 
-        ballSelector.flashMosaicPattern();
-
         // Telemetry - all subsystems use updateTelemetry which sends to both Driver Station and FTC Dashboard
         if (DEBUG)
             telemetry.addLine("!-!-!-!-! Debug Mode Enabled !-!-!-!-!");

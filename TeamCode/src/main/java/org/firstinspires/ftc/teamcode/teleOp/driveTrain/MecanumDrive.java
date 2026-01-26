@@ -90,8 +90,7 @@ public class MecanumDrive {
         odo.setEncoderResolution(GoBildaPinpointDriverRR.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
         //Current Bot Directions: FORWARD, REVERSED (11/13)
-        odo.setEncoderDirections(GoBildaPinpointDriverRR.EncoderDirection.FORWARD,
-                GoBildaPinpointDriverRR.EncoderDirection.REVERSED);
+        odo.setEncoderDirections(GoBildaPinpointDriverRR.EncoderDirection.FORWARD, GoBildaPinpointDriverRR.EncoderDirection.REVERSED);
 
         //Calibrate ODO
         odo.resetPosAndIMU();

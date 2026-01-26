@@ -1,7 +1,17 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
-import static org.firstinspires.ftc.teamcode.teleOp.util.Colors.*;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.GATE_CLOSE;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.GATE_OPEN;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.POSITIONS;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PUSH_IDLE;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KI;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KP;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.VELOCITY_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.revColorSensorGain;
+import static org.firstinspires.ftc.teamcode.teleOp.util.Colors.UNKNOWN;
+import static org.firstinspires.ftc.teamcode.teleOp.util.Colors.getColor;
 
 import androidx.annotation.NonNull;
 
@@ -15,7 +25,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.controller.PIDController;
@@ -26,19 +35,10 @@ import org.firstinspires.ftc.teamcode.teleOp.util.Colors;
 import org.firstinspires.ftc.teamcode.teleOp.util.MathUtils;
 
 public class Indexer {
-    protected enum State {
-        INTAKE,
-        OUTTAKE
-    }
-
-    protected enum Status {
-        SORTING,
-        IDLE;
-    }
-
     //Sorting System
-    private int[] intakePositions = {POSITIONS[1], POSITIONS[3], POSITIONS[5]};
-    private int[] outtakePositions = {POSITIONS[0], POSITIONS[2], POSITIONS[4]};
+    private final int[] intakePositions = {POSITIONS[1], POSITIONS[3], POSITIONS[5]};
+    private final int[] outtakePositions = {POSITIONS[0], POSITIONS[2], POSITIONS[4]};
+    private final ElapsedTime emptyTimer = new ElapsedTime();
     private int currentPositionIndex = 0;
     private int target = 0;
     private State currentState = State.INTAKE;
@@ -46,8 +46,6 @@ public class Indexer {
     private int zero = 0;
     private boolean newBall = true;
     private boolean empty = false;
-    private ElapsedTime emptyTimer = new ElapsedTime();
-
     //Hardware
     private Servo pushServo, gateServo;
     private CRServo rotaryServo;
@@ -55,20 +53,15 @@ public class Indexer {
     private DcMotorEx elcDigital;
     private RevColorSensorV3 cBottom, cLeft, cRight;
     private Servo indicator;
-
     //Classes
     private PIDController controller;
 
     public static boolean isEmpty(@NonNull RevColorSensorV3 cs) {
-        if (cs == null) return true;
 
         double dist = cs.getDistance(DistanceUnit.INCH);
         Colors color = getColor(cs);
 
-        if (color == UNKNOWN && dist >= 1.0)
-            return true;
-
-        return false;
+        return color == UNKNOWN && dist >= 1.0;
     }
 
     public void init(HardwareMap map) {
@@ -118,19 +111,14 @@ public class Indexer {
         determineStatus();
 
         if (!isEmpty(cBottom) && currentState == State.INTAKE && emptyTimer.seconds() >= 0.5) {
-            if (isEmpty(cRight))
-                moveUp();
-            else if (isEmpty(cLeft))
-                moveDown();
-            else
-                currentState = State.OUTTAKE;
+            if (isEmpty(cRight)) moveUp();
+            else if (isEmpty(cLeft)) moveDown();
+            else currentState = State.OUTTAKE;
             emptyTimer.reset();
         }
 
-        if (isEmpty(cBottom))
-            indicator.setPosition(0.7);
-        else
-            indicator.setPosition(0.4);
+        if (isEmpty(cBottom)) indicator.setPosition(0.7);
+        else indicator.setPosition(0.4);
 
         //idk bout this zero thing rn
         double output = controller.calculate(elcDigital.getCurrentPosition() - zero, target);
@@ -139,8 +127,7 @@ public class Indexer {
     }
 
     public void detectNewBall() {
-        if (emptyTimer.seconds() >= 0.2)
-            empty = isEmpty(cBottom);
+        if (emptyTimer.seconds() >= 0.2) empty = isEmpty(cBottom);
         if (isEmpty(cBottom) != empty) {
             emptyTimer.reset();
             newBall = true;
@@ -151,50 +138,38 @@ public class Indexer {
 
     public void determineStatus() {
         double velocity = elcDigital.getVelocity();
-        if (Math.abs(velocity) <= VELOCITY_THRESHOLD)
-            currentStatus = Status.IDLE;
-        else
-            currentStatus = Status.SORTING;
+        if (Math.abs(velocity) <= VELOCITY_THRESHOLD) currentStatus = Status.IDLE;
+        else currentStatus = Status.SORTING;
     }
 
     public void determineState() {
-        if(isEmpty(cBottom) && isEmpty(cLeft) && isEmpty(cRight))
-            currentState = State.OUTTAKE;
-        else
-            currentState = State.INTAKE;
+        if (isEmpty(cBottom) && isEmpty(cLeft) && isEmpty(cRight)) currentState = State.OUTTAKE;
+        else currentState = State.INTAKE;
     }
 
     public void toggleState() {
-        if (currentState == State.OUTTAKE)
-            currentState = State.INTAKE;
-        else
-            currentState = State.OUTTAKE;
+        if (currentState == State.OUTTAKE) currentState = State.INTAKE;
+        else currentState = State.OUTTAKE;
     }
 
     public void moveUp() {
         currentPositionIndex = (currentPositionIndex + 1) % 3;
-        if (currentState == State.OUTTAKE)
-            target = outtakePositions[currentPositionIndex];
-        else
-            target = intakePositions[currentPositionIndex];
+        if (currentState == State.OUTTAKE) target = outtakePositions[currentPositionIndex];
+        else target = intakePositions[currentPositionIndex];
     }
 
     public void moveDown() {
         currentPositionIndex = (currentPositionIndex + 2) % 3;
-        if (currentState == State.OUTTAKE)
-            target = outtakePositions[currentPositionIndex];
-        else
-            target = intakePositions[currentPositionIndex];
+        if (currentState == State.OUTTAKE) target = outtakePositions[currentPositionIndex];
+        else target = intakePositions[currentPositionIndex];
     }
 
     public void gatekeeper() {
-        if (currentState == State.INTAKE)
-            gateServo.setPosition(GATE_OPEN);
-        else
-            gateServo.setPosition(GATE_CLOSE);
+        if (currentState == State.INTAKE) gateServo.setPosition(GATE_OPEN);
+        else gateServo.setPosition(GATE_CLOSE);
     }
 
-    public void log(Telemetry telemetry) {
+    public void updateTelemetry(Telemetry telemetry) {
         MultipleTelemetry tele = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         tele.addData("State", currentState.toString());
@@ -216,5 +191,13 @@ public class Indexer {
         tele.addData("Bottom Color", isEmpty(cBottom));
         tele.addData("Right Color", isEmpty(cRight));
         tele.addData("Left Color", isEmpty(cLeft));
+    }
+
+    protected enum State {
+        INTAKE, OUTTAKE
+    }
+
+    protected enum Status {
+        SORTING, IDLE
     }
 }

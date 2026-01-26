@@ -24,7 +24,7 @@ public class IndexerTest extends OpMode {
         if (gamepad1.squareWasPressed())
             indexer.toggleState();
 
-        indexer.log(telemetry);
+        indexer.updateTelemetry(telemetry);
         indexer.periodic();
     }
 }

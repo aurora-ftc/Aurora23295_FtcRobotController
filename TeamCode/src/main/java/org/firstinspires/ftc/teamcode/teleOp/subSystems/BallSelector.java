@@ -28,7 +28,6 @@ import com.seattlesolvers.solverslib.controller.PIDController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.teleOp.util.Colors;
-import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
 import java.util.Arrays;
 
@@ -212,33 +211,6 @@ public class BallSelector extends SubsystemBase {
 
     public void lampOn() {
         light.setPosition(lightColor);
-    }
-
-
-    /**
-     * flashMosaicPattern: flashes the mosaic pattern periodically on the indicator light.
-     * The pattern cycles through the colors: Purple-Purple-Green, Green-Purple-Purple, or Purple-Green-Purple
-     * based on the detected mosaic pattern.
-     * Doesn't flash if the mosaic is unknown
-     *
-     * @author James Beers
-     */
-    public void flashMosaicPattern() {
-        Mosaic mosaic = Mosaic.GPP;
-
-        if (mosaic == null || mosaic == Mosaic.UNKNOWN) {
-            return;
-        }
-
-        if (mosaicFlashTimer.seconds() > 2) {
-            if (isPurple) {
-                light.setPosition(0.5);
-                mosaicFlashTimer.reset();
-            } else {
-                light.setPosition(0.7);
-                mosaicFlashTimer.reset();
-            }
-        }
     }
 
     /**
