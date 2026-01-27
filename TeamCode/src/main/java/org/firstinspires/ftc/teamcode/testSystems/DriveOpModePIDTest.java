@@ -176,7 +176,7 @@ public class DriveOpModePIDTest extends OpMode {
             drive.debugTelemetry(telemetry, slow);
         } else {
             launcher.updateTelemetry(telemetry);
-            drive.updateTelemetry(telemetry, slow);
+            drive.log(telemetry, slow);
         }
 
     }

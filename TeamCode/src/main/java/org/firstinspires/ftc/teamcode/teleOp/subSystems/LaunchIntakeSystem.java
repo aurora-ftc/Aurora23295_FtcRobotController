@@ -1,15 +1,15 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.DEBUG;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KD;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KI;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KP;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KS;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.FLYWHEEL_KV;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Flywheel.KD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Flywheel.KI;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Flywheel.KP;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Flywheel.KS;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Flywheel.KV;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.LAUNCHER_ENCODER_PER_REV;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.MAX_FLYWHEEL_KV;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.MIN_FLYWHEEL_KV;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Flywheel.MAX_KV;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Flywheel.MIN_KV;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.VOLTS_NOMINAL;
 
 import androidx.annotation.NonNull;
@@ -53,10 +53,8 @@ public class LaunchIntakeSystem {
         launcherMotor = hwMap.get(DcMotorEx.class, HWMap.LAUNCHER_MOTOR);
         intakeMotor = hwMap.get(DcMotor.class, HWMap.INTAKE_MOTOR);
 
-
         launcherMotor.setDirection(DcMotorEx.Direction.FORWARD);
         intakeMotor.setDirection(DcMotorEx.Direction.REVERSE);
-
 
         launcherMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         launcherMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -67,7 +65,7 @@ public class LaunchIntakeSystem {
         intakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
 
-        flywheelPID = new PIDController(FLYWHEEL_KP, FLYWHEEL_KI, FLYWHEEL_KD, FLYWHEEL_KV, FLYWHEEL_KS);
+        flywheelPID = new PIDController(KP, KI, KD, KV, KS);
         flywheelPID.previousTime = System.nanoTime() / 1e9;
         ballselector.init(hwMap);
 
@@ -88,8 +86,8 @@ public class LaunchIntakeSystem {
         double time = System.nanoTime() / 1e9; // Seconds
 
         //Adjusts the necessary kV of the wheel based on
-        batteryCorrectedKv = FLYWHEEL_KV * (VOLTS_NOMINAL / batteryVolts);
-        batteryCorrectedKv = Math.min(MAX_FLYWHEEL_KV, Math.max(batteryCorrectedKv, MIN_FLYWHEEL_KV));
+        batteryCorrectedKv = KV * (VOLTS_NOMINAL / batteryVolts);
+        batteryCorrectedKv = Math.min(MAX_KV, Math.max(batteryCorrectedKv, MIN_KV));
 
         double outputPID = flywheelPID.calculateOutputPID(currentVelocity, time, false);
         double outputFF = flywheelPID.calculateOutputFF(targetVelocity, batteryCorrectedKv);

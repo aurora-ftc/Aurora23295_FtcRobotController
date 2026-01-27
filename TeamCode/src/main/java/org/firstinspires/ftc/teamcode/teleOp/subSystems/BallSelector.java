@@ -3,9 +3,9 @@ package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.POSITIONS;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.PUSH_SERVO_FLICK_TIME;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KD;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KI;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KP;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Rotary.ROTARY_KD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Rotary.ROTARY_KI;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Rotary.ROTARY_KP;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_THRESHOLD;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.greenColor;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.revColorSensorGain;
@@ -88,10 +88,11 @@ public class BallSelector extends SubsystemBase {
 
         controller = new PIDController(ROTARY_KP, ROTARY_KI, ROTARY_KD);
 
-        pushServo.scaleRange(0.0, 0.25);
+        pushServo.scaleRange(0.05, 0.25);
 
         // Initialize to first position
         currentPositionIndex = 0;
+        pushServo.setDirection(Servo.Direction.FORWARD);
         pushServo.setPosition(0);
         dcEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         dcEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -258,8 +259,16 @@ public class BallSelector extends SubsystemBase {
         multiTelemetry.addData("Servo Power", rotaryServo.getPower());
         multiTelemetry.addData("At Target", isAtTarget());
         multiTelemetry.addData("Push Position", pushServo.getPosition());
-
         multiTelemetry.addLine();
+
+        multiTelemetry.addData("PID Coefficients", controller.getCoefficients());
+        multiTelemetry.addLine();
+
+        multiTelemetry.addData("Bottom Color", Colors.getColor(colorBottom));
+        multiTelemetry.addData("Right Color", Colors.getColor(colorRight));
+        multiTelemetry.addData("Left Color", Colors.getColor(colorLeft));
+
+        multiTelemetry.update();
     }
 }
 

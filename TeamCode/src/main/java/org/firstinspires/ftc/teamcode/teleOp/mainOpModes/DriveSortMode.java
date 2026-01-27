@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.BLUE_SIDE;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.DEBUG;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.INITIAL_POSE_BLUE;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.Pose.INITIAL_POSE_BLUE;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.SLOW_SPEED_LT;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -65,16 +65,16 @@ public class DriveSortMode extends OpMode {
         drive.init(hardwareMap, telemetry);
 
         if (BLUE_SIDE) {
-            goalPose = Constants.GOAL_POSE_BLUE;
+            goalPose = Constants.Pose.GOAL_POSE_BLUE;
         } else {
-            goalPose = Constants.GOAL_POSE_RED;
+            goalPose = Constants.Pose.GOAL_POSE_RED;
         }
         drive.initTracker(goalPose, false);
 
         if (BLUE_SIDE) {
-            initialPose = Constants.INITIAL_POSE_BLUE;
+            initialPose = Constants.Pose.INITIAL_POSE_BLUE;
         } else {
-            initialPose = Constants.INITIAL_POSE_RED;
+            initialPose = Constants.Pose.INITIAL_POSE_RED;
         }
         drive.setOdoPosition(initialPose);
 
@@ -226,10 +226,10 @@ public class DriveSortMode extends OpMode {
         ballSelector.flashMosaicPattern();
 
         // Telemetry - all subsystems use updateTelemetry which sends to both Driver Station and FTC Dashboard
-        if (DEBUG) {
+        if (DEBUG)
             telemetry.addLine("!-!-!-!-! Debug Mode Enabled !-!-!-!-!");
-        }
-        drive.updateTelemetry(telemetry, slow);
+
+        drive.log(telemetry, slow);
         launchSystem.updateTelemetry(telemetry);
         ballSelector.updateTelemetry(telemetry);
 //        limelight.updateTelemetry(telemetry);
