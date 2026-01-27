@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode.teleOp.driveTrain;
 
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.DEBUG;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.DRIVE_KD;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.DRIVE_KI;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.DRIVE_KP;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Drive.KD;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Drive.KI;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PID.Drive.KP;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.IS_FIELD_CENTRIC;
 
@@ -95,12 +95,12 @@ public class MecanumDrive {
         //Calibrate ODO
         odo.resetPosAndIMU();
 
-        headingPID = new PIDController(DRIVE_KP, DRIVE_KI, DRIVE_KD); // tune these values
+        headingPID = new PIDController(KP, KI, KD); // tune these values
         headingPID.setTarget(Math.PI / 2.0); //default goalPose heading = 0 degrees
         headingPID.previousTime = System.nanoTime() / 1e9;
 
         String PIDData = String.format(Locale.US, "{KP: %.3f, KI: %.3f, KD: %.3f}",
-                DRIVE_KP, DRIVE_KI, DRIVE_KD);
+                KP, KI, KD);
 
         telemetry.addData("Status", "Initialized");
         if (odo != null) {
@@ -468,7 +468,7 @@ public class MecanumDrive {
      * @param telemetry telemetry object
      * @param slow      speed modifier (no idea why its here again)
      */
-    public void updateTelemetry(Telemetry telemetry, double slow) {
+    public void log(Telemetry telemetry, double slow) {
 
         TelemetryPacket packet = new TelemetryPacket();
         MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());

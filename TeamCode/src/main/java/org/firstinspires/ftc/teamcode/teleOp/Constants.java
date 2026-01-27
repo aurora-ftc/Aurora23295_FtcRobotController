@@ -8,36 +8,44 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 @Config
 public class Constants {
-    // Limelight Pipelines
-    public static final int APRIL_TAG_DETECTION = 0;
-    // Points for Auto-Lock
-    public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62, AngleUnit.DEGREES, 0);
-    public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 63, 62, AngleUnit.DEGREES, 0);
-    // Default Start Positions
-    public static final Pose2D INITIAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -13, -35, AngleUnit.DEGREES, 90);
-    public static final Pose2D INITIAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 13, -35, AngleUnit.DEGREES, 90);
-    public static final double GATE_OPEN = 0;
-    public static final double GATE_CLOSE = 1;
-    public static final double PUSH_PUSH = 1;
-    public static final double PUSH_IDLE = 0;
-    public static int PUSH_SERVO_FLICK_TIME = 250; //IN MS
-    // Easy Mode Switches
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
     public static boolean BLUE_SIDE = false;
     public static boolean IS_FIELD_CENTRIC = true;
-    // Drive PID
-    public static double DRIVE_KP = 2.3;
-    public static double DRIVE_KI = 0.0;
-    public static double DRIVE_KD = 0.003;
-    // Flywheel PID
-    public static double FLYWHEEL_KP = 0.08;   // 0.08
-    public static double FLYWHEEL_KI = 0.05;   // 0.05
-    public static double FLYWHEEL_KD = 0.002;  // 0.002
-    public static double FLYWHEEL_KV = 0.01;   // 0.01
-    public static double FLYWHEEL_KS = 0.0055; // 0.004
-    // Range for Battery Adjusted Kv
-    public static double MAX_FLYWHEEL_KV = 0.014;
-    public static double MIN_FLYWHEEL_KV = 0.006;
+    public static final int APRIL_TAG_DETECTION = 0;
+    public static final double MOSAIC_FLASH_INTERVAL = 0.5;
+    public static int PUSH_SERVO_FLICK_TIME = 250;
+    public static class Pose {
+        public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62, AngleUnit.DEGREES, 0);
+        public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 63, 62, AngleUnit.DEGREES, 0);
+        public static final Pose2D INITIAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -13, -35, AngleUnit.DEGREES, 90);
+        public static final Pose2D INITIAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 13, -35, AngleUnit.DEGREES, 90);
+    }
+
+    public static class PID {
+        public static class Drive{
+            public static double KP = 2.3;
+            public static double KI = 0.0;
+            public static double KD = 0.003;
+        }
+        public static class Flywheel{
+            public static double KP = 0.08;
+            public static double KI = 0.05;
+            public static double KD = 0.002;
+            public static double KV = 0.01;
+            public static double KS = 0.0055;
+
+            // Range for Battery Adjusted Kv
+            public static double MAX_KV = 0.014;
+            public static double MIN_KV = 0.006;
+        }
+        public static class Rotary{
+            public static double ROTARY_KP = 0.00028;
+            public static double ROTARY_KI = 0.000;
+            public static double ROTARY_KD = 0.000017;
+            public static double ROTARY_KS = 0.055;
+        }
+    }
+
     // Ideal Volts
     public static double VOLTS_NOMINAL = 12.5;
     // Launcher Ticks Per Rev
@@ -47,17 +55,19 @@ public class Constants {
     public static double[] POWER_STEPS = {25, 40, 42, 44, 85};
     public static int[] POSITIONS = {0, 667, 1333, 2000, 2666, 3333};
     public static float revColorSensorGain = 0.4f;
-    /**
-     * Rotary Selector System Configuration
-     */
-    public static double ROTARY_KP = 0.000055;
-    public static double ROTARY_KI = 0.00000001;
-    public static double ROTARY_KD = 0.000002;
+
     public static int ROTARY_TICKS_PER_REVOLUTION = 4000;
     public static double ROTARY_THRESHOLD = 0.2;
     public static double purpleColor = 0.7;
     public static double greenColor = 0.5;
-    public static double VELOCITY_THRESHOLD = 1;
+
+    public static final double GATE_OPEN = 0;
+    public static final double GATE_CLOSE = 1;
+
+    public static final double PUSH_PUSH = 1;
+    public static final double PUSH_IDLE = 0;
+
+    public static double VELOCITY_THRESHOLD = 100;
 
     public static final class ColorConfig {
         // Color sensor cut offs for UNKNOWN
@@ -105,7 +115,8 @@ public class Constants {
         public static final String LIMELIGHT = "limelight";
 
         // Ball Selector Hardware
-        public static final String ROTARY_SERVO = "selector_servo";
+        public static final String ROTARY_SERVO = "selector_motor";
+        public static final String INDEXER_MOTOR = "indexer_motor";
         public static final String PUSH_SERVO = "push_servo";
         public static final String GATE_SERVO = "gate_servo";
 

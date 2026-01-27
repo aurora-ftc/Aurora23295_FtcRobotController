@@ -86,6 +86,6 @@ public class DriveOpMode extends OpMode {
         drive.driveFieldOriented(forward, strafe, rotate, slow);
 
         // All telemetry is now handled in updateTelemetry methods
-        drive.updateTelemetry(telemetry, slow);
+        drive.log(telemetry, slow);
     }
 }
