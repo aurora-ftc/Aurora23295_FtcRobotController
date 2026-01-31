@@ -31,7 +31,7 @@ dependencies {
     implementation('com.acmerobotics.roadrunner:actions:1.0.1') {
         exclude group: "com.acmerobotics.dashboard"
     }
-    implementation ('com.acmerobotics.roadrunner:ftc:0.1.21') {
+    implementation ('com.acmerobotics.roadrunner:ftc:0.1.25') {
         exclude group: "com.acmerobotics.dashboard"
     }
 
