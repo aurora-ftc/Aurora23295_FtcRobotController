@@ -42,4 +42,7 @@ dependencies {
     }
     implementation "com.github.FTCLib:FTCLib:2.1.1"
     implementation "org.solverslib:core:0.3.3"
+    implementation "com.acmerobotics.roadrunner:ftc:0.1.25"
+    implementation "com.acmerobotics.roadrunner:core:1.0.1"
+    implementation "com.acmerobotics.roadrunner:actions:1.0.1"
 }

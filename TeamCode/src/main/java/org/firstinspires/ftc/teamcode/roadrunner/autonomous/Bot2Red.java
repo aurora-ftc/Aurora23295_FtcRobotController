@@ -96,7 +96,7 @@ public class Bot2Red extends LinearOpMode {
 
         if (isStopRequested())
             return;
-        if (mosaic == Mosaic.xxx) {
+        if (mosaic == Mosaic.UNKNOWN) {
             Actions.runBlocking(
                     new SequentialAction(
                             new InstantAction(() -> lift.liftDown()),
@@ -129,7 +129,7 @@ public class Bot2Red extends LinearOpMode {
                             new InstantAction(() -> launcher.stop()),
 
                             tab5.build()));
-        } else if (mosaic == Mosaic.yyy) {
+        } else if (mosaic == Mosaic.GPP) {
             Actions.runBlocking(
                     new SequentialAction(
                             new InstantAction(() -> lift.liftDown()),
@@ -162,7 +162,40 @@ public class Bot2Red extends LinearOpMode {
                             new InstantAction(() -> launcher.stop()),
 
                             tab5.build()));
-        } else if (mosaic == Mosaic.zzz) {
+        } else if (mosaic == Mosaic.PGP) {
+            Actions.runBlocking(
+                    new SequentialAction(
+                            new InstantAction(() -> lift.liftDown()),
+                            new RaceAction(
+                                    launcher.spinForTime(Constants.POWER_STEPS[10], 8),
+                                    new SequentialAction(
+                                            tab1.build(),
+                                            new SleepAction(1.0),
+                                            shootThree(lift, intake))),
+                            new InstantAction(() -> launcher.stop()),
+
+                            new RaceAction(
+                                    launcher.spinForTime(0, 8),
+                                    new SequentialAction(
+                                            tab2.build(),
+                                            new InstantAction(() -> intake.fullPower()),
+                                            new SleepAction(0.5),
+
+                                            tab3.build(),
+
+                                            new InstantAction(() -> intake.stop()),
+                                            new SleepAction(0.5))),
+
+                            new RaceAction(
+                                    launcher.spinForTime(POWER_STEPS[0], 14),
+                                    new SequentialAction(
+                                            tab4.build(),
+                                            new SleepAction(0.8), // allow time to reach velocity
+                                            shootThree(lift, intake))),
+                            new InstantAction(() -> launcher.stop()),
+
+                            tab5.build()));
+        } else if (mosaic == Mosaic.PPG) {
             Actions.runBlocking(
                     new SequentialAction(
                             new InstantAction(() -> lift.liftDown()),
