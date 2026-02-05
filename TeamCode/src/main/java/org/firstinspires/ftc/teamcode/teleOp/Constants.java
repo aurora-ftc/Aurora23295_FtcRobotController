@@ -23,9 +23,9 @@ public class Constants {
 
     public static class PID {
         public static class Drive{
-            public static double KP = 2.3;
+            public static double KP = 1.3;
             public static double KI = 0.0;
-            public static double KD = 0.003;
+            public static double KD = 0.002;
         }
         public static class Flywheel{
             public static double KP = 0.08;
