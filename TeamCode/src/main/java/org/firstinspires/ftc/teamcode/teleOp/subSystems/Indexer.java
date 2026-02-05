@@ -52,6 +52,7 @@ public class Indexer {
     private AnalogInput elcAnalog;
     private DcMotorEx elcDigital, indexerMotor;
     private RevColorSensorV3 cBottom, cLeft, cRight;
+    private boolean needTurn = false, update = false;
 
     //Classes
     private PIDController controller;
@@ -116,15 +117,21 @@ public class Indexer {
         determineState();
     }
 
-    public void periodic() {
+    public void periodic(Intake intake) {
 
         gatekeeper();
         determineStatus();
+        updateBlip(intake);
 
         controller.setPID(PID.Rotary.ROTARY_KP, PID.Rotary.ROTARY_KI, PID.Rotary.ROTARY_KD);
 
         if (shootTimer.seconds() >= 0.15)
             pushServo.setPosition(PUSH_IDLE);
+
+        if (shootTimer.seconds() >= 0.25 && needTurn) {
+            clockwise();
+            needTurn = false;
+        }
 
         if (!isEmpty(cBottom) && currentState == State.INTAKE
                 && currentStatus == Status.IDLE && emptyTimer.seconds() >= 0.2) {
@@ -168,20 +175,30 @@ public class Indexer {
     public void shoot() {
         pushServo.setPosition(PUSH_PUSH);
         shootTimer.reset();
+        needTurn = true;
+    }
+    public void determineState() {
+        if(!isEmpty(cBottom) && !isEmpty(cLeft) && !isEmpty(cRight)) {
+            currentState = State.OUTTAKE;
+            update = true;
+        } else
+            currentState = State.INTAKE;
     }
 
-    public void determineState() {
-        if(!isEmpty(cBottom) && !isEmpty(cLeft) && !isEmpty(cRight))
-            currentState = State.OUTTAKE;
-        else
-            currentState = State.INTAKE;
+    public void updateBlip(Intake intake) {
+        if (update && currentState == State.OUTTAKE) {
+            intake.outtakeBlip();
+            update = false;
+        }
     }
 
     public void toggleState() {
         if (currentState == State.OUTTAKE)
             currentState = State.INTAKE;
-        else
+        else {
             currentState = State.OUTTAKE;
+            update = true;
+        }
     }
 
     public void clockwise() {

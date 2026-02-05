@@ -6,10 +6,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Intake {
     private DcMotorEx intake;
     private double power = 0;
+    private boolean on = false, blipper = false;
+    private ElapsedTime timer = new ElapsedTime();
 
     public void init(HardwareMap hwMap) {
         intake = hwMap.get(DcMotorEx.class, HWMap.INTAKE_MOTOR);
@@ -20,29 +23,62 @@ public class Intake {
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intake.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+        timer.reset();
+
+        off();
     }
 
     public void in() {
-        power = 1;
+        intake.setPower(1);
     }
 
     public void out() {
-        power = -1;
+        intake.setPower(-1);
     }
 
     public void off() {
-        power = 0;
+        intake.setPower(0);
     }
 
-    public void toggle() {
-        if (power == 1) {
-            power = 0;
+    public void toggleIn() {
+        if (blipOn()) return;
+
+        if (on) {
+            off();
+            on = false;
         } else {
-            power = 1;
+            in();
+            on = true;
         }
     }
 
+    public void toggleOut() {
+        if (blipOn()) return;
+
+        if (on) {
+            off();
+            on = false;
+        } else {
+            out();
+            on = true;
+        }
+    }
+
+    public void outtakeBlip() {
+        timer.reset();
+        blipper = true;
+    }
+
+    public boolean blipOn() {
+        return timer.milliseconds() <= 450;
+    }
+
     public void periodic() {
-        intake.setPower(power);
+         if (blipOn())
+             out();
+         else if (blipper) {
+             off();
+             blipper = false;
+         }
     }
 }
