@@ -8,16 +8,15 @@ import com.acmerobotics.roadrunner.Vector2d;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 
 public class SmartPark {
 
     private final MecanumDrive drive;
-    private final PinpointDrive driveRR;
+    private final org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive driveRR;
     private final Vector2d parkPose;
 
-    public SmartPark(MecanumDrive drive, PinpointDrive driveRR, Vector2d parkPose) {
+    public SmartPark(MecanumDrive drive, org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive driveRR, Vector2d parkPose) {
         this.drive = drive;
         this.driveRR = driveRR;
         this.parkPose = parkPose;

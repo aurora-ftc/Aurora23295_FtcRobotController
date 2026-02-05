@@ -24,7 +24,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Storage;
-import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Lift;
@@ -44,7 +44,7 @@ public class SixBallBlue extends LinearOpMode {
 
         // ---------------------- Initialize ----------------------
         Pose2d initialPose = new Pose2d(63, -12, Math.toRadians(180));
-        PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Lift lift = new Lift(hardwareMap);
         Limelight limelight = new Limelight(hardwareMap, telemetry);

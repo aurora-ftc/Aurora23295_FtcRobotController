@@ -9,7 +9,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Lift;
@@ -20,7 +20,7 @@ public class BlueLBL extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Pose2d initialPose = new Pose2d(-14, -62, Math.toRadians(115));
-        PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Intake intake = new Intake(hardwareMap);
         Lift lift = new Lift(hardwareMap);

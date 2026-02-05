@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
+//import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.BallSelector;
@@ -39,9 +39,8 @@ public class DriveSortMode extends OpMode {
     private MecanumDrive drive;
     private LaunchIntakeSystem launchSystem;
     private BallSelector ballSelector;
-    private PinpointDrive dwive;
     private SmartPark smartPark;
-    private PinpointDrive driveRR;
+//    private PinpointDrive driveRR;
     private Pose2D initialPose, goalPose;
     private double forward, strafe, rotate;
     private double lastHeading = 0;
@@ -57,7 +56,7 @@ public class DriveSortMode extends OpMode {
         ballSelector = new BallSelector();
         launchSystem = new LaunchIntakeSystem();
 //        limelight = new Limelight(hardwareMap, 0);
-        driveRR = new PinpointDrive(hardwareMap, startPose);
+//        driveRR = new PinpointDrive(hardwareMap, startPose);
 
         Vector2d parkPose = new Vector2d(33, -39);
 

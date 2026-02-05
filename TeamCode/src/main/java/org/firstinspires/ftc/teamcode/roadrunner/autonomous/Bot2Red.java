@@ -26,7 +26,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Storage;
-import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
+import org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Launcher;
 import org.firstinspires.ftc.teamcode.roadrunner.subsystems.Lift;
@@ -45,7 +45,7 @@ public class Bot2Red extends LinearOpMode {
 
         // ---------------------- Initialize ----------------------
         Pose2d initialPose = new Pose2d(63, 12, Math.toRadians(180));
-        PinpointDrive drive = new PinpointDrive(hardwareMap, initialPose);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Launcher launcher = new Launcher(hardwareMap);
         Lift lift = new Lift(hardwareMap);
         Limelight limelight = new Limelight(hardwareMap, telemetry);
@@ -99,25 +99,25 @@ public class Bot2Red extends LinearOpMode {
         if (mosaic == Mosaic.UNKNOWN) {
             Actions.runBlocking(
                     new SequentialAction(
-                            new InstantAction(() -> lift.liftDown()),
+                            new InstantAction(lift::liftDown),
                             new RaceAction(
                                     launcher.spinForTime(Constants.POWER_STEPS[10], 8),
                                     new SequentialAction(
                                             tab1.build(),
                                             new SleepAction(1.0),
                                             shootThree(lift, intake))),
-                            new InstantAction(() -> launcher.stop()),
+                            new InstantAction(launcher::stop),
 
                             new RaceAction(
                                     launcher.spinForTime(0, 8),
                                     new SequentialAction(
                                             tab2.build(),
-                                            new InstantAction(() -> intake.fullPower()),
+                                            new InstantAction(intake::fullPower),
                                             new SleepAction(0.5),
 
                                             tab3.build(),
 
-                                            new InstantAction(() -> intake.stop()),
+                                            new InstantAction(intake::stop),
                                             new SleepAction(0.5))),
 
                             new RaceAction(
@@ -126,31 +126,31 @@ public class Bot2Red extends LinearOpMode {
                                             tab4.build(),
                                             new SleepAction(0.8), // allow time to reach velocity
                                             shootThree(lift, intake))),
-                            new InstantAction(() -> launcher.stop()),
+                            new InstantAction(launcher::stop),
 
                             tab5.build()));
         } else if (mosaic == Mosaic.GPP) {
             Actions.runBlocking(
                     new SequentialAction(
-                            new InstantAction(() -> lift.liftDown()),
+                            new InstantAction(lift::liftDown),
                             new RaceAction(
                                     launcher.spinForTime(Constants.POWER_STEPS[10], 8),
                                     new SequentialAction(
                                             tab1.build(),
                                             new SleepAction(1.0),
                                             shootThree(lift, intake))),
-                            new InstantAction(() -> launcher.stop()),
+                            new InstantAction(launcher::stop),
 
                             new RaceAction(
                                     launcher.spinForTime(0, 8),
                                     new SequentialAction(
                                             tab2.build(),
-                                            new InstantAction(() -> intake.fullPower()),
+                                            new InstantAction(intake::fullPower),
                                             new SleepAction(0.5),
 
                                             tab3.build(),
 
-                                            new InstantAction(() -> intake.stop()),
+                                            new InstantAction(intake::stop),
                                             new SleepAction(0.5))),
 
                             new RaceAction(
@@ -159,31 +159,31 @@ public class Bot2Red extends LinearOpMode {
                                             tab4.build(),
                                             new SleepAction(0.8), // allow time to reach velocity
                                             shootThree(lift, intake))),
-                            new InstantAction(() -> launcher.stop()),
+                            new InstantAction(launcher::stop),
 
                             tab5.build()));
         } else if (mosaic == Mosaic.PGP) {
             Actions.runBlocking(
                     new SequentialAction(
-                            new InstantAction(() -> lift.liftDown()),
+                            new InstantAction(lift::liftDown),
                             new RaceAction(
                                     launcher.spinForTime(Constants.POWER_STEPS[10], 8),
                                     new SequentialAction(
                                             tab1.build(),
                                             new SleepAction(1.0),
                                             shootThree(lift, intake))),
-                            new InstantAction(() -> launcher.stop()),
+                            new InstantAction(launcher::stop),
 
                             new RaceAction(
                                     launcher.spinForTime(0, 8),
                                     new SequentialAction(
                                             tab2.build(),
-                                            new InstantAction(() -> intake.fullPower()),
+                                            new InstantAction(intake::fullPower),
                                             new SleepAction(0.5),
 
                                             tab3.build(),
 
-                                            new InstantAction(() -> intake.stop()),
+                                            new InstantAction(intake::stop),
                                             new SleepAction(0.5))),
 
                             new RaceAction(
@@ -192,31 +192,31 @@ public class Bot2Red extends LinearOpMode {
                                             tab4.build(),
                                             new SleepAction(0.8), // allow time to reach velocity
                                             shootThree(lift, intake))),
-                            new InstantAction(() -> launcher.stop()),
+                            new InstantAction(launcher::stop),
 
                             tab5.build()));
         } else if (mosaic == Mosaic.PPG) {
             Actions.runBlocking(
                     new SequentialAction(
-                            new InstantAction(() -> lift.liftDown()),
+                            new InstantAction(lift::liftDown),
                             new RaceAction(
                                     launcher.spinForTime(Constants.POWER_STEPS[10], 8),
                                     new SequentialAction(
                                             tab1.build(),
                                             new SleepAction(1.0),
                                             shootThree(lift, intake))),
-                            new InstantAction(() -> launcher.stop()),
+                            new InstantAction(launcher::stop),
 
                             new RaceAction(
                                     launcher.spinForTime(0, 8),
                                     new SequentialAction(
                                             tab2.build(),
-                                            new InstantAction(() -> intake.fullPower()),
+                                            new InstantAction(intake::fullPower),
                                             new SleepAction(0.5),
 
                                             tab3.build(),
 
-                                            new InstantAction(() -> intake.stop()),
+                                            new InstantAction(intake::stop),
                                             new SleepAction(0.5))),
 
                             new RaceAction(
@@ -225,7 +225,7 @@ public class Bot2Red extends LinearOpMode {
                                             tab4.build(),
                                             new SleepAction(0.8), // allow time to reach velocity
                                             shootThree(lift, intake))),
-                            new InstantAction(() -> launcher.stop()),
+                            new InstantAction(launcher::stop),
 
                             tab5.build()));
         }
@@ -233,7 +233,6 @@ public class Bot2Red extends LinearOpMode {
 
         telemetry.addLine("Path execution complete");
         telemetry.update();
-
         Storage.endPoseRR = drive.pose;
         Storage.endPose = new Pose2D(DistanceUnit.INCH, drive.pose.position.y, -drive.pose.position.x,
                 AngleUnit.RADIANS, drive.pose.heading.toDouble());
@@ -247,18 +246,18 @@ public class Bot2Red extends LinearOpMode {
                 lift.liftForTime(1, 0.55),
                 new SleepAction(0.2),
 
-                new InstantAction(() -> intake.fullPower()),
+                new InstantAction(intake::fullPower),
                 new SleepAction(0.5),
-                new InstantAction(() -> intake.stop()),
+                new InstantAction(intake::stop),
                 new SleepAction(0.5),
 
                 lift.liftForTime(0, 0.15),
                 lift.liftForTime(1, 0.55),
                 new SleepAction(0.2),
 
-                new InstantAction(() -> intake.fullPower()),
+                new InstantAction(intake::fullPower),
                 new SleepAction(0.5),
-                new InstantAction(() -> intake.stop()),
+                new InstantAction(intake::stop),
                 new SleepAction(0.3),
 
                 lift.liftForTime(0, 0.15),
