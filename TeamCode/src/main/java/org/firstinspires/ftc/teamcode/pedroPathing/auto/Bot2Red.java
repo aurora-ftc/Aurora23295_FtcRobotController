@@ -42,18 +42,18 @@ public class Bot2Red extends OpMode {
     private LimelightControl limelight;
 
     // Power steps
-    private final double[] powerSteps = {0.68, 0.68};
+    private final double[] powerSteps = {0.68, 1};
 
     // === Tunable Parameter ===
 
     /** Must be > 0.15s because Indexer resets PUSH servo to idle after 0.15s. */
-    public static double SHOT_INTERVAL_S = 0.35;
+    public static double SHOT_INTERVAL_S = 0.5;
 
     // Poses
     private final Pose startPose = new Pose(85, 8.8, Math.toRadians(90));
     private final Pose launchPose = new Pose(85, 16,  Math.toRadians(72));
     private final Pose pickup1StartPose = new Pose(100, 35, Math.toRadians(0));
-    private final Pose pickup1EndPose = new Pose(120, 35, Math.toRadians(0));
+    private final Pose pickup1EndPose = new Pose(130, 35, Math.toRadians(0));
     private final Pose parkPose = new Pose(85, 35,  Math.toRadians(90));
 
     // Paths
@@ -155,7 +155,7 @@ public class Bot2Red extends OpMode {
             case 0: {
                 follower.followPath(firstLaunch);
                 launchIntake.toggleLauncher();
-                launchIntake.setLauncherPower(1, 0.7);
+                launchIntake.spinToVelocity(1);
                 setPathState(1);
                 break;
             }
@@ -190,7 +190,7 @@ public class Bot2Red extends OpMode {
              */
             case 3: {
                 if (!follower.isBusy()) {
-                    follower.followPath(pickup1End, 0.6, false);
+                    follower.followPath(pickup1End, 0.5, false);
                     setPathState(4);
                 }
                 break;

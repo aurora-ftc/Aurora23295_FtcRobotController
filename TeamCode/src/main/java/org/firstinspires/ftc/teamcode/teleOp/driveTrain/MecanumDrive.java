@@ -68,10 +68,10 @@ public class MecanumDrive {
         imu = hwMap.get(IMU.class, HWMap.IMU);
 
         //Drive Motor Spin Directions
-        frontLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        backLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        frontRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotorEx.Direction.FORWARD);
 
         driveMotors = new DcMotorGroup(frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
 
