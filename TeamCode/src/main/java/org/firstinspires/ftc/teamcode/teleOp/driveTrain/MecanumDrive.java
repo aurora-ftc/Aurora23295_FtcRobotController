@@ -11,7 +11,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -32,8 +31,7 @@ public class MecanumDrive {
     public DcMotorGroup driveMotors;
     public boolean trackGoalOn = false;
     public Pose2D goalPose;
-    GoBildaPinpointDriverRR odo;
-    private GoBildaPinpointDriverRR odoRR;
+    GoBildaPinpointDriver odo;
     private DcMotorEx frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
     private IMU imu;
     private PIDController headingPID;
@@ -58,7 +56,7 @@ public class MecanumDrive {
         backLeftMotor = hwMap.get(DcMotorEx.class, HWMap.BL_MOTOR);
         backRightMotor = hwMap.get(DcMotorEx.class, HWMap.BR_MOTOR);
 
-        odo = hwMap.get(GoBildaPinpointDriverRR.class, "odo");
+        odo = hwMap.get(GoBildaPinpointDriver.class, "odo");
 
         if (odo == null) {
             telemetry.addData("ERROR", "GoBildaPinpointDriverRR device 'odo' not found in hardware map!");
@@ -88,10 +86,10 @@ public class MecanumDrive {
         //old bot odo.setOffsets(-41, 0, DistanceUnit.MM);
         //odo.setOffsets(-13, -18.5, DistanceUnit.CM);
         odo.setOffsets(-5.05, -6.7, DistanceUnit.INCH);
-        odo.setEncoderResolution(GoBildaPinpointDriverRR.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
         //Current Bot Directions: FORWARD, REVERSED (11/13)
-        odo.setEncoderDirections(GoBildaPinpointDriverRR.EncoderDirection.FORWARD, GoBildaPinpointDriverRR.EncoderDirection.REVERSED);
+        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
         //Calibrate ODO
         odo.resetPosAndIMU();
@@ -261,8 +259,8 @@ public class MecanumDrive {
     public void resetOdoHeading() {
         if (odo != null) {
             //Resets Heading and Position -STAY STILL FOR AT LEAST 0.25 SECONDS WHILE DOING SO FOR ACCURACY-
-            odo.resetYaw();
-            odo.update(GoBildaPinpointDriverRR.ReadData.ONLY_UPDATE_HEADING);
+            odo.resetPosAndIMU();
+            odo.update(GoBildaPinpointDriver.ReadData.ONLY_UPDATE_HEADING);
         }
     }
 
@@ -286,7 +284,7 @@ public class MecanumDrive {
 
     public void updateOdoHeading() {
         if (odo != null) {
-            odo.update(GoBildaPinpointDriverRR.ReadData.ONLY_UPDATE_HEADING);
+            odo.update(GoBildaPinpointDriver.ReadData.ONLY_UPDATE_HEADING);
         }
     }
 
@@ -297,7 +295,7 @@ public class MecanumDrive {
      */
     public double getOdoHeading(AngleUnit angleUnit) {
         if (odo != null) {
-            odo.update(GoBildaPinpointDriverRR.ReadData.ONLY_UPDATE_HEADING);
+            odo.update(GoBildaPinpointDriver.ReadData.ONLY_UPDATE_HEADING);
             return odo.getPosition().getHeading(angleUnit);
         }
         return 0.0;

@@ -13,12 +13,10 @@
 //public class SmartPark {
 //
 //    private final MecanumDrive drive;
-//    private final org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive driveRR;
 //    private final Vector2d parkPose;
 //
-//    public SmartPark(MecanumDrive drive, org.firstinspires.ftc.teamcode.roadrunner.MecanumDrive driveRR, Vector2d parkPose) {
+//    public SmartPark(MecanumDrive drive, Vector2d parkPose) {
 //        this.drive = drive;
-//        this.driveRR = driveRR;
 //        this.parkPose = parkPose;
 //    }
 //
@@ -54,7 +52,7 @@
 //
 //        Pose2d startPose = new Pose2d(robotX, robotY, Math.toRadians(currentHeading));
 //
-//        TrajectoryActionBuilder builder = driveRR.actionBuilder(startPose)
+//        TrajectoryActionBuilder builder = drive.actionBuilder(startPose)
 //                .strafeToLinearHeading(parkPose, Math.toRadians(bestAngle));
 //
 //        Action action = builder.build();
