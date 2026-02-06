@@ -13,6 +13,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -59,18 +60,18 @@ public class MecanumDrive {
         odo = hwMap.get(GoBildaPinpointDriver.class, "odo");
 
         if (odo == null) {
-            telemetry.addData("ERROR", "GoBildaPinpointDriverRR device 'odo' not found in hardware map!");
+            telemetry.addData("ERROR", "GoBildaPinpointDriver device 'odo' not found in hardware map!");
             telemetry.update();
-            throw new IllegalStateException("GoBildaPinpointDriverRR device 'odo' not found in hardware map. Please check your robot configuration.");
+            throw new IllegalStateException("GoBildaPinpointDriver device 'odo' not found in hardware map. Please check your robot configuration.");
         }
 
         imu = hwMap.get(IMU.class, HWMap.IMU);
 
         //Drive Motor Spin Directions
-        frontLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
-        backLeftMotor.setDirection(DcMotorEx.Direction.REVERSE);
-        frontRightMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        backRightMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        frontLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        backLeftMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        frontRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
         driveMotors = new DcMotorGroup(frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor);
 
