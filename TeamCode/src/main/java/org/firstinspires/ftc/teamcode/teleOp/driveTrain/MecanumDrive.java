@@ -86,7 +86,8 @@ public class MecanumDrive {
 
         //Current Bot Offsets: -41, 0, MM (11/13)
         //old bot odo.setOffsets(-41, 0, DistanceUnit.MM);
-        odo.setOffsets(-13, -18.5, DistanceUnit.CM);
+        //odo.setOffsets(-13, -18.5, DistanceUnit.CM);
+        odo.setOffsets(-5.05, -6.7, DistanceUnit.INCH);
         odo.setEncoderResolution(GoBildaPinpointDriverRR.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
         //Current Bot Directions: FORWARD, REVERSED (11/13)
@@ -134,7 +135,7 @@ public class MecanumDrive {
         double backRightPower = forward + strafe + rotate;
 
         double maxPower = 1.0;
-        double maxSpeed = 1.0;
+        double maxSpeed = 0.8;
 
         maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
