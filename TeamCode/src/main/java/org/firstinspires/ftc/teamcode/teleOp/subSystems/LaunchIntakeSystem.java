@@ -111,7 +111,7 @@ public class LaunchIntakeSystem {
      * @param step    the power step
      * @param autoPow automatically generated power value
      */
-    private void setLauncherPower(int step, double autoPow) {
+    public void setLauncherPower(int step, double autoPow) {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
                 if (autoPower)
