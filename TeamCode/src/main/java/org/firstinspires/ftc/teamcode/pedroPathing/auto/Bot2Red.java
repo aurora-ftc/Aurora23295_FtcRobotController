@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.Intake;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.Indexer;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
@@ -35,6 +36,7 @@ public class Bot2Red extends OpMode {
     private Timer opmodeTimer;
 
     // Subsystems
+    private final Intake intake = new Intake();
     private final LaunchIntakeSystem launchIntake = new LaunchIntakeSystem();
     private final Indexer indexer = new Indexer();
     private LimelightControl limelight;
@@ -120,7 +122,7 @@ public class Bot2Red extends OpMode {
         double t = actionTimer.getElapsedTimeSeconds();
 
         // Indexer must run every loop for timers, gatekeeper, and PID.
-        indexer.periodic();
+        indexer.periodic(intake);
 
         // Fire next shot on interval.
         if (shotsRemaining > 0 && (t - lastShotTimeS) >= SHOT_INTERVAL_S) {
@@ -142,7 +144,7 @@ public class Bot2Red extends OpMode {
     private void autonomousPathUpdate() {
 
         if (!burstActive) {
-            indexer.periodic();
+            indexer.periodic(intake);
         }
 
         switch (pathState) {
