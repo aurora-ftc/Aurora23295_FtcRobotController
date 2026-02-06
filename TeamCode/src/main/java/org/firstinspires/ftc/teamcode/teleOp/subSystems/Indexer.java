@@ -5,9 +5,7 @@ import static org.firstinspires.ftc.teamcode.teleOp.Constants.GATE_OPEN;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.POSITIONS;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.PUSH_IDLE;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KD;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KI;
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.ROTARY_KP;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.PUSH_PUSH;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.VELOCITY_THRESHOLD;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.revColorSensorGain;
 import static org.firstinspires.ftc.teamcode.teleOp.util.Colors.UNKNOWN;
@@ -30,32 +28,22 @@ import com.seattlesolvers.solverslib.controller.PIDController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.util.Colors;
 
 public class Indexer {
-    //Sorting System
-    protected enum State {
-        INTAKE,
-        OUTTAKE
-    }
-    protected enum Status {
-        SORTING,
-        IDLE;
-    }
-    private int[] outtakePositions = {POSITIONS[1], POSITIONS[3], POSITIONS[5]};
-    private int[] intakePositions = {POSITIONS[0], POSITIONS[2], POSITIONS[4]};
+    private final int[] outtakePositions = {POSITIONS[1], POSITIONS[3], POSITIONS[5]};
+    private final int[] intakePositions = {POSITIONS[0], POSITIONS[2], POSITIONS[4]};
     private int currentPositionIndex = 0;
     private int target = intakePositions[1];
     private State currentState = State.INTAKE;
     private Status currentStatus = Status.IDLE;
     private int zero;
     private double current;
-
     //Event Timers
-    private ElapsedTime emptyTimer = new ElapsedTime();
-    private ElapsedTime gateTimer = new ElapsedTime();
-    private ElapsedTime shootTimer = new ElapsedTime();
-
+    private final ElapsedTime emptyTimer = new ElapsedTime();
+    private final ElapsedTime gateTimer = new ElapsedTime();
+    private final ElapsedTime shootTimer = new ElapsedTime();
     //Hardware
     private Servo pushServo, gateServo;
     private AnalogInput elcAnalog;
@@ -97,8 +85,8 @@ public class Indexer {
         cRight.setGain(revColorSensorGain);
         cLeft.setGain(revColorSensorGain);
 
-        controller = new PIDController(PID.Rotary.ROTARY_KP, PID.Rotary.ROTARY_KI, PID.Rotary.ROTARY_KD);
-        controller.setPID(PID.Rotary.ROTARY_KP, PID.Rotary.ROTARY_KI, PID.Rotary.ROTARY_KD);
+        controller = new PIDController(Constants.PID.Rotary.ROTARY_KP, Constants.PID.Rotary.ROTARY_KI, Constants.PID.Rotary.ROTARY_KD);
+        controller.setPID(Constants.PID.Rotary.ROTARY_KP, Constants.PID.Rotary.ROTARY_KI, Constants.PID.Rotary.ROTARY_KD);
 
         pushServo.scaleRange(0.05, 0.25);
         gateServo.scaleRange(0.1, 0.25);
@@ -128,10 +116,9 @@ public class Indexer {
         determineStatus();
         updateBlip(intake);
 
-        controller.setPID(PID.Rotary.ROTARY_KP, PID.Rotary.ROTARY_KI, PID.Rotary.ROTARY_KD);
+        controller.setPID(Constants.PID.Rotary.ROTARY_KP, Constants.PID.Rotary.ROTARY_KI, Constants.PID.Rotary.ROTARY_KD);
 
-        if (shootTimer.seconds() >= 0.15)
-            pushServo.setPosition(PUSH_IDLE);
+        if (shootTimer.seconds() >= 0.15) pushServo.setPosition(PUSH_IDLE);
 
         if (shootTimer.seconds() >= 0.25 && needTurn) {
             clockwise();
@@ -152,10 +139,8 @@ public class Indexer {
         current = elcDigital.getCurrentPosition() - zero;
         double output = controller.calculate(current, target);
 
-        if (output < -0.01)
-            output -= PID.Rotary.ROTARY_KS;
-        else if (output > 0.01)
-            output += PID.Rotary.ROTARY_KS;
+        if (output < -0.01) output -= Constants.PID.Rotary.ROTARY_KS;
+        else if (output > 0.01) output += Constants.PID.Rotary.ROTARY_KS;
 
         indexerMotor.setPower(Range.clip(output, -1, 1));
 
@@ -225,15 +210,12 @@ public class Indexer {
         }
         if (currentState == State.INTAKE && currentStatus == Status.IDLE)
             gateServo.setPosition(GATE_OPEN);
-        else
-            gateServo.setPosition(GATE_CLOSE);
+        else gateServo.setPosition(GATE_CLOSE);
     }
 
     public void lightkeeper() {
-        if (currentState == State.INTAKE)
-            light.green();
-        else
-            light.red();
+        if (currentState == State.INTAKE) light.green();
+        else light.red();
     }
 
     public void log(Telemetry telemetry) {
@@ -260,6 +242,7 @@ public class Indexer {
         tele.addData("Left Color", isEmpty(cLeft));
     }
 
+    //Sorting System
     protected enum State {
         INTAKE, OUTTAKE
     }

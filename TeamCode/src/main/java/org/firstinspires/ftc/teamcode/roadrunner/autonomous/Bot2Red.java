@@ -96,7 +96,7 @@ public class Bot2Red extends LinearOpMode {
 
         if (isStopRequested())
             return;
-        if (mosaic == Mosaic.xxx) {
+        if (mosaic == Mosaic.UNKNOWN) {
             Actions.runBlocking(
                     new SequentialAction(
                             new InstantAction(() -> lift.liftDown()),
@@ -129,7 +129,7 @@ public class Bot2Red extends LinearOpMode {
                             new InstantAction(() -> launcher.stop()),
 
                             tab5.build()));
-        } else if (mosaic == Mosaic.yyy) {
+        } else if (mosaic == Mosaic.UNKNOWN) {
             Actions.runBlocking(
                     new SequentialAction(
                             new InstantAction(() -> lift.liftDown()),
@@ -162,7 +162,7 @@ public class Bot2Red extends LinearOpMode {
                             new InstantAction(() -> launcher.stop()),
 
                             tab5.build()));
-        } else if (mosaic == Mosaic.zzz) {
+        } else if (mosaic == Mosaic.UNKNOWN) {
             Actions.runBlocking(
                     new SequentialAction(
                             new InstantAction(() -> lift.liftDown()),
