@@ -7,8 +7,6 @@ import static org.firstinspires.ftc.teamcode.teleOp.Constants.SLOW_SPEED_LT;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,12 +14,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-//import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.BallSelector;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
-import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
 @TeleOp(name = "Drive Sort Mode", group = "OpModes")
 public class DriveSortMode extends OpMode {
@@ -31,16 +27,11 @@ public class DriveSortMode extends OpMode {
     // --- Timers ---
     private final ElapsedTime matchTime = new ElapsedTime();
     private final ElapsedTime PIDTimer = new ElapsedTime();
-    private final Pose2d startPose =
-            new Pose2d(INITIAL_POSE_BLUE.getX(DistanceUnit.INCH), INITIAL_POSE_BLUE.getY(DistanceUnit.INCH),
-                    INITIAL_POSE_BLUE.getHeading(AngleUnit.RADIANS));
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     //    private Limelight limelight;
     private MecanumDrive drive;
     private LaunchIntakeSystem launchSystem;
     private BallSelector ballSelector;
-    private SmartPark smartPark;
-//    private PinpointDrive driveRR;
     private Pose2D initialPose, goalPose;
     private double forward, strafe, rotate;
     private double lastHeading = 0;
@@ -56,9 +47,6 @@ public class DriveSortMode extends OpMode {
         ballSelector = new BallSelector();
         launchSystem = new LaunchIntakeSystem();
 //        limelight = new Limelight(hardwareMap, 0);
-//        driveRR = new PinpointDrive(hardwareMap, startPose);
-
-        Vector2d parkPose = new Vector2d(33, -39);
 
         // Drive Systems Init
         drive.init(hardwareMap, telemetry);
@@ -221,8 +209,6 @@ public class DriveSortMode extends OpMode {
         launchSystem.updateLauncher(dist, hardwareMap);
 
         ballSelector.periodic();
-
-        ballSelector.flashMosaicPattern();
 
         // Telemetry - all subsystems use updateTelemetry which sends to both Driver Station and FTC Dashboard
         if (DEBUG)

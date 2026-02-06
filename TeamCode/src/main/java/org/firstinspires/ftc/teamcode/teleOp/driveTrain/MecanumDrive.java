@@ -11,7 +11,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -32,7 +31,7 @@ public class MecanumDrive {
     public DcMotorGroup driveMotors;
     public boolean trackGoalOn = false;
     public Pose2D goalPose;
-    private GoBildaPinpointDriver odo;
+    GoBildaPinpointDriver odo;
     private DcMotorEx frontLeftMotor, frontRightMotor, backLeftMotor, backRightMotor;
     private IMU imu;
     private PIDController headingPID;
@@ -60,9 +59,9 @@ public class MecanumDrive {
         odo = hwMap.get(GoBildaPinpointDriver.class, "odo");
 
         if (odo == null) {
-            telemetry.addData("ERROR", "GoBildaPinpointDriver device 'odo' not found in hardware map!");
+            telemetry.addData("ERROR", "GoBildaPinpointDriverRR device 'odo' not found in hardware map!");
             telemetry.update();
-            throw new IllegalStateException("GoBildaPinpointDriver device 'odo' not found in hardware map. Please check your robot configuration.");
+            throw new IllegalStateException("GoBildaPinpointDriverRR device 'odo' not found in hardware map. Please check your robot configuration.");
         }
 
         imu = hwMap.get(IMU.class, HWMap.IMU);
@@ -85,12 +84,12 @@ public class MecanumDrive {
 
         //Current Bot Offsets: -41, 0, MM (11/13)
         //old bot odo.setOffsets(-41, 0, DistanceUnit.MM);
-        odo.setOffsets(-13, -18.5, DistanceUnit.CM);
+        //odo.setOffsets(-13, -18.5, DistanceUnit.CM);
+        odo.setOffsets(-5.05, -6.7, DistanceUnit.INCH);
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
         //Current Bot Directions: FORWARD, REVERSED (11/13)
-        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD,
-                GoBildaPinpointDriver.EncoderDirection.REVERSED);
+        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
         //Calibrate ODO
         odo.resetPosAndIMU();
@@ -134,7 +133,7 @@ public class MecanumDrive {
         double backRightPower = forward + strafe + rotate;
 
         double maxPower = 1.0;
-        double maxSpeed = 1.0;
+        double maxSpeed = 0.8;
 
         maxPower = Math.max(maxPower, Math.abs(frontLeftPower));
         maxPower = Math.max(maxPower, Math.abs(backLeftPower));
