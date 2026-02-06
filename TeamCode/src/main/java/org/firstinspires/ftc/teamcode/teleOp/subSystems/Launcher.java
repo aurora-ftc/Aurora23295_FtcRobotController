@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -17,13 +18,14 @@ import org.firstinspires.ftc.teamcode.teleOp.util.Volts;
 public class Launcher {
     //Hardware
     private DcMotorEx launcher;
+    private Servo angleServo;
 
     //Classes
     private final Volts volts = new Volts();
-    private final ElapsedTime intakeTimer = new ElapsedTime();
     private PIDController flywheelPID;
 
     //Launcher
+    private double angle = 0.5;
     private double batteryVolts, batteryCorrectedKv;
     private double[] powerSteps = POWER_STEPS;
     private double power = 0;
@@ -32,13 +34,18 @@ public class Launcher {
 
     public void init(HardwareMap hwMap) {
         launcher = hwMap.get(DcMotorEx.class, HWMap.LAUNCHER_MOTOR);
+        angleServo = hwMap.get(Servo.class, "angle_servo");
+
+        angleServo.scaleRange(0.15, 0.9);
+
+        angleServo.setPosition(angle);
 
         launcher.setPower(0);
 
         launcher.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         launcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         launcher.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
@@ -66,9 +73,9 @@ public class Launcher {
 
         TelemetryPacket packet = new TelemetryPacket();
 
-        packet.put("target", flywheelPID.target);
-        packet.put("current", flywheelPID.current);
-        packet.put("output", output);
+        packet.put("2target", flywheelPID.target);
+        packet.put("2current", flywheelPID.current);
+        packet.put("2output", output);
 
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
@@ -81,7 +88,7 @@ public class Launcher {
                 else
                     spinToVelocity(powerSteps[step]);
             } else {
-                spinToVelocity(0);
+                launcher.setPower(0);
             }
         }
     }
@@ -93,6 +100,8 @@ public class Launcher {
     public void updateLauncher(double dist, HardwareMap hwMap) {
         double pow = calcAutoPower(dist);
 
+        angleServo.setPosition(angle);
+
         batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
         batteryVolts = batteryVolts <= 15 && batteryVolts >= 9 ? batteryVolts : VOLTS_NOMINAL;
 
@@ -100,6 +109,16 @@ public class Launcher {
             setLauncherPower(currentStep, pow);
         else
             launcher.setPower(0.0);
+    }
+
+    public void angleUp() {
+        angle -= 0.05;
+        angle = Math.max(0.15, Math.min(0.9, angle));
+    }
+
+    public void angleDown() {
+        angle += 0.05;
+        angle = Math.max(0.15, Math.min(0.9, angle));
     }
 
     public void log(Telemetry tele) {
@@ -112,6 +131,7 @@ public class Launcher {
                 : (int) (((power / 85.0) * 100) + 0.5) + "%");
         tele.addData("Power Step", !autoPower ? powerSteps[currentStep] : power);
         tele.addData("Battery Volts", batteryVolts);
+        tele.addData("Angle", angle);
 
         if (DEBUG) {
             tele.addLine("--- Debug Info ---");
@@ -129,6 +149,7 @@ public class Launcher {
     public void stepDownPower() {
         currentStep = Math.max(currentStep - 1, minStep);
     }
+
     public void disableAutoPower() {
         autoPower = false;
     }
@@ -139,7 +160,7 @@ public class Launcher {
 
     private double calcAutoPower(double distance) {
         double power = 0.09 / 65116 * distance + 53.81395;
-        power = Math.max(41, Math.min(44.5, power));
+        //power = Math.max(41, Math.min(44.5, power));
         return power;
     }
 

@@ -23,14 +23,14 @@ public class Constants {
 
     public static class PID {
         public static class Drive{
-            public static double KP = 2.3;
+            public static double KP = 1.3;
             public static double KI = 0.0;
-            public static double KD = 0.003;
+            public static double KD = 0.002;
         }
         public static class Flywheel{
-            public static double KP = 0.08;
+            public static double KP = 0.06;
             public static double KI = 0.05;
-            public static double KD = 0.002;
+            public static double KD = 0.0025;
             public static double KV = 0.01;
             public static double KS = 0.0055;
 
@@ -39,9 +39,9 @@ public class Constants {
             public static double MIN_KV = 0.006;
         }
         public static class Rotary{
-            public static double ROTARY_KP = 0.00028;
+            public static double ROTARY_KP = 0.000189;
             public static double ROTARY_KI = 0.000;
-            public static double ROTARY_KD = 0.000017;
+            public static double ROTARY_KD = 0.0000119;
             public static double ROTARY_KS = 0.055;
         }
     }
@@ -51,8 +51,8 @@ public class Constants {
     // Launcher Ticks Per Rev
     public static double LAUNCHER_ENCODER_PER_REV = 28.0;
     // Slow Speed Modifier
-    public static double SLOW_SPEED_LT = 0.35;
-    public static double[] POWER_STEPS = {25, 40, 42, 44, 85};
+    public static double SLOW_SPEED_LT = 0.7;
+    public static double[] POWER_STEPS = {50, 55, 58, 65, 70, 75, 85};
     public static int[] POSITIONS = {0, 667, 1333, 2000, 2666, 3333};
     public static float revColorSensorGain = 0.4f;
 

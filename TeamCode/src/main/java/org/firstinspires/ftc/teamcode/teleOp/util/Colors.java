@@ -79,6 +79,5 @@ public enum Colors {
         }
 
         return detectedColor;
-
     }
 }
