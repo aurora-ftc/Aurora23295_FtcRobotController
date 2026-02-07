@@ -88,7 +88,7 @@ public class Indexer {
         controller = new PIDController(Constants.PID.Rotary.ROTARY_KP, Constants.PID.Rotary.ROTARY_KI, Constants.PID.Rotary.ROTARY_KD);
         controller.setPID(Constants.PID.Rotary.ROTARY_KP, Constants.PID.Rotary.ROTARY_KI, Constants.PID.Rotary.ROTARY_KD);
 
-        pushServo.scaleRange(0.05, 0.25);
+        pushServo.scaleRange(0.05, 0.3);
         gateServo.scaleRange(0.1, 0.25);
 
         pushServo.setPosition(PUSH_IDLE);
@@ -154,6 +154,38 @@ public class Indexer {
 
     }
 
+    public void periodicPP() {
+        gatekeeper();
+
+        controller.setPID(Constants.PID.Rotary.ROTARY_KP, Constants.PID.Rotary.ROTARY_KI, Constants.PID.Rotary.ROTARY_KD);
+
+        if (shootTimer.seconds() >= 0.15) pushServo.setPosition(PUSH_IDLE);
+
+        if (shootTimer.seconds() >= 0.5 && needTurn) {
+            clockwise();
+            needTurn = false;
+        }
+
+        if (!isEmpty(cBottom) && currentState == State.INTAKE
+                && currentStatus == Status.IDLE && emptyTimer.seconds() >= 0.2) {
+            if (isEmpty(cRight))
+                counterClockwise();
+            else if (isEmpty(cLeft))
+                clockwise();
+            else
+                currentState = State.OUTTAKE;
+            emptyTimer.reset();
+        }
+
+        current = elcDigital.getCurrentPosition() - zero;
+        double output = controller.calculate(current, target);
+
+        if (output < -0.01) output -= Constants.PID.Rotary.ROTARY_KS;
+        else if (output > 0.01) output += Constants.PID.Rotary.ROTARY_KS;
+
+        indexerMotor.setPower(Range.clip(output, -1, 1));
+    }
+
     public void determineStatus() {
         double velocity = elcDigital.getVelocity();
         if (Math.abs(velocity) <= VELOCITY_THRESHOLD) currentStatus = Status.IDLE;
@@ -187,6 +219,14 @@ public class Indexer {
             currentState = State.OUTTAKE;
             update = true;
         }
+    }
+
+    public void setModeOuttake() {
+        currentState = State.OUTTAKE;
+    }
+
+    public void setModeIntake() {
+        currentState = State.INTAKE;
     }
 
     public void clockwise() {

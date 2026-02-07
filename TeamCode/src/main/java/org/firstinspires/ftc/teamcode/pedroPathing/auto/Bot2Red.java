@@ -10,6 +10,8 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.Intake;
@@ -38,6 +40,7 @@ public class Bot2Red extends OpMode {
     // Subsystems
     private final Intake intake = new Intake();
     private final LaunchIntakeSystem launchIntake = new LaunchIntakeSystem();
+    private DcMotor launcherMotor;
     private final Indexer indexer = new Indexer();
     private LimelightControl limelight;
 
@@ -47,11 +50,11 @@ public class Bot2Red extends OpMode {
     // === Tunable Parameter ===
 
     /** Must be > 0.15s because Indexer resets PUSH servo to idle after 0.15s. */
-    public static double SHOT_INTERVAL_S = 0.5;
+    public static double SHOT_INTERVAL_S = 2.5;
 
     // Poses
     private final Pose startPose = new Pose(85, 8.8, Math.toRadians(90));
-    private final Pose launchPose = new Pose(85, 16,  Math.toRadians(72));
+    private final Pose launchPose = new Pose(85, 16,  Math.toRadians(68));
     private final Pose pickup1StartPose = new Pose(100, 35, Math.toRadians(0));
     private final Pose pickup1EndPose = new Pose(130, 35, Math.toRadians(0));
     private final Pose parkPose = new Pose(85, 35,  Math.toRadians(90));
@@ -69,6 +72,7 @@ public class Bot2Red extends OpMode {
         firstLaunch = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, launchPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading())
+                .setTimeoutConstraint(4000)
                 .build();
 
         pickup1Start = follower.pathBuilder()
@@ -79,16 +83,19 @@ public class Bot2Red extends OpMode {
         pickup1End = follower.pathBuilder()
                 .addPath(new BezierLine(pickup1StartPose, pickup1EndPose))
                 .setLinearHeadingInterpolation(pickup1StartPose.getHeading(), pickup1EndPose.getHeading())
+                .setTimeoutConstraint(1000)
                 .build();
 
         secondLaunch = follower.pathBuilder()
                 .addPath(new BezierLine(pickup1EndPose, launchPose))
                 .setLinearHeadingInterpolation(pickup1EndPose.getHeading(), launchPose.getHeading())
+                .setTimeoutConstraint(500)
                 .build();
 
         park = follower.pathBuilder()
                 .addPath(new BezierLine(launchPose, parkPose))
                 .setLinearHeadingInterpolation(launchPose.getHeading(), parkPose.getHeading())
+                .setTimeoutConstraint(500)
                 .build();
     }
 
@@ -104,12 +111,9 @@ public class Bot2Red extends OpMode {
         burstActive = true;
 
         // Force first shot available immediately.
-        lastShotTimeS = -1e9;
+        lastShotTimeS = 0;
 
         actionTimer.resetTimer();
-
-        // Refresh state before shooting.
-        indexer.determineState();
     }
 
     /**
@@ -122,7 +126,7 @@ public class Bot2Red extends OpMode {
         double t = actionTimer.getElapsedTimeSeconds();
 
         // Indexer must run every loop for timers, gatekeeper, and PID.
-        indexer.periodic(intake);
+        indexer.periodicPP();
 
         // Fire next shot on interval.
         if (shotsRemaining > 0 && (t - lastShotTimeS) >= SHOT_INTERVAL_S) {
@@ -144,7 +148,7 @@ public class Bot2Red extends OpMode {
     private void autonomousPathUpdate() {
 
         if (!burstActive) {
-            indexer.periodic(intake);
+            indexer.periodicPP();
         }
 
         switch (pathState) {
@@ -153,9 +157,8 @@ public class Bot2Red extends OpMode {
              * 0) Start: drive firstLaunch and turn on launcher.
              */
             case 0: {
+                launcherMotor.setPower(0.72);
                 follower.followPath(firstLaunch);
-                launchIntake.toggleLauncher();
-                launchIntake.spinToVelocity(1);
                 setPathState(1);
                 break;
             }
@@ -177,8 +180,9 @@ public class Bot2Red extends OpMode {
             case 2: {
                 if (updateBurst()) {
                     follower.followPath(pickup1Start, false);
+                    indexer.setModeIntake();
+                    indexer.clockwise();
                     launchIntake.toggleIntake();
-                    indexer.determineState(); // refresh before intake flow
                     setPathState(3);
                 }
                 break;
@@ -186,11 +190,11 @@ public class Bot2Red extends OpMode {
 
             /*
              * 3) Wait pickup1Start complete, then drive pickup1End.
-             *    During pickup1End movement, intake runs continuously (indexer.periodic keeps sorting).
+             *    During pickup1End movement, intake runs continuously (indexer.periodicPP keeps sorting).
              */
             case 3: {
                 if (!follower.isBusy()) {
-                    follower.followPath(pickup1End, 0.5, false);
+                    follower.followPath(pickup1End, 0.3,false);
                     setPathState(4);
                 }
                 break;
@@ -201,8 +205,10 @@ public class Bot2Red extends OpMode {
              */
             case 4: {
                 if (!follower.isBusy()) {
-                    follower.followPath(secondLaunch, false);
+                    follower.followPath(secondLaunch,false);
                     launchIntake.toggleIntake();
+                    indexer.setModeOuttake();
+                    indexer.clockwise();
                     setPathState(5);
                 }
                 break;
@@ -225,7 +231,7 @@ public class Bot2Red extends OpMode {
             case 6: {
                 if (updateBurst()) {
                     follower.followPath(park, false);
-                    launchIntake.toggleLauncher();
+                    launcherMotor.setPower(0);
                     //launchIntake.toggleIntake();
 
                     setPathState(7);
@@ -238,14 +244,11 @@ public class Bot2Red extends OpMode {
              */
             case 7: {
                 if (!follower.isBusy()) {
+                    launcherMotor.setPower(0);
                     setPathState(-1);
                 }
                 break;
             }
-
-            default:
-                // idle
-                break;
         }
     }
 
@@ -255,7 +258,6 @@ public class Bot2Red extends OpMode {
         pathTimer = new Timer();
         actionTimer = new Timer();
         opmodeTimer = new Timer();
-        opmodeTimer.resetTimer();
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -267,6 +269,11 @@ public class Bot2Red extends OpMode {
 
         launchIntake.init(powerSteps, hardwareMap);
         indexer.init(hardwareMap);
+        indexer.setModeOuttake();
+        launcherMotor = hardwareMap.get(DcMotorEx.class, org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap.LAUNCHER_MOTOR);
+        launcherMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        launcherMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        launcherMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
     }
 
     @Override
@@ -277,7 +284,14 @@ public class Bot2Red extends OpMode {
     @Override
     public void start() {
         opmodeTimer.resetTimer();
+        indexer.setModeOuttake();
+        indexer.clockwise();
         setPathState(0);
+    }
+
+    @Override
+    public void stop() {
+        launcherMotor.setPower(0);
     }
 
     @Override
