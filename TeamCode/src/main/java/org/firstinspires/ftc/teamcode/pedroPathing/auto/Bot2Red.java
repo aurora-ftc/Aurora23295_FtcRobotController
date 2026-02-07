@@ -89,7 +89,6 @@ public class Bot2Red extends OpMode {
         secondLaunch = follower.pathBuilder()
                 .addPath(new BezierLine(pickup1EndPose, launchPose))
                 .setLinearHeadingInterpolation(pickup1EndPose.getHeading(), launchPose.getHeading())
-                .setTimeoutConstraint(500)
                 .build();
 
         park = follower.pathBuilder()
