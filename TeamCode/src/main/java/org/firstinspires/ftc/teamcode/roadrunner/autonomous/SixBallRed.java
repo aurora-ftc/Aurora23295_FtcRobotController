@@ -65,16 +65,16 @@ public class SixBallRed extends LinearOpMode {
                 .strafeToLinearHeading(new Vector2d(55, 12), Math.toRadians(156.5));
 
         TrajectoryActionBuilder tab2 = drive.actionBuilder(new Pose2d(55, 12, Math.toRadians(156.5)))
-                .strafeToLinearHeading(new Vector2d(35, 26), Math.toRadians(270));
+                .strafeToLinearHeading(new Vector2d(40, 26), Math.toRadians(270));
 
-        TrajectoryActionBuilder tab3 = drive.actionBuilder(new Pose2d(35, 26, Math.toRadians(270)))
+        TrajectoryActionBuilder tabb3 = drive.actionBuilder(new Pose2d(40, 26, Math.toRadians(270)))
                 .lineToY(54, collectingBallsVel, collectingBallsAccel);
 
-        TrajectoryActionBuilder tab4 = drive.actionBuilder(new Pose2d(35, 54, Math.toRadians(270)))
+        TrajectoryActionBuilder tabb4 = drive.actionBuilder(new Pose2d(40, 54, Math.toRadians(270)))
                 .setReversed(true)
                 .strafeToLinearHeading(new Vector2d(53, 13), Math.toRadians(156.5));
 
-        TrajectoryActionBuilder tab5 = drive.actionBuilder(new Pose2d(53, 13, Math.toRadians(156.5)))
+        TrajectoryActionBuilder tabb5 = drive.actionBuilder(new Pose2d(53, 13, Math.toRadians(156.5)))
                 .setReversed(false)
                 .strafeToLinearHeading(new Vector2d(35, 13), Math.toRadians(150));
 
@@ -117,24 +117,25 @@ public class SixBallRed extends LinearOpMode {
                                         new InstantAction(() -> intake.fullPower()),
                                         new SleepAction(0.5),
 
-                                        tab3.build(),
+                                        tabb3.build(),
 
                                         new InstantAction(() -> intake.stop()),
                                         new SleepAction(0.5)
                                 )
                         ),
 
-                        tab4.build(),
+                        tabb4.build(),
 
                         new RaceAction(
                                 launcher.spinForTime(AUTO_FAR_POWER, 14, telemetry),
                                 new SequentialAction(
                                         new SleepAction(0.8), // allow time to reach velocity
                                         shootThree(lift, intake),
+                                        shoot(lift, intake),
                                         new SleepAction(0.4))),
                         new InstantAction(() -> launcher.stop()),
 
-                        tab5.build()));
+                        tabb5.build()));
 
         telemetry.addLine("Path execution complete");
         telemetry.update();
@@ -143,6 +144,18 @@ public class SixBallRed extends LinearOpMode {
         Storage.endPose = new Pose2D(DistanceUnit.INCH, drive.pose.position.y, -drive.pose.position.x,
                 AngleUnit.RADIANS, drive.pose.heading.toDouble());
 
+    }
+
+    private Action shoot(Lift lift, Intake intake) {
+        Action newAction = new SequentialAction(
+                new InstantAction(() -> intake.fullPower()),
+                new SleepAction(0.8),
+                new InstantAction(() -> intake.stop()),
+                new SleepAction(0.5),
+                lift.liftForTime(0, 0.15),
+                lift.liftForTime(1, 0.55),
+                new SleepAction(0.2));
+        return newAction;
     }
 
     // Total time ~3.65 seconds

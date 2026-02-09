@@ -139,7 +139,7 @@ public class LaunchIntakeSystem {
         if (launcherOn) {
             setLauncherPower(currentStep, tele, pow, hwMap);
         } else {
-            launcherMotor.setPower(0.0);
+            spinToVelocity(0, tele);
         }
     }
 
@@ -239,7 +239,7 @@ public class LaunchIntakeSystem {
     }
 
     private double calcAutoPower(double distance) {
-        power = 0.22 * distance + 48;
+        power = 0.22 * distance + 48.5;
         power = Math.max(61, Math.min(75, power));
 //        power = 0.189189 * distance +38.97297;
 //        power = Math.max(55, Math.min(65, power));

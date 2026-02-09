@@ -1,16 +1,23 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
-import static org.firstinspires.ftc.teamcode.Constants.*;
-
-import android.content.Context;
-import android.content.SharedPreferences;
+import static org.firstinspires.ftc.teamcode.Constants.BLUE_SIDE;
+import static org.firstinspires.ftc.teamcode.Constants.DEBUG;
+import static org.firstinspires.ftc.teamcode.Constants.DRIVE_PID_BUFFER_MS;
+import static org.firstinspires.ftc.teamcode.Constants.GOAL_POSE_BLUE;
+import static org.firstinspires.ftc.teamcode.Constants.GOAL_POSE_RED;
+import static org.firstinspires.ftc.teamcode.Constants.INITIAL_POSE_BLUE;
+import static org.firstinspires.ftc.teamcode.Constants.INITIAL_POSE_RED;
+import static org.firstinspires.ftc.teamcode.Constants.LIFT_SERVO_FLICK_TIME;
+import static org.firstinspires.ftc.teamcode.Constants.LT_DEAD_ZONE;
+import static org.firstinspires.ftc.teamcode.Constants.PARK_POSE_BLUE;
+import static org.firstinspires.ftc.teamcode.Constants.PARK_POSE_RED;
+import static org.firstinspires.ftc.teamcode.Constants.POWER_STEPS;
+import static org.firstinspires.ftc.teamcode.Constants.RIGHT_STICK_DEAD_ZONE;
+import static org.firstinspires.ftc.teamcode.Constants.USE_PID;
+import static org.firstinspires.ftc.teamcode.Constants.llPipelines;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -18,17 +25,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Storage;
 import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
-import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
 import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 import org.firstinspires.ftc.teamcode.teleOp.util.SmartPark;
 
-@TeleOp(name = "DriveLaunchMode", group = "OpModes")
-public class DriveLaunchMode extends OpMode {
+@TeleOp(name = "Red", group = "OpModes")
+public class Red extends OpMode {
     private MecanumDrive drive = new MecanumDrive();
     //------Timers------
     private final ElapsedTime matchTime = new ElapsedTime();
@@ -50,7 +57,6 @@ public class DriveLaunchMode extends OpMode {
     private boolean liftDown = true;
     private double startWait, recenterTime = 0.0;
     private int shotsLeft = 0;
-    int p = 0;
 
     @Override
     public void init() {
@@ -66,7 +72,7 @@ public class DriveLaunchMode extends OpMode {
 
         initialPose = null;
 
-        goalPose = BLUE_SIDE ? GOAL_POSE_BLUE: GOAL_POSE_RED;
+        goalPose = GOAL_POSE_RED;
 
         mosaic = (Storage.mosaic == Mosaic.UNKNOWN) ? Mosaic.PGP : Storage.mosaic;
         // PGP is a lucky lucky guess, we need to have a default in case it doesn't work
@@ -75,7 +81,6 @@ public class DriveLaunchMode extends OpMode {
 
         dashboard.isEnabled();
         initTimer.reset();
-        cameraTimer.reset();
 
     }
 
@@ -93,12 +98,9 @@ public class DriveLaunchMode extends OpMode {
                 poseCalculated = true;
             }
             cameraTimer.reset();
-            p++;
         }
 
         telemetry.addData("Mosaic", mosaic.name());
-        telemetry.addData("Captures", p);
-        telemetry.addData("Camera Timer", cameraTimer.milliseconds());
         telemetry.addData("initialPoseGottenX", drive.getOdoX(DistanceUnit.INCH));
         telemetry.addData("initialPoseGottenY", drive.getOdoY(DistanceUnit.INCH));
         telemetry.addData("initialPoseGottenHeading", drive.getOdoHeading(AngleUnit.DEGREES));
@@ -113,7 +115,7 @@ public class DriveLaunchMode extends OpMode {
 
         if (!poseCalculated || initialPose == null){
             if (Storage.endPose == null)
-                initialPose = BLUE_SIDE ? INITIAL_POSE_BLUE : INITIAL_POSE_RED;
+                initialPose = INITIAL_POSE_RED;
             else
                 initialPose = Storage.endPose;
         } else {
@@ -167,10 +169,7 @@ public class DriveLaunchMode extends OpMode {
                             initialPose.getY(DistanceUnit.INCH),
                             initialPose.getHeading(AngleUnit.RADIANS));
                     driveRR = new PinpointDrive(hardwareMap, startPose);
-                    if (BLUE_SIDE)
-                        smartPark = new SmartPark(drive, driveRR, PARK_POSE_BLUE);
-                    else
-                        smartPark = new SmartPark(drive, driveRR, PARK_POSE_RED);
+                    smartPark = new SmartPark(drive, driveRR, PARK_POSE_RED);
                 } // So it doesn't fry the camera sensor
                 cameraTimer.reset();
             }
@@ -185,13 +184,8 @@ public class DriveLaunchMode extends OpMode {
         else
             slow = 0.78;
 
-        if (BLUE_SIDE) {
-            forward = MecanumDrive.smoothDrive(gamepad1.left_stick_y);
-            strafe = MecanumDrive.smoothDrive(-gamepad1.left_stick_x);
-        } else {
-            forward = MecanumDrive.smoothDrive(-gamepad1.left_stick_y);
-            strafe = MecanumDrive.smoothDrive(gamepad1.left_stick_x);
-        }
+        forward = MecanumDrive.smoothDrive(-gamepad1.left_stick_y);
+        strafe = MecanumDrive.smoothDrive(gamepad1.left_stick_x);
 
         if (!drive.trackGoalOn) {
 

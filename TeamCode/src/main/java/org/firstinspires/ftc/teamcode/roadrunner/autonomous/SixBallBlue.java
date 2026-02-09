@@ -131,6 +131,7 @@ public class SixBallBlue extends LinearOpMode {
                                                 tab4.build(),
                                                 new SleepAction(0.8), // allow time to reach velocity
                                                 shootThree(lift, intake),
+                                                shoot(lift, intake),
                                                 new SleepAction(0.4))),
                                 new InstantAction(() -> launcher.stop()),
 
@@ -143,6 +144,17 @@ public class SixBallBlue extends LinearOpMode {
                 Storage.endPose = new Pose2D(DistanceUnit.INCH, drive.pose.position.y, -drive.pose.position.x,
                         AngleUnit.RADIANS, drive.pose.heading.toDouble());
 
+        }
+        private Action shoot(Lift lift, Intake intake) {
+                Action newAction = new SequentialAction(
+                        new InstantAction(() -> intake.fullPower()),
+                        new SleepAction(0.8),
+                        new InstantAction(() -> intake.stop()),
+                        new SleepAction(0.5),
+                        lift.liftForTime(0, 0.15),
+                        lift.liftForTime(1, 0.55),
+                        new SleepAction(0.2));
+                return newAction;
         }
 
         // Total time ~3.65 seconds

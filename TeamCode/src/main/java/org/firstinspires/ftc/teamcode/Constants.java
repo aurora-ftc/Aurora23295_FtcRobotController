@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 @Config
 public class Constants {
     public static boolean DEBUG = false;
-    public static boolean BLUE_SIDE = false;
+    public static boolean BLUE_SIDE = true;
     public static boolean IS_FIELD_CENTRIC = true;
     public static boolean USE_MAHALANOBIS_DISTANCE = true;
     public static boolean USE_PID = true;
@@ -50,9 +50,9 @@ public class Constants {
 
     public static double[] POWER_STEPS = {56, 58, 63, 65, 67, 73.2, 85}; //{40, 42, 44, 85} old one idk why no work
 
-    public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 59,
+    public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -65, 62.5,
             AngleUnit.DEGREES, 0);
-    public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 63, 59,
+    public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 65, 62.5,
             AngleUnit.DEGREES, 0);
 
     public static final Pose2D INITIAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -13, -35,
