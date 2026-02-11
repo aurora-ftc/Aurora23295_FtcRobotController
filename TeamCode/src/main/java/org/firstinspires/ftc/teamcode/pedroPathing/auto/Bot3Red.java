@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.auto;
 
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -15,11 +16,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Intake;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
 
 @Autonomous(name = "Bot3Red", group = "Bot3Autos")
 @Configurable // Panels
@@ -40,12 +36,9 @@ public class Bot3Red extends OpMode {
     private Timer opmodeTimer;
 
     // Subsystems
-    private final Intake intake = new Intake();
-    private final LaunchIntakeSystem launchIntake = new LaunchIntakeSystem();
     private DcMotor launcherMotor;
     private DcMotor intakeMotor;
     private Servo pushServo;
-    private LimelightControl limelight;
 
     // Power steps
 
@@ -234,7 +227,7 @@ public class Bot3Red extends OpMode {
             case 4: {
                 if (!follower.isBusy()) {
                     follower.followPath(secondLaunch,false);
-                    launchIntake.toggleIntake();
+                    intakeMotor.setPower(0);
                     setPathState(5);
                 }
                 break;
@@ -281,7 +274,7 @@ public class Bot3Red extends OpMode {
             case 8: {
                 if (!follower.isBusy()) {
                     follower.followPath(thirdLaunch,false);
-                    launchIntake.toggleIntake();
+                    intakeMotor.setPower(0);
                     setPathState(9);
                 }
                 break;
@@ -328,7 +321,7 @@ public class Bot3Red extends OpMode {
             case 12: {
                 if (!follower.isBusy()) {
                     follower.followPath(fourthLaunch,false);
-                    launchIntake.toggleIntake();
+                    intakeMotor.setPower(0);
                     setPathState(13);
                 }
                 break;
