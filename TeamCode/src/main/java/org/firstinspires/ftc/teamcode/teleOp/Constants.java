@@ -13,7 +13,6 @@ public class Constants {
     public static boolean IS_FIELD_CENTRIC = true;
     public static final int APRIL_TAG_DETECTION = 0;
     public static final double MOSAIC_FLASH_INTERVAL = 0.5;
-    public static int PUSH_SERVO_FLICK_TIME = 250;
     public static class Pose {
         public static final Pose2D GOAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -63, 62, AngleUnit.DEGREES, 0);
         public static final Pose2D GOAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 63, 62, AngleUnit.DEGREES, 0);

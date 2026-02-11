@@ -33,7 +33,6 @@ public class Bot3Red extends OpMode {
     // Timers
     private Timer pathTimer;
     private Timer actionTimer;
-    private Timer opmodeTimer;
 
     // Subsystems
     private DcMotor launcherMotor;
@@ -45,22 +44,22 @@ public class Bot3Red extends OpMode {
     // === Tunable Parameter ===
 
     public static double SHOT_INTERVAL_S = 1;
+    public static double PUSH_SERVO_FLICK_TIME_S = 0.5;
 
     // Poses
     private final Pose startPose = new Pose(85, 8.8, Math.toRadians(90));
-    private final Pose launchPose = new Pose(85, 16,  Math.toRadians(68));
+    private final Pose launchPose = new Pose(85, 16, Math.toRadians(68));
     private final Pose pickup1StartPose = new Pose(100, 36, Math.toRadians(0));
     private final Pose pickup1EndPose = new Pose(130, 36, Math.toRadians(0));
     private final Pose pickup2StartPose = new Pose(100, 60, Math.toRadians(0));
     private final Pose pickup2EndPose = new Pose(130, 60, Math.toRadians(0));
     private final Pose pickup3StartPose = new Pose(100, 84, Math.toRadians(0));
     private final Pose pickup3EndPose = new Pose(130, 84, Math.toRadians(0));
-
-    private final Pose parkPose = new Pose(85, 35,  Math.toRadians(90));
-
+    private final Pose parkPose = new Pose(85, 35, Math.toRadians(90));
 
     // Paths
-    public PathChain firstLaunch, pickup1Start, pickup1End, secondLaunch, pickup2Start, pickup2End, thirdLaunch, pickup3Start, pickup3End, fourthLaunch, park;
+    public PathChain firstLaunch, pickup1Start, pickup1End, secondLaunch, pickup2Start, pickup2End, thirdLaunch,
+            pickup3Start, pickup3End, fourthLaunch, park;
 
     // === Burst scheduler ===
     private boolean burstActive = false;
@@ -83,7 +82,6 @@ public class Bot3Red extends OpMode {
         pickup1End = follower.pathBuilder()
                 .addPath(new BezierLine(pickup1StartPose, pickup1EndPose))
                 .setLinearHeadingInterpolation(pickup1StartPose.getHeading(), pickup1EndPose.getHeading())
-                .setTimeoutConstraint(1000)
                 .build();
 
         secondLaunch = follower.pathBuilder()
@@ -99,7 +97,6 @@ public class Bot3Red extends OpMode {
         pickup2End = follower.pathBuilder()
                 .addPath(new BezierLine(pickup2StartPose, pickup2EndPose))
                 .setLinearHeadingInterpolation(pickup2StartPose.getHeading(), pickup2EndPose.getHeading())
-                .setTimeoutConstraint(1000)
                 .build();
 
         thirdLaunch = follower.pathBuilder()
@@ -114,7 +111,6 @@ public class Bot3Red extends OpMode {
         pickup3End = follower.pathBuilder()
                 .addPath(new BezierLine(pickup3StartPose, pickup3EndPose))
                 .setLinearHeadingInterpolation(pickup3StartPose.getHeading(), pickup3EndPose.getHeading())
-                .setTimeoutConstraint(1000)
                 .build();
 
         fourthLaunch = follower.pathBuilder()
@@ -125,7 +121,6 @@ public class Bot3Red extends OpMode {
         park = follower.pathBuilder()
                 .addPath(new BezierLine(launchPose, parkPose))
                 .setLinearHeadingInterpolation(launchPose.getHeading(), parkPose.getHeading())
-                .setTimeoutConstraint(500)
                 .build();
     }
 
@@ -140,30 +135,37 @@ public class Bot3Red extends OpMode {
         shotsRemaining = 3;
         burstActive = true;
 
-        // Force first shot available immediately.
-        lastShotTimeS = 0;
+        // Force first shot available immediately by setting last shot time in the past.
+        lastShotTimeS = -SHOT_INTERVAL_S;
 
         actionTimer.resetTimer();
     }
 
     /**
      * Runs the burst scheduler.
+     * 
      * @return true when the burst is complete (or inactive).
      */
     private boolean updateBurst() {
-        if (!burstActive) return true;
+        if (!burstActive)
+            return true;
 
         double t = actionTimer.getElapsedTimeSeconds();
 
         // Fire next shot on interval.
         if (shotsRemaining > 0 && (t - lastShotTimeS) >= SHOT_INTERVAL_S) {
-            shoot();
+            pushServo.setPosition(PUSH_PUSH);
             shotsRemaining--;
             lastShotTimeS = t;
         }
 
-        // Done.
-        if (shotsRemaining <= 0) {
+        // Retract the servo after last shot time + flick time (e.g., 0.5s).
+        if (t - lastShotTimeS >= PUSH_SERVO_FLICK_TIME_S) {
+            pushServo.setPosition(PUSH_IDLE);
+        }
+
+        // Done when all shots fired AND the last one is retracted.
+        if (shotsRemaining <= 0 && (t - lastShotTimeS) >= PUSH_SERVO_FLICK_TIME_S) {
             burstActive = false;
             return true;
         }
@@ -187,7 +189,8 @@ public class Bot3Red extends OpMode {
             }
 
             /*
-             * 1) Wait until firstLaunch complete (at launchPose) and begin to execute burst #1.
+             * 1) Wait until firstLaunch complete (at launchPose) and begin to execute burst
+             * #1.
              */
             case 1: {
                 if (!follower.isBusy()) {
@@ -198,7 +201,8 @@ public class Bot3Red extends OpMode {
             }
 
             /*
-             * 2) Execute burst #1 and wait until it completes, drive pickup1Start and turn on intake.
+             * 2) Execute burst #1 and wait until it completes, drive pickup1Start and turn
+             * on intake.
              */
             case 2: {
                 if (updateBurst()) {
@@ -211,11 +215,11 @@ public class Bot3Red extends OpMode {
 
             /*
              * 3) Wait pickup1Start complete, then drive pickup1End.
-             *    During pickup1End movement, intake runs continuously.
+             * During pickup1End movement, intake runs continuously.
              */
             case 3: {
                 if (!follower.isBusy()) {
-                    follower.followPath(pickup1End, 0.5,false);
+                    follower.followPath(pickup1End, 0.5, false);
                     setPathState(4);
                 }
                 break;
@@ -226,7 +230,7 @@ public class Bot3Red extends OpMode {
              */
             case 4: {
                 if (!follower.isBusy()) {
-                    follower.followPath(secondLaunch,false);
+                    follower.followPath(secondLaunch, false);
                     intakeMotor.setPower(0);
                     setPathState(5);
                 }
@@ -245,7 +249,8 @@ public class Bot3Red extends OpMode {
             }
 
             /*
-             * 6) Execute burst #2 and wait until it completes, drive pickup2Start and turn on intake.
+             * 6) Execute burst #2 and wait until it completes, drive pickup2Start and turn
+             * on intake.
              */
             case 6: {
                 if (updateBurst()) {
@@ -258,11 +263,11 @@ public class Bot3Red extends OpMode {
 
             /*
              * 7) Wait pickup2Start complete, then drive pickup2End.
-             *    During pickup2End movement, intake runs continuously.
+             * During pickup2End movement, intake runs continuously.
              */
             case 7: {
                 if (!follower.isBusy()) {
-                    follower.followPath(pickup2End, 0.5,false);
+                    follower.followPath(pickup2End, 0.5, false);
                     setPathState(8);
                 }
                 break;
@@ -273,7 +278,7 @@ public class Bot3Red extends OpMode {
              */
             case 8: {
                 if (!follower.isBusy()) {
-                    follower.followPath(thirdLaunch,false);
+                    follower.followPath(thirdLaunch, false);
                     intakeMotor.setPower(0);
                     setPathState(9);
                 }
@@ -292,7 +297,8 @@ public class Bot3Red extends OpMode {
             }
 
             /*
-             * 10) Execute burst #3 and wait until it completes, drive pickup3Start and turn on intake.
+             * 10) Execute burst #3 and wait until it completes, drive pickup3Start and turn
+             * on intake.
              */
             case 10: {
                 if (updateBurst()) {
@@ -305,11 +311,11 @@ public class Bot3Red extends OpMode {
 
             /*
              * 11) Wait pickup3Start complete, then drive pickup3End.
-             *    During pickup3End movement, intake runs continuously.
+             * During pickup3End movement, intake runs continuously.
              */
             case 11: {
                 if (!follower.isBusy()) {
-                    follower.followPath(pickup3End, 0.5,false);
+                    follower.followPath(pickup3End, 0.5, false);
                     setPathState(12);
                 }
                 break;
@@ -320,7 +326,7 @@ public class Bot3Red extends OpMode {
              */
             case 12: {
                 if (!follower.isBusy()) {
-                    follower.followPath(fourthLaunch,false);
+                    follower.followPath(fourthLaunch, false);
                     intakeMotor.setPower(0);
                     setPathState(13);
                 }
@@ -368,7 +374,6 @@ public class Bot3Red extends OpMode {
     public void init() {
         pathTimer = new Timer();
         actionTimer = new Timer();
-        opmodeTimer = new Timer();
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -400,7 +405,6 @@ public class Bot3Red extends OpMode {
 
     @Override
     public void start() {
-        opmodeTimer.resetTimer();
         setPathState(0);
     }
 
@@ -428,10 +432,5 @@ public class Bot3Red extends OpMode {
         panelsTelemetry.debug("ActionTimer(s)", actionTimer.getElapsedTimeSeconds());
 
         panelsTelemetry.update(telemetry);
-    }
-
-    public void shoot() {
-        pushServo.setPosition(PUSH_PUSH);
-        pushServo.setPosition(PUSH_IDLE);
     }
 }
