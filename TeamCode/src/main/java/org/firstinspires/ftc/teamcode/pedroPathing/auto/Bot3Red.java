@@ -135,8 +135,8 @@ public class Bot3Red extends OpMode {
         shotsRemaining = 3;
         burstActive = true;
 
-        // Force first shot available immediately by setting last shot time in the past.
-        lastShotTimeS = -SHOT_INTERVAL_S;
+        // Wait a bit before firing the first shot.
+        lastShotTimeS = 1;
 
         actionTimer.resetTimer();
     }
