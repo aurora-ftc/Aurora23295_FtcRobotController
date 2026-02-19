@@ -256,15 +256,23 @@ public class MecanumDrive {
     }
 
     public void trackGoal(Telemetry tele, double forward, double strafe, double slow) {
+
         updateOdo();
 
         double x = this.getOdoX(DistanceUnit.INCH);
         double y = this.getOdoY(DistanceUnit.INCH);
 
+        double dist = 4.4;
+
         double deltaY = goalPose.getY(DistanceUnit.INCH) - y;
         double deltaX = goalPose.getX(DistanceUnit.INCH) - x;
 
-        double thetaGoal = AngleUnit.normalizeRadians(Math.atan2(deltaY, deltaX));
+        double diffTheta = (Math.PI/2.0) - Math.atan2(deltaY, deltaX);
+
+        double deltaY2 = goalPose.getY(DistanceUnit.INCH) - (dist * Math.sin(diffTheta)) - y;
+        double deltaX2 = goalPose.getX(DistanceUnit.INCH) - (dist * Math.sin(diffTheta)) - x;
+
+        double thetaGoal = AngleUnit.normalizeRadians(Math.atan2(deltaX2, deltaY2) - (Math.PI/2.0));
 
         if (Constants.DEBUG) {
             tele.addData("deltaY", deltaY);
