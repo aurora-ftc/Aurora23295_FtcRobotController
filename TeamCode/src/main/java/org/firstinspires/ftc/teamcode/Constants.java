@@ -23,7 +23,7 @@ public class Constants {
 
     public static double AUTO_FAR_POWER = 73; //formerly 63 and TC is SOOO cute
 
-    public static double DRIVE_KP = 1.76;
+    public static double DRIVE_KP = 1.02;
     public static double DRIVE_KI = 0.0;
     public static double DRIVE_KD = 0.003;
 
@@ -33,19 +33,19 @@ public class Constants {
     public static double FLYWHEEL_KI = 0.05; //0.05
     public static double FLYWHEEL_KD = 0.002; //0.002
     public static double FLYWHEEL_KV = 0.01; //0.01
-    public static double FLYWHEEL_KS = 0.0055; //0.004
+    public static double FLYWHEEL_KS = 0.0; //0.004
 
     public static double MAX_FLYWHEEL_KV = 0.014;
     public static double MIN_FLYWHEEL_KV = 0.006;
 
     public static double VOLTS_NOMINAL = 12.5;
 
-    public static double LAUNCHER_ENCODER_PER_REV = 28.0;
+    public static double LAUNCHER_ENCODER_PER_REV = 28.0; //Still correct robot 4
 
-    public static double LIFT_SERVO_MIN = 0.082;
-    public static double LIFT_SERVO_MAX = 0.228;
-    public static double LIFT_SERVO_UP = 0.0;
-    public static double LIFT_SERVO_DOWN = 1.0;
+    public static double LIFT_SERVO_MIN = 0.18;
+    public static double LIFT_SERVO_MAX = LIFT_SERVO_MIN + 0.105;
+    public static double LIFT_SERVO_CLOSE = 0.0;
+    public static double LIFT_SERVO_OPEN = 1.0;
     public static double LIFT_SERVO_FLICK_TIME = 120.0;
 
     public static double[] POWER_STEPS = {56, 58, 63, 65, 67, 73.2, 85}; //{40, 42, 44, 85} old one idk why no work

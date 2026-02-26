@@ -152,15 +152,9 @@ public class DriveOpModePIDTest extends OpMode {
             launcher.stepDownPower();
 
         if (gamepad1.crossWasPressed()) {
-            launcher.liftUp();
+            launcher.liftOpen();
             startWait = matchTime.milliseconds();
             liftDown = false;
-        }
-
-        if (!liftDown && matchTime.milliseconds() >= startWait + 100) {
-            launcher.liftDown();
-            liftDown = true;
-            launcher.intakeBlipReset();
         }
 
         double dist = drive.getDistanceFromGoal();

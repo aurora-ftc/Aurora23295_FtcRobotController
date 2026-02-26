@@ -3,9 +3,7 @@ package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 import static org.firstinspires.ftc.teamcode.Constants.BLUE_SIDE;
 import static org.firstinspires.ftc.teamcode.Constants.DEBUG;
 import static org.firstinspires.ftc.teamcode.Constants.DRIVE_PID_BUFFER_MS;
-import static org.firstinspires.ftc.teamcode.Constants.GOAL_POSE_BLUE;
 import static org.firstinspires.ftc.teamcode.Constants.GOAL_POSE_RED;
-import static org.firstinspires.ftc.teamcode.Constants.INITIAL_POSE_BLUE;
 import static org.firstinspires.ftc.teamcode.Constants.INITIAL_POSE_RED;
 import static org.firstinspires.ftc.teamcode.Constants.LIFT_SERVO_FLICK_TIME;
 import static org.firstinspires.ftc.teamcode.Constants.LT_DEAD_ZONE;
@@ -248,13 +246,13 @@ public class Red extends OpMode {
             launchSystem.toggleIntakeReverse();
 
         if (gamepad1.crossWasPressed()) {
-            launchSystem.liftUp();
+            launchSystem.liftOpen();
             startWait = matchTime.milliseconds();
             liftDown = false;
         }
 
         if (!liftDown && matchTime.milliseconds() >= startWait + LIFT_SERVO_FLICK_TIME) {
-            launchSystem.liftDown();
+            launchSystem.liftClose();
             liftDown = true;
             launchSystem.intakeBlipReset();
         }

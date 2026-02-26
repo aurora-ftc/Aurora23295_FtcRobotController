@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriver;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
@@ -68,12 +69,13 @@ public class MecanumDrive {
         driveMotors.setPower(0);
 
         //Current Bot Offsets: -41, 0, MM (11/13)
-        odo.setOffsets(-41, 0, DistanceUnit.MM);
+        //odo.setOffsets(-16, -6.5, DistanceUnit.CM);
+        odo.setOffsets(-7.54, -15.24, DistanceUnit.CM);
         odo.setEncoderResolution(GoBildaPinpointDriverRR.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
         //Current Bot Directions: FORWARD, REVERSED (11/13)
-        odo.setEncoderDirections(GoBildaPinpointDriverRR.EncoderDirection.FORWARD,
-                GoBildaPinpointDriverRR.EncoderDirection.REVERSED);
+        odo.setEncoderDirections(GoBildaPinpointDriverRR.EncoderDirection.REVERSED,
+                GoBildaPinpointDriverRR.EncoderDirection.FORWARD);
 
         //Calibrate ODO
         odo.resetPosAndIMU();
@@ -96,10 +98,10 @@ public class MecanumDrive {
     }
 
     public void drive(double forward, double strafe, double rotate, double slow) {
-        double frontLeftPower = forward + strafe - rotate;
-        double backLeftPower = forward - strafe - rotate;
-        double frontRightPower = forward - strafe + rotate;
-        double backRightPower = forward + strafe + rotate;
+        double frontLeftPower = forward + strafe + rotate;
+        double backLeftPower = forward - strafe + rotate;
+        double frontRightPower = forward - strafe - rotate;
+        double backRightPower = forward + strafe - rotate;
 
         double maxPower = 1.0;
         double maxSpeed = 1.0;
@@ -255,32 +257,20 @@ public class MecanumDrive {
         this.trackGoalOn = trackGoalOn;
     }
 
-    public void trackGoal(Telemetry tele, double forward, double strafe, double slow) {
-
+    public double angleToGoal() {
         updateOdo();
 
         double x = this.getOdoX(DistanceUnit.INCH);
         double y = this.getOdoY(DistanceUnit.INCH);
 
-        double dist = 4.4;
-
         double deltaY = goalPose.getY(DistanceUnit.INCH) - y;
         double deltaX = goalPose.getX(DistanceUnit.INCH) - x;
 
-        double diffTheta = (Math.PI/2.0) - Math.atan2(deltaY, deltaX);
+        return AngleUnit.normalizeRadians(Math.atan2(deltaX, deltaY));
+    }
 
-        double deltaY2 = goalPose.getY(DistanceUnit.INCH) - (dist * Math.sin(diffTheta)) - y;
-        double deltaX2 = goalPose.getX(DistanceUnit.INCH) - (dist * Math.sin(diffTheta)) - x;
-
-        double thetaGoal = AngleUnit.normalizeRadians(Math.atan2(deltaX2, deltaY2) - (Math.PI/2.0));
-
-        if (Constants.DEBUG) {
-            tele.addData("deltaY", deltaY);
-            tele.addData("deltaX", deltaX);
-            tele.addData("x", y);
-            tele.addData("x", x);
-            tele.addData("thetaGoal", thetaGoal);
-        }
+    public void trackGoal(Telemetry tele, double forward, double strafe, double slow) {
+        double thetaGoal = angleToGoal();
 
         double output = headingPID(thetaGoal);
 
