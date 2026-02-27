@@ -39,6 +39,7 @@ public class Bot3Red extends OpMode {
     private DcMotor intakeMotor;
     private Servo liftServo;
     private Servo ts1, ts2;
+    private Servo angleServo;
 
     // === Tunable Parameter ===
 
@@ -48,12 +49,12 @@ public class Bot3Red extends OpMode {
     // Poses
     private final Pose startPose = new Pose(87, 8.8, Math.toRadians(0));
     private final Pose launchPose = new Pose(87, 18, Math.toRadians(0));
-    private final Pose pickup1StartPose = new Pose(100, 36, Math.toRadians(0));
-    private final Pose pickup1EndPose = new Pose(120, 36, Math.toRadians(0));
-    private final Pose pickup2StartPose = new Pose(100, 60, Math.toRadians(0));
-    private final Pose pickup2EndPose = new Pose(120, 60, Math.toRadians(0));
-    private final Pose pickup3StartPose = new Pose(100, 84, Math.toRadians(0));
-    private final Pose pickup3EndPose = new Pose(120, 84, Math.toRadians(0));
+    private final Pose pickup1StartPose = new Pose(100, 32, Math.toRadians(0));
+    private final Pose pickup1EndPose = new Pose(120, 32, Math.toRadians(0));
+    private final Pose pickup2StartPose = new Pose(100, 52, Math.toRadians(0));
+    private final Pose pickup2EndPose = new Pose(120, 52, Math.toRadians(0));
+    private final Pose pickup3StartPose = new Pose(100, 78, Math.toRadians(0));
+    private final Pose pickup3EndPose = new Pose(120, 78, Math.toRadians(0));
     private final Pose parkPose = new Pose(85, 40, Math.toRadians(0));
 
     // Paths
@@ -390,9 +391,12 @@ public class Bot3Red extends OpMode {
         liftServo.setPosition(CLOSE);
 
         ts1 = hardwareMap.get(Servo.class, "ts1");
-        ts1.setPosition(0.85);
+        ts1.setPosition(0.82);
         ts2 = hardwareMap.get(Servo.class, "ts2");
-        ts2.setPosition(0.85);
+        ts2.setPosition(0.82);
+
+        angleServo = hardwareMap.get(Servo.class, "angle_servo");
+        angleServo.setPosition(0);
     }
 
     @Override
