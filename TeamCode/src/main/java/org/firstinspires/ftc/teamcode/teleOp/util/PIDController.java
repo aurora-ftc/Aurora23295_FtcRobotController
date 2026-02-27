@@ -3,18 +3,9 @@ package org.firstinspires.ftc.teamcode.teleOp.util;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class PIDController {
-    public double kp;
-    public double ki;
-    public double kd;
-    public double kv;
-    public double ks;
-
-    public double target;
-    public double current;
-    public double output;
+    public double kp, ki, kd, kv, ks;
+    public double target, current, output, previousError, previousTime; // Using System.nanoTime() or ElapsedTime for more accurate timing
     private double integral;
-    public double previousError;
-    public double previousTime; // Using System.nanoTime() or ElapsedTime for more accurate timing
 
     public PIDController(double kp, double ki, double kd) {
         this.kp = kp;
@@ -24,6 +15,7 @@ public class PIDController {
         integral = 0.0;
         previousError = 0.0;// Initialize with current time in actual implementation
     }
+
     public PIDController(double kp, double ki, double kd, double kv, double ks) {
         this.kp = kp;
         this.ki = ki;
@@ -35,29 +27,23 @@ public class PIDController {
         previousError = 0.0;// Initialize with current time in actual implementation
     }
 
-    public void setKP(double kp) {
-        this.kp = kp;
-    }
-
-    public void setKI(double ki) {
-        this.ki = ki;
-    }
-
-    public void setKD(double kd) {
-        this.kd = kd;
-    }
-
-    public void setKV(double kv) {this.kv = kv;}
-
     public void setTarget(double target) {
         this.target = target;
     }
 
+    /**
+     * calculateOutputPID: calculates the output for a given motor using feedback systems
+     *
+     * @param current          the current position of the actuator <b>IN RADIANS</b>
+     * @param time             the time elapsed since startup
+     * @param shouldRadianWrap should full 2pi radians be used
+     * @return the output power to use in the actuator
+     */
     public double calculateOutputPID(double current, double time, boolean shouldRadianWrap) {
         this.current = current;
-        double error = shouldRadianWrap?
+        double error = shouldRadianWrap ?
                 AngleUnit.normalizeRadians(target - current)
-                :(target - current);
+                : (target - current);
         double deltaTime = time - previousTime;
 
         if (deltaTime <= 0) return output;
@@ -75,9 +61,15 @@ public class PIDController {
 
         return output;
     }
-    public double calculateOutputFF(double targetVelocity, double kv) {
-        double FeedForwardOutput = kv * targetVelocity + ks;
-        return FeedForwardOutput;
-    }
 
+    /**
+     * calculateOutputFF: outputs power value from targetVelocity
+     *
+     * @param targetVelocity the target velocity to use
+     * @param kv             velocity dampener constant
+     * @return motor power output
+     */
+    public double calculateOutputFF(double targetVelocity, double kv) {
+        return kv * targetVelocity + ks;
+    }
 }

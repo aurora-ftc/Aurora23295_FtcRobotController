@@ -1,9 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.roadrunner.Pose2d;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
@@ -13,7 +9,6 @@ import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
  * A static field allows data to persist between opmodes.
  */
 public class Storage {
-    public static Pose2d endPoseRR = new Pose2d(-36, -60, Math.toRadians(150));
     public static Pose2D endPose = null;
     public static Mosaic mosaic = Mosaic.UNKNOWN;
 }

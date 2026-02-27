@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp.util;
 
-import static org.firstinspires.ftc.teamcode.Constants.*;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.VOLTS_NOMINAL;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -23,6 +23,4 @@ public class Volts {
         vFiltered = alpha * vRead + (1.0 - alpha) * vFiltered;
         return vFiltered;
     }
-
-
 }

@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.teleOp.util;
 
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-//Credit to Kinnqq for this classs
+//Credit to Kinnqq for this class
 public class DcMotorGroup {
-    private DcMotorEx[] motors;
+    private final DcMotorEx[] motors;
 
     // Constructor using varargs to allow any number of motors
     public DcMotorGroup(DcMotorEx... motors) {
