@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 import static org.firstinspires.ftc.teamcode.Constants.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -12,7 +11,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Storage;
-import org.firstinspires.ftc.teamcode.roadrunner.PinpointDrive;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.Basing;
@@ -29,7 +27,6 @@ public class DriveLaunchMode extends OpMode {
     private final ElapsedTime PIDTimer = new ElapsedTime();
     private final ElapsedTime cameraTimer = new ElapsedTime();
     private final ElapsedTime initTimer = new ElapsedTime();
-    private Pose2d startPose;
     //private PinpointDrive driveRR;
     private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
     private Basing basing = new Basing();
@@ -111,10 +108,6 @@ public class DriveLaunchMode extends OpMode {
                 initialPose = BLUE_SIDE ? INITIAL_POSE_BLUE : INITIAL_POSE_RED;
             else
                 initialPose = Storage.endPose;
-        } else {
-            startPose = new Pose2d(initialPose.getX(DistanceUnit.INCH),
-                    initialPose.getY(DistanceUnit.INCH),
-                    initialPose.getHeading(AngleUnit.RADIANS));
         }
 
         drive.setOdoPosition(initialPose);
@@ -153,10 +146,6 @@ public class DriveLaunchMode extends OpMode {
                     poseCalculated = true;
                     lastHeading = initialPose.getHeading(AngleUnit.RADIANS);
                     drive.setPIDTargetHeading(lastHeading);
-
-                    startPose = new Pose2d(initialPose.getX(DistanceUnit.INCH),
-                            initialPose.getY(DistanceUnit.INCH),
-                            initialPose.getHeading(AngleUnit.RADIANS));
                 } // So it doesn't fry the camera sensor
                 cameraTimer.reset();
             }

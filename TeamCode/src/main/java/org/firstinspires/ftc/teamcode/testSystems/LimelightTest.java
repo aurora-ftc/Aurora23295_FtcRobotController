@@ -21,7 +21,7 @@ public class LimelightTest extends OpMode {
 
     private LimelightControl limelightControl;
     private Mosaic detectedPattern;
-    private final MecanumDrive drive = new MecanumDrive();
+    private MecanumDrive drive = new MecanumDrive();
 
     @Override
     public void init() {

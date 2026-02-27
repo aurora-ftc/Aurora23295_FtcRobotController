@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -10,18 +8,18 @@ import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 
 @TeleOp(name = "DriveOpMode", group = "OpModes")
 public class DriveOpMode extends OpMode {
-    private final ElapsedTime matchTimer = new ElapsedTime();
     MecanumDrive drive = new MecanumDrive();
     double forward, strafe, rotate, slow;
+    private final ElapsedTime matchTimer = new ElapsedTime();
     private boolean endgameRumbleDone;
     private double recenterTime = 0;
 
     @Override
     public void init() {
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         //Initializes hardware
         drive.init(hardwareMap, telemetry);
+
     }
 
     @Override
@@ -68,7 +66,7 @@ public class DriveOpMode extends OpMode {
         if (gamepad1.touchpad) {
             gamepad1.rumbleBlips(2);
             recenterTime = matchTimer.seconds();
-            drive.resetOdoHeading();
+            drive.resetOdoHeading(telemetry);
             return;
         }
 
@@ -79,13 +77,16 @@ public class DriveOpMode extends OpMode {
             endgameRumbleDone = true;
         }
 
+        telemetry.addData("forward", forward);
+        telemetry.addData("strafe", strafe);
+        telemetry.addData("rotate", rotate);
+        telemetry.addData("speed", slow);
+
         /*
         Use this for non field-centric code:
         drive.drive(forward, strafe, rotate, slow);
          */
-        drive.driveFieldOriented(forward, strafe, rotate, slow);
+        drive.driveFieldOriented(forward, strafe, rotate, slow, telemetry);
 
-        // All telemetry is now handled in updateTelemetry methods
-        drive.log(telemetry, slow);
     }
 }

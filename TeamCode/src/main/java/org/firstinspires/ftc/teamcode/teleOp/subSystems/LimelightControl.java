@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleOp.subSystems;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import static org.firstinspires.ftc.teamcode.Constants.*;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -14,7 +14,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
 import java.util.ArrayList;
@@ -24,42 +23,29 @@ public class LimelightControl {
     /**
      * Plug LimelightControl into Computer and set values for offsets
      */
-    private final Limelight3A limelight;
+    private Limelight3A limelight;
     private byte obeliskID;
     private Mosaic mosaic;
     private List<LLResultTypes.FiducialResult> obeliskList = new ArrayList<>();
 
     public LimelightControl(HardwareMap hwMap, int pipeline) {
-        limelight = hwMap.get(Limelight3A.class, Constants.HWMap.LIMELIGHT);
+        limelight = hwMap.get(Limelight3A.class, HWMap.LIMELIGHT);
         limelight.pipelineSwitch(pipeline); //0 is the normal
         limelight.start();
-    }
-
-    public static Pose2D fixCoordinates(Pose2D pose) {
-        double x = pose.getX(DistanceUnit.INCH);
-        double y = pose.getY(DistanceUnit.INCH);
-        double theta = pose.getHeading(AngleUnit.DEGREES);
-        // Reverse x and y
-        return new Pose2D(DistanceUnit.INCH, y, -x, AngleUnit.DEGREES, theta);
-    }
-
-    public Limelight3A getInstance() {
-        return limelight;
     }
 
     public void changePipeline(int index) {
         limelight.pipelineSwitch(index);
     }
 
-    public void close() {
-        limelight.close();
-    }
+    public void close() {limelight.close();}
 
     public Pose3D get3DLocationMT1(Double heading) {
         limelight.updateRobotOrientation(heading);
         LLResult llResult = limelight.getLatestResult();
         if (llResult != null && llResult.isValid()) {
-            return llResult.getBotpose_MT2();
+            Pose3D botPose = llResult.getBotpose_MT2();
+            return botPose;
         } else {
             return null;
         }
@@ -82,15 +68,12 @@ public class LimelightControl {
     public Pose2D get2DLocationMT2(Double heading) {
         limelight.updateRobotOrientation(heading);
         LLResult llResult = limelight.getLatestResult();
-
         if (llResult != null && llResult.isValid()) {
             Pose3D botPose3D = llResult.getBotpose_MT2();
             Position pose = botPose3D.getPosition();
-
             YawPitchRollAngles yawPitchRollAngles = botPose3D.getOrientation();
             Pose2D botPose2D = new Pose2D(DistanceUnit.METER, pose.x, pose.y,
                     AngleUnit.RADIANS, yawPitchRollAngles.getYaw(AngleUnit.RADIANS));
-
             return fixCoordinates(botPose2D);
         } else {
             return null;
@@ -124,20 +107,17 @@ public class LimelightControl {
     }
 
     public void updateTelemetry(Telemetry telemetry) {
-        MultipleTelemetry multiTelemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
-        multiTelemetry.addLine("===== Limelight Control Telemetry =====");
-        multiTelemetry.addData("Limelight Status", limelight.getStatus());
-        multiTelemetry.addData("Obelisk ID", obeliskID);
-        multiTelemetry.addData("Mosaic", mosaic != null ? mosaic.name() : "UNKNOWN");
-        multiTelemetry.addData("Tags Detected", obeliskList != null ? obeliskList.size() : 0);
-
-        multiTelemetry.update();
+        telemetry.addData("LimelightControl Status", limelight.getStatus());
+        telemetry.addLine();
+        telemetry.addData("Obelisk", obeliskID);
     }
 
-    public double getDistance(double ta) {
-        double scale = 30665.96; //change ts
-        return scale / ta;
+    public static Pose2D fixCoordinates(Pose2D pose) {
+        double x = pose.getX(DistanceUnit.INCH);
+        double y = pose.getY(DistanceUnit.INCH);
+        double theta = pose.getHeading(AngleUnit.DEGREES);
+        Pose2D newPose = new Pose2D(DistanceUnit.INCH, y, -x, AngleUnit.DEGREES, theta);
+        return newPose;
     }
 
 }

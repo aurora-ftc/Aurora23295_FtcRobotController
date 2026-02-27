@@ -1,17 +1,15 @@
 package org.firstinspires.ftc.teamcode.testSystems;
 
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-
-import org.firstinspires.ftc.teamcode.teleOp.Constants;
 
 @TeleOp(name = "HSV_Tuner", group = "TestModes")
 public class HSV_Tuner extends LinearOpMode {
 
     // Adjust defaults if you want
-    private static final String SENSOR_NAME = Constants.HWMap.COLOR_SENSOR_RIGHT;
+    private static final String SENSOR_NAME = "color_sensor";
     private static final int DEFAULT_MAX_SAMPLES = 3000;
 
     @Override

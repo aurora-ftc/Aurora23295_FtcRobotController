@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -60,9 +59,6 @@ public class Constants {
             AngleUnit.DEGREES, 90);
     public static final Pose2D INITIAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 13, -35,
             AngleUnit.DEGREES, 90);
-
-    public static final Vector2d PARK_POSE_BLUE = new Vector2d(33, -39);
-    public static final Vector2d PARK_POSE_RED = new Vector2d(-33, -39);
 
     public static class HWMap {
         public static String FL_MOTOR = "front_left_motor";
