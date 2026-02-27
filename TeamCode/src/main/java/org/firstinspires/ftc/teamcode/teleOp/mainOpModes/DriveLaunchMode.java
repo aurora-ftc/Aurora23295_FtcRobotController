@@ -30,7 +30,7 @@ public class DriveLaunchMode extends OpMode {
     private final ElapsedTime cameraTimer = new ElapsedTime();
     private final ElapsedTime initTimer = new ElapsedTime();
     private Pose2d startPose;
-    private PinpointDrive driveRR;
+    //private PinpointDrive driveRR;
     private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
     private Basing basing = new Basing();
     private Turret turret = new Turret();
@@ -115,8 +115,6 @@ public class DriveLaunchMode extends OpMode {
             startPose = new Pose2d(initialPose.getX(DistanceUnit.INCH),
                     initialPose.getY(DistanceUnit.INCH),
                     initialPose.getHeading(AngleUnit.RADIANS));
-            driveRR = new PinpointDrive(hardwareMap, startPose);
-
         }
 
         drive.setOdoPosition(initialPose);
@@ -159,7 +157,6 @@ public class DriveLaunchMode extends OpMode {
                     startPose = new Pose2d(initialPose.getX(DistanceUnit.INCH),
                             initialPose.getY(DistanceUnit.INCH),
                             initialPose.getHeading(AngleUnit.RADIANS));
-                    driveRR = new PinpointDrive(hardwareMap, startPose);
                 } // So it doesn't fry the camera sensor
                 cameraTimer.reset();
             }
@@ -237,7 +234,7 @@ public class DriveLaunchMode extends OpMode {
         else if (gamepad2.dpad_left)
             turret.clockwise();
 
-        if (gamepad2.crossWasPressed())
+        if (gamepad1.rightBumperWasPressed())
             turret.toggle();
 
         // Launcher on/off
@@ -251,7 +248,7 @@ public class DriveLaunchMode extends OpMode {
             launchSystem.toggleIntakeReverse();
 
         if (gamepad1.crossWasPressed())
-            launchSystem.liftToggle();
+            launchSystem.liftBlip();
 
         // Reset heading
         if (gamepad1.touchpadWasPressed()) {
@@ -273,8 +270,10 @@ public class DriveLaunchMode extends OpMode {
             return;
         }
 
-        if (gamepad1.rightBumperWasPressed())
-            drive.toggleTrackGoal();
+        if (gamepad2.left_bumper)
+            launchSystem.angleDown();
+        else if (gamepad2.right_bumper)
+            launchSystem.angleUp();
 
         if (gamepad1.leftBumperWasPressed())
             launchSystem.toggleAutoPower();
@@ -285,7 +284,6 @@ public class DriveLaunchMode extends OpMode {
 //            basing.up();
 //        else
 //            basing.idle();
-
 
         // Continuous subsystem updates
         double dist = drive.getDistanceFromGoal();
@@ -317,6 +315,7 @@ public class DriveLaunchMode extends OpMode {
 
         telemetry.addData("Mosaic", mosaic.name());
         telemetry.addData("BlueSide", BLUE_SIDE);
+        telemetry.addData("dist", dist);
 
         telemetry.update();
     }

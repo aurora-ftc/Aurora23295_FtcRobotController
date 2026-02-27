@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 @Config
 public class Constants {
     public static boolean DEBUG = false;
-    public static boolean BLUE_SIDE = true;
+    public static boolean BLUE_SIDE = false;
     public static boolean IS_FIELD_CENTRIC = true;
     public static boolean USE_MAHALANOBIS_DISTANCE = true;
     public static boolean USE_PID = true;
@@ -23,15 +23,15 @@ public class Constants {
 
     public static double AUTO_FAR_POWER = 73; //formerly 63 and TC is SOOO cute
 
-    public static double DRIVE_KP = 1.02;
+    public static double DRIVE_KP = 1.00;
     public static double DRIVE_KI = 0.0;
-    public static double DRIVE_KD = 0.003;
+    public static double DRIVE_KD = 0.025;
 
     public static double DRIVE_PID_BUFFER_MS = 150;
 
     public static double FLYWHEEL_KP = 0.08; //0.08
     public static double FLYWHEEL_KI = 0.05; //0.05
-    public static double FLYWHEEL_KD = 0.002; //0.002
+    public static double FLYWHEEL_KD = 0.022; //0.002
     public static double FLYWHEEL_KV = 0.01; //0.01
     public static double FLYWHEEL_KS = 0.0; //0.004
 

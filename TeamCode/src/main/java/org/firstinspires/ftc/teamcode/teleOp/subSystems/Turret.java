@@ -40,16 +40,20 @@ public class Turret {
         turret.scaleRange(min, max);
 
         pos = zero;
-        tsb.setPosition(pos);
+        //tsb.setPosition(pos);
+        turret.setPosition(pos);
 
         auto();
     }
 
     public void periodic(MecanumDrive drive) {
         if (currentState == State.AUTO)
-            pos = clamp(diffTheta(drive) / Math.PI + zero);
-        //turret.setPosition(pos);
-        tsb.setPosition(pos);
+            pos = clamp((diffTheta(drive) /
+                    (1.27300194932 * Math.PI)) + zero); //Assumes 74-114 Gear ratio and 353rads
+        else
+            pos = zero;
+        turret.setPosition(pos);
+        //tsb.setPosition(pos);
     }
 
     public void clockwise() {

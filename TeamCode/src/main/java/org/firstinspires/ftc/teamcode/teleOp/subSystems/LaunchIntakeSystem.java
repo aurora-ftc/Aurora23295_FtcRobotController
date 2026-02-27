@@ -22,7 +22,9 @@ public class LaunchIntakeSystem {
 
     private Volts volts = new Volts();
     private ElapsedTime intakeTimer = new ElapsedTime();
+    private ElapsedTime liftTimer = new ElapsedTime();
     private PIDController flywheelPID;
+    private Indicator indicator = new Indicator();
 
     private final int minStep = 0;
     private int maxStep = 0;
@@ -33,7 +35,6 @@ public class LaunchIntakeSystem {
 
     public boolean launcherOn = false;
     public boolean intakeOn = false;
-    private final ElapsedTime time = new ElapsedTime();
 
     private double intakeBlipReset = 0;
     private boolean autoPowerOn = false;
@@ -49,10 +50,13 @@ public class LaunchIntakeSystem {
         liftServo = hwMap.get(Servo.class, HWMap.LIFT_SERVO);
         angleServo = hwMap.get(Servo.class, "angle_servo");
 
+        indicator.init(hwMap);
+
         launcherMotor.setDirection(DcMotorEx.Direction.FORWARD);
         intakeMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
         liftServo.setDirection(Servo.Direction.FORWARD);
+        angleServo.setDirection(Servo.Direction.REVERSE);
 
         launcherMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         launcherMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -63,19 +67,23 @@ public class LaunchIntakeSystem {
         intakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         liftServo.scaleRange(LIFT_SERVO_MIN, LIFT_SERVO_MAX);
-        angleServo.scaleRange(0, 1);
+        angleServo.scaleRange(0, 1); //MIN down Max UP
 
         flywheelPID = new PIDController(FLYWHEEL_KP,
                 FLYWHEEL_KI, FLYWHEEL_KD,
                 FLYWHEEL_KV, FLYWHEEL_KS);
         flywheelPID.previousTime = System.nanoTime() / 1e9;
 
-        //Set Servo Down
-        liftClose();
-
         debugTelemetry(telemetry);
 
         intakeTimer.reset();
+        liftTimer.reset();
+
+        angleServo.setPosition(1);
+
+        indicator.blue();
+
+        liftClose();
     }
 
     public void spinToVelocity(double targetVelocity, Telemetry tele) {
@@ -114,7 +122,6 @@ public class LaunchIntakeSystem {
         packet.put("output", output);
 
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
-
     }
 
     private void setLauncherPower(int step, Telemetry tele, double autoPow, HardwareMap hwMap) {
@@ -138,6 +145,14 @@ public class LaunchIntakeSystem {
     }
 
     public void updateLauncher(Telemetry tele, double dist, HardwareMap hwMap) {
+
+        if (Math.abs(flywheelPID.current - flywheelPID.target) <= 1.5 && intakeMotor.getPower() >= 0.5 && launcherMotor.getPower() != 0)
+            indicator.green();
+        else if (Math.abs(flywheelPID.current - flywheelPID.target) <= 1.5 && launcherMotor.getPower() != 0)
+            indicator.yellow();
+        else
+            indicator.red();
+
         double pow = calcAutoPower(dist);
 
         batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
@@ -147,6 +162,9 @@ public class LaunchIntakeSystem {
         tele.addData("Battery Volts", batteryVolts);
 
         setLauncherPower(currentStep, tele, pow, hwMap);
+
+        if (liftTimer.milliseconds() > 1000 && liftOpen)
+            liftClose();
     }
 
     public void stepUpPower() {
@@ -190,11 +208,17 @@ public class LaunchIntakeSystem {
         }
     }
 
-    public void liftToggle() {
-        if (liftOpen)
-            liftClose();
-        else
-            liftOpen();
+    public void angleUp() {
+        angleServo.setPosition(angleServo.getPosition() + 0.01);
+    }
+
+    public void angleDown() {
+        angleServo.setPosition(angleServo.getPosition() - 0.01);
+    }
+
+    public void liftBlip() {
+        liftTimer.reset();
+        liftOpen();
     }
 
     public void liftOpen() {
@@ -224,6 +248,7 @@ public class LaunchIntakeSystem {
         telemetry.addLine();
         telemetry.addData("liftOpen",liftOpen);
         telemetry.addData("liftPos", liftServo.getPosition());
+        telemetry.addData("anglePos", angleServo.getPosition());
     }
 
     public void debugTelemetry(Telemetry telemetry) {
