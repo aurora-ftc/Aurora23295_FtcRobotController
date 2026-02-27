@@ -63,8 +63,8 @@ public class Constants {
     public static final double GATE_OPEN = 0;
     public static final double GATE_CLOSE = 1;
 
-    public static final double PUSH_PUSH = 1;
-    public static final double PUSH_IDLE = 0;
+    public static final double CLOSE = 1;
+    public static final double OPEN = 0;
 
     public static double VELOCITY_THRESHOLD = 100;
 
@@ -118,6 +118,8 @@ public class Constants {
         public static final String INDEXER_MOTOR = "indexer_motor";
         public static final String PUSH_SERVO = "push_servo";
         public static final String GATE_SERVO = "gate_servo";
+        public static final String LIFT_SERVO = "lift_servo";
+
 
         // Selector Pos Sensors
         public static final String ELC_ANALOG = "rotary_encoder";

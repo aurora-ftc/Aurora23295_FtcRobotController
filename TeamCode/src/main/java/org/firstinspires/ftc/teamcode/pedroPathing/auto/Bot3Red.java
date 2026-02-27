@@ -37,14 +37,12 @@ public class Bot3Red extends OpMode {
     // Subsystems
     private DcMotor launcherMotor;
     private DcMotor intakeMotor;
-    private Servo pushServo;
-
-    // Power steps
+    private Servo liftServo;
 
     // === Tunable Parameter ===
 
-    public static double SHOT_INTERVAL_S = 1;
-    public static double PUSH_SERVO_FLICK_TIME_S = 0.5;
+    public static double WAIT_TIME_S = 1;
+    public static double TOTAL_TIME_S = 2;
 
     // Poses
     private final Pose startPose = new Pose(85, 8.8, Math.toRadians(90));
@@ -63,8 +61,7 @@ public class Bot3Red extends OpMode {
 
     // === Burst scheduler ===
     private boolean burstActive = false;
-    private int shotsRemaining = 0;
-    private double lastShotTimeS = 0.0;
+    private double startTimeS = 0.0;
 
     // --- Build paths ---
     private void buildPaths() {
@@ -132,11 +129,10 @@ public class Bot3Red extends OpMode {
 
     // --- Burst shooting (non-blocking) ---
     private void startBurst() {
-        shotsRemaining = 3;
         burstActive = true;
 
-        // Wait a bit before firing the first shot.
-        lastShotTimeS = 1;
+        // Wait a bit before firing.
+        startTimeS = 1;
 
         actionTimer.resetTimer();
     }
@@ -152,20 +148,14 @@ public class Bot3Red extends OpMode {
 
         double t = actionTimer.getElapsedTimeSeconds();
 
-        // Fire next shot on interval.
-        if (shotsRemaining > 0 && (t - lastShotTimeS) >= SHOT_INTERVAL_S) {
-            pushServo.setPosition(PUSH_PUSH);
-            shotsRemaining--;
-            lastShotTimeS = t;
+        if ((t - startTimeS) >= WAIT_TIME_S && (t - startTimeS) < TOTAL_TIME_S) {
+            liftServo.setPosition(OPEN);
+            intakeMotor.setPower(1);
         }
 
-        // Retract the servo after last shot time + flick time (e.g., 0.5s).
-        if (t - lastShotTimeS >= PUSH_SERVO_FLICK_TIME_S) {
-            pushServo.setPosition(PUSH_IDLE);
-        }
-
-        // Done when all shots fired AND the last one is retracted.
-        if (shotsRemaining <= 0 && (t - lastShotTimeS) >= PUSH_SERVO_FLICK_TIME_S) {
+        if ((t - startTimeS) >= TOTAL_TIME_S) {
+            intakeMotor.setPower(0);
+            liftServo.setPosition(CLOSE);
             burstActive = false;
             return true;
         }
@@ -183,6 +173,7 @@ public class Bot3Red extends OpMode {
              */
             case 0: {
                 launcherMotor.setPower(0.72);
+                intakeMotor.setPower(1);
                 follower.followPath(firstLaunch);
                 setPathState(1);
                 break;
@@ -393,9 +384,9 @@ public class Bot3Red extends OpMode {
         intakeMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         intakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
-        pushServo = hardwareMap.get(Servo.class, HWMap.PUSH_SERVO);
-        pushServo.scaleRange(0.05, 0.3);
-        pushServo.setPosition(PUSH_IDLE);
+        liftServo = hardwareMap.get(Servo.class, HWMap.LIFT_SERVO);
+        liftServo.scaleRange(0.18, 0.285);
+        liftServo.setPosition(CLOSE);
     }
 
     @Override
@@ -427,7 +418,6 @@ public class Bot3Red extends OpMode {
         panelsTelemetry.debug("Heading", p.getHeading());
 
         panelsTelemetry.debug("BurstActive", burstActive);
-        panelsTelemetry.debug("ShotsRemaining", shotsRemaining);
         panelsTelemetry.debug("PathTimer(s)", pathTimer.getElapsedTimeSeconds());
         panelsTelemetry.debug("ActionTimer(s)", actionTimer.getElapsedTimeSeconds());
 

@@ -154,14 +154,14 @@ public class Bot3Blue extends OpMode {
 
         // Fire next shot on interval.
         if (shotsRemaining > 0 && (t - lastShotTimeS) >= SHOT_INTERVAL_S) {
-            pushServo.setPosition(PUSH_PUSH);
+            pushServo.setPosition(CLOSE);
             shotsRemaining--;
             lastShotTimeS = t;
         }
 
         // Retract the servo after last shot time + flick time (e.g., 0.5s).
         if (t - lastShotTimeS >= PUSH_SERVO_FLICK_TIME_S) {
-            pushServo.setPosition(PUSH_IDLE);
+            pushServo.setPosition(OPEN);
         }
 
         // Done when all shots fired AND the last one is retracted.
@@ -395,7 +395,7 @@ public class Bot3Blue extends OpMode {
 
         pushServo = hardwareMap.get(Servo.class, HWMap.PUSH_SERVO);
         pushServo.scaleRange(0.05, 0.3);
-        pushServo.setPosition(PUSH_IDLE);
+        pushServo.setPosition(CLOSE);
     }
 
     @Override

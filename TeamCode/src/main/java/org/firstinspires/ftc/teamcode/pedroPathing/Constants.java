@@ -19,7 +19,7 @@ public class Constants {
             .mass(13)
             .forwardZeroPowerAcceleration(-40.905039604608426)
             .lateralZeroPowerAcceleration(-89.9106235392484)
-            .headingPIDFCoefficients(new PIDFCoefficients(1.3, 0.0, 0.002, 0));
+            .headingPIDFCoefficients(new PIDFCoefficients(1, 0.0, 0.025, 0));
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
@@ -37,16 +37,16 @@ public class Constants {
             .rightRearMotorName("back_right_motor")
             .leftRearMotorName("back_left_motor")
             .leftFrontMotorName("front_left_motor")
-            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .xVelocity(75.83300396776576)
+            .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .xVelocity(77.40834297720842)
             .yVelocity(48.73576342965674);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-6.7)
-            .strafePodX(-5.05)
+            .forwardPodY(-6.8)
+            .strafePodX(-3)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("odo")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
