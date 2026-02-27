@@ -63,8 +63,8 @@ public class Constants {
     public static final double GATE_OPEN = 0;
     public static final double GATE_CLOSE = 1;
 
-    public static final double CLOSE = 1;
-    public static final double OPEN = 0;
+    public static final double CLOSE = 0;
+    public static final double OPEN = 1;
 
     public static double VELOCITY_THRESHOLD = 100;
 
