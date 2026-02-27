@@ -259,11 +259,6 @@ public class DriveLaunchMode extends OpMode {
             return;
         }
 
-        if (gamepad2.left_bumper)
-            launchSystem.angleDown();
-        else if (gamepad2.right_bumper)
-            launchSystem.angleUp();
-
         if (gamepad1.leftBumperWasPressed())
             launchSystem.toggleAutoPower();
 

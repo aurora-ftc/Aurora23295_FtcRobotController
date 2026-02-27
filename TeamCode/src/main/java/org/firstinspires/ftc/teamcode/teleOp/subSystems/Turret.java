@@ -26,7 +26,7 @@ public class Turret {
     private State currentState;
 
     //Adjustable
-    private final double min = 0.1, max = 1.0, zero = 0.46; //Subject to change
+    private final double min = 0.1, max = 0.92, zero = 0.46; //Subject to change
 
     public void init(HardwareMap hwMap) {
         tsf = hwMap.get(Servo.class, "ts1");
@@ -49,7 +49,7 @@ public class Turret {
     public void periodic(MecanumDrive drive) {
         if (currentState == State.AUTO)
             pos = clamp((diffTheta(drive) /
-                    (1.27300194932 * Math.PI)) + zero); //Assumes 74-114 Gear ratio and 353rads
+                    (0.9 * Math.PI)) + zero); //Assumes 74-114 Gear ratio and 353rads
         else
             pos = zero;
         turret.setPosition(pos);
