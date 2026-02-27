@@ -23,10 +23,10 @@ public class Turret {
         MANUAL,
         AUTO;
     }
-    private State currentState = State.MANUAL;
+    private State currentState;
 
     //Adjustable
-    private final double min = 0.17, max = 1.0, zero = 0.5; //Subject to change
+    private final double min = 0.1, max = 1.0, zero = 0.46; //Subject to change
 
     public void init(HardwareMap hwMap) {
         tsf = hwMap.get(Servo.class, "ts1");
@@ -40,15 +40,16 @@ public class Turret {
         turret.scaleRange(min, max);
 
         pos = zero;
-        turret.setPosition(pos);
+        tsb.setPosition(pos);
 
-        manual();
+        auto();
     }
 
     public void periodic(MecanumDrive drive) {
         if (currentState == State.AUTO)
             pos = clamp(diffTheta(drive) / Math.PI + zero);
-        turret.setPosition(pos);
+        //turret.setPosition(pos);
+        tsb.setPosition(pos);
     }
 
     public void clockwise() {
