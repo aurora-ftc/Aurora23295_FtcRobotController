@@ -31,7 +31,7 @@ public class LaunchIntakeSystem {
     private int currentStep = minStep + 1;
     private double[] powerSteps;
 
-    private double power, batteryVolts, batteryCorrectedKv;
+    private double power, batteryVolts, batteryCorrectedKv, angle;
 
     public boolean launcherOn = false;
     public boolean intakeOn = false;
@@ -79,9 +79,9 @@ public class LaunchIntakeSystem {
         intakeTimer.reset();
         liftTimer.reset();
 
-        angleServo.setPosition(1);
+        angleServo.setPosition(0);
 
-        indicator.blue();
+        indicator.green();
 
         liftClose();
     }
@@ -128,7 +128,8 @@ public class LaunchIntakeSystem {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
                 if (autoPowerOn) spinToVelocity(autoPow, tele);
-                else spinToVelocity(powerSteps[step], tele);
+//                else spinToVelocity(powerSteps[step], tele);
+                else spinToVelocity(46.5, tele);
             } else {
                 launcherMotor.setPower(0.0);
                 //spinToVelocity(0, tele);
@@ -154,6 +155,7 @@ public class LaunchIntakeSystem {
             indicator.red();
 
         double pow = calcAutoPower(dist);
+        double ang = calcAutoHood(dist);
 
         batteryVolts = volts.smoothVolts(volts.readBatteryVoltage(hwMap));
         batteryVolts = batteryVolts <= 15 && batteryVolts >= 9?
@@ -162,6 +164,11 @@ public class LaunchIntakeSystem {
         tele.addData("Battery Volts", batteryVolts);
 
         setLauncherPower(currentStep, tele, pow, hwMap);
+
+        if (!autoPowerOn)
+            ang = 0;
+
+        angleServo.setPosition(ang);
 
         if (liftTimer.milliseconds() > 1000 && liftOpen)
             liftClose();
@@ -195,10 +202,6 @@ public class LaunchIntakeSystem {
         }
     }
 
-    public void intakeBlipReset() {
-        intakeTimer.reset();
-    }
-
     public void intakeBlipLoop() {
         if (200 < intakeTimer.milliseconds() &&
                 intakeTimer.milliseconds() < 600) {
@@ -206,14 +209,6 @@ public class LaunchIntakeSystem {
         } else {
             if (!intakeOn) intakeMotor.setPower(0);
         }
-    }
-
-    public void angleUp() {
-        angleServo.setPosition(angleServo.getPosition() + 0.01);
-    }
-
-    public void angleDown() {
-        angleServo.setPosition(angleServo.getPosition() - 0.01);
     }
 
     public void liftBlip() {
@@ -234,21 +229,13 @@ public class LaunchIntakeSystem {
 
     public void compTelemetry(Telemetry telemetry) {
         telemetry.addLine();
-        telemetry.addData("Launcher Status", launcherOn? "On" : "Off");
-        telemetry.addData("Intake Status", intakeOn? "On" : "Off");
-        telemetry.addLine();
-        telemetry.addData("Auto Power", autoPowerOn ? "On": "Off");
-        telemetry.addData("Launcher Power (%)", !autoPowerOn
-                ? (int) (((powerSteps[currentStep] / 85.0) * 100) + 0.5)
-                : (int) (((power / 85.0) * 100) + 0.5)
-                + "%");
+        telemetry.addData("Auto Features", autoPowerOn ? "On": "Off");
         telemetry.addData("Power Step", !autoPowerOn
                 ? powerSteps[currentStep]
                 : power);
         telemetry.addLine();
-        telemetry.addData("liftOpen",liftOpen);
-        telemetry.addData("liftPos", liftServo.getPosition());
-        telemetry.addData("anglePos", angleServo.getPosition());
+        telemetry.addData("angle", angle);
+        telemetry.addData("power", power);
     }
 
     public void debugTelemetry(Telemetry telemetry) {
@@ -280,14 +267,23 @@ public class LaunchIntakeSystem {
         autoPowerOn = !autoPowerOn;
     }
 
-    private double calcAutoPower(double distance) {
-        power = 0.22 * distance + 48.5;
-        power = Math.max(61, Math.min(75, power)); //
-//        power = 0.189189 * distance +38.97297;
-//        power = Math.max(55, Math.min(65, power));
-//        power = 0.09/65116 * distance + 53.81395;
-//        power = Math.max(41, Math.min(44.5, power));
+    private double calcAutoPower(double x) {
+        power = (((-2.2941e-7 * x
+                + 0.00010807) * x
+                - 0.0182732) * x
+                + 1.46786) * x
+                + 2.86572;
         return power;
+    }
+
+    private double calcAutoHood(double x) {
+        angle = (((-1.04061e-6 * x
+                + 0.000438459) * x
+                - 0.0687862) * x
+                + 4.78304) * x
+                - 124.39506;
+        angle = Math.min(1, Math.max(0, angle));
+        return angle;
     }
 
 }
