@@ -35,8 +35,6 @@ public class LaunchIntakeSystem {
 
     public boolean launcherOn = false;
     public boolean intakeOn = false;
-
-    private double intakeBlipReset = 0;
     private boolean autoPowerOn = false;
     private boolean liftOpen = false;
 
@@ -129,7 +127,7 @@ public class LaunchIntakeSystem {
             if (launcherOn) {
                 if (autoPowerOn) spinToVelocity(autoPow, tele);
 //                else spinToVelocity(powerSteps[step], tele);
-                else spinToVelocity(46.5, tele);
+                else spinToVelocity(46, tele);
             } else {
                 launcherMotor.setPower(0.0);
                 //spinToVelocity(0, tele);
@@ -283,6 +281,7 @@ public class LaunchIntakeSystem {
                 + 4.78304) * x
                 - 124.39506;
         angle = Math.min(1, Math.max(0, angle));
+        if (x > 124) angle = 1;
         return angle;
     }
 

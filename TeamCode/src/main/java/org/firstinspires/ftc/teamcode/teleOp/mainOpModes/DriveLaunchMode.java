@@ -49,7 +49,7 @@ public class DriveLaunchMode extends OpMode {
 
         // Systems Init
         drive.init(hardwareMap, telemetry);
-        //basing.init(hardwareMap);
+        basing.init(hardwareMap);
         turret.init(hardwareMap);
         launchSystem.init(POWER_STEPS, hardwareMap, telemetry);
         limelightControl = new LimelightControl(hardwareMap, llPipelines.LOCALIZATION);
@@ -262,12 +262,9 @@ public class DriveLaunchMode extends OpMode {
         if (gamepad1.leftBumperWasPressed())
             launchSystem.toggleAutoPower();
 
-//        if (gamepad2.right_bumper)
-//            basing.down();
-//        else if (gamepad2.left_bumper)
-//            basing.up();
-//        else
-//            basing.idle();
+        basing.idle();
+        if (gamepad2.squareWasPressed())
+            basing.ascend();
 
         // Continuous subsystem updates
         double dist = drive.getDistanceFromGoal();

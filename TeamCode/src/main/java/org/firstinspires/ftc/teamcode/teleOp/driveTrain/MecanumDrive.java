@@ -68,7 +68,7 @@ public class MecanumDrive {
 
         //Current Bot Offsets: -41, 0, MM (11/13)
         //odo.setOffsets(-16, -6.5, DistanceUnit.CM);
-        odo.setOffsets(-7.54, -15.24, DistanceUnit.CM);
+        odo.setOffsets(-7.54, -20, DistanceUnit.CM);
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
         //Current Bot Directions: FORWARD, REVERSED (11/13)
@@ -259,13 +259,19 @@ public class MecanumDrive {
     public double angleToGoal() {
         updateOdo();
 
+        double r = 0; //Dist from center of robot to launcher in inches
+        double theta = getOdoHeading(AngleUnit.RADIANS);
+
         double x = this.getOdoX(DistanceUnit.INCH);
         double y = this.getOdoY(DistanceUnit.INCH);
 
-        double deltaY = goalPose.getY(DistanceUnit.INCH) - y;
-        double deltaX = goalPose.getX(DistanceUnit.INCH) - x;
+        double tx = -r * Math.cos(theta) + x;
+        double ty = -r * Math.sin(theta) + y;
 
-        return AngleUnit.normalizeRadians(Math.atan2(deltaX, deltaY));
+        double deltaX = goalPose.getX(DistanceUnit.INCH) - x;
+        double deltaY = goalPose.getY(DistanceUnit.INCH) - y;
+
+        return AngleUnit.normalizeRadians(Math.atan2(deltaY, deltaX));
     }
 
     public void trackGoal(Telemetry tele, double forward, double strafe, double slow) {

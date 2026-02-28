@@ -26,7 +26,7 @@ public class Turret {
     private State currentState;
 
     //Adjustable
-    private final double min = 0.1, max = 0.92, zero = 0.46; //Subject to change
+    private final double min = 0.1, max = 0.92, zero = 0.4962; //Subject to change
 
     public void init(HardwareMap hwMap) {
         tsf = hwMap.get(Servo.class, "ts1");
@@ -40,8 +40,8 @@ public class Turret {
         turret.scaleRange(min, max);
 
         pos = zero;
-        //tsb.setPosition(pos);
-        turret.setPosition(pos);
+        tsb.setPosition(pos);
+        //turret.setPosition(pos);
 
         auto();
     }
@@ -52,8 +52,8 @@ public class Turret {
                     (0.9 * Math.PI)) + zero); //Assumes 74-114 Gear ratio and 353rads
         else
             pos = zero;
-        turret.setPosition(pos);
-        //tsb.setPosition(pos);
+        //turret.setPosition(pos);
+        tsb.setPosition(pos);
     }
 
     public void clockwise() {
