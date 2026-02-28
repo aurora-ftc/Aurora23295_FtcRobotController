@@ -1,6 +1,17 @@
 package org.firstinspires.ftc.teamcode.teleOp.mainOpModes;
 
-import static org.firstinspires.ftc.teamcode.Constants.*;
+import static org.firstinspires.ftc.teamcode.Constants.BLUE_SIDE;
+import static org.firstinspires.ftc.teamcode.Constants.DEBUG;
+import static org.firstinspires.ftc.teamcode.Constants.DRIVE_PID_BUFFER_MS;
+import static org.firstinspires.ftc.teamcode.Constants.GOAL_POSE_BLUE;
+import static org.firstinspires.ftc.teamcode.Constants.GOAL_POSE_RED;
+import static org.firstinspires.ftc.teamcode.Constants.INITIAL_POSE_BLUE;
+import static org.firstinspires.ftc.teamcode.Constants.INITIAL_POSE_RED;
+import static org.firstinspires.ftc.teamcode.Constants.LT_DEAD_ZONE;
+import static org.firstinspires.ftc.teamcode.Constants.POWER_STEPS;
+import static org.firstinspires.ftc.teamcode.Constants.RIGHT_STICK_DEAD_ZONE;
+import static org.firstinspires.ftc.teamcode.Constants.USE_PID;
+import static org.firstinspires.ftc.teamcode.Constants.llPipelines;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -10,8 +21,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.Storage;
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Storage;
 import org.firstinspires.ftc.teamcode.teleOp.driveTrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.Basing;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
@@ -19,8 +30,8 @@ import org.firstinspires.ftc.teamcode.teleOp.subSystems.LimelightControl;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.Turret;
 import org.firstinspires.ftc.teamcode.teleOp.util.Mosaic;
 
-@TeleOp(name = "DriveLaunchMode", group = "OpModes")
-public class DriveLaunchMode extends OpMode {
+@TeleOp(name = "Blue", group = "OpModes")
+public class Blue extends OpMode {
     private MecanumDrive drive = new MecanumDrive();
     //------Timers------
     private final ElapsedTime matchTime = new ElapsedTime();
@@ -58,7 +69,7 @@ public class DriveLaunchMode extends OpMode {
 
         initialPose = null;
 
-        goalPose = BLUE_SIDE ? GOAL_POSE_BLUE: GOAL_POSE_RED;
+        goalPose = GOAL_POSE_BLUE;
 
         mosaic = (Storage.mosaic == Mosaic.UNKNOWN) ? Mosaic.PGP : Storage.mosaic;
         // PGP is a lucky lucky guess, we need to have a default in case it doesn't work
@@ -105,7 +116,7 @@ public class DriveLaunchMode extends OpMode {
 
         if (!poseCalculated || initialPose == null){
             if (Storage.endPose == null)
-                initialPose = BLUE_SIDE ? INITIAL_POSE_BLUE : INITIAL_POSE_RED;
+                initialPose = INITIAL_POSE_BLUE;
             else
                 initialPose = Storage.endPose;
         }
@@ -155,8 +166,6 @@ public class DriveLaunchMode extends OpMode {
         // Speed modifiers
         if (gamepad1.left_trigger > LT_DEAD_ZONE)
             slow = Constants.SLOW_SPEED_LT;
-        else if (gamepad1.right_trigger > LT_DEAD_ZONE)
-            slow = 1.0;
         else
             slow = 1;
 

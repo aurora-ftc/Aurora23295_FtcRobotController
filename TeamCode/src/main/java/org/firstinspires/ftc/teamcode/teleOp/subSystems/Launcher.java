@@ -112,13 +112,13 @@ public class Launcher {
     }
 
     public void angleUp() {
-        angle -= 0.05;
-        angle = Math.max(0.15, Math.min(0.9, angle));
+        angle -= 0.025;
+        angle = Math.max(0, Math.min(1, angle));
     }
 
     public void angleDown() {
-        angle += 0.05;
-        angle = Math.max(0.15, Math.min(0.9, angle));
+        angle += 0.025;
+        angle = Math.max(0, Math.min(1, angle));
     }
 
     public void log(Telemetry tele) {

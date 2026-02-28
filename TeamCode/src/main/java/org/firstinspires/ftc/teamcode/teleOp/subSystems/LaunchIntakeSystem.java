@@ -126,8 +126,8 @@ public class LaunchIntakeSystem {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
                 if (autoPowerOn) spinToVelocity(autoPow, tele);
-//                else spinToVelocity(powerSteps[step], tele);
-                else spinToVelocity(46, tele);
+                else spinToVelocity(powerSteps[step], tele);
+//                else spinToVelocity(46, tele);
             } else {
                 launcherMotor.setPower(0.0);
                 //spinToVelocity(0, tele);
@@ -143,11 +143,13 @@ public class LaunchIntakeSystem {
         }
     }
 
-    public void updateLauncher(Telemetry tele, double dist, HardwareMap hwMap) {
+    public void updateLauncher(Telemetry tele, double dist, HardwareMap hwMap, Turret turret) {
 
-        if (Math.abs(flywheelPID.current - flywheelPID.target) <= 1.5 && intakeMotor.getPower() >= 0.5 && launcherMotor.getPower() != 0)
+        if (Math.abs(flywheelPID.current - flywheelPID.target) <= 1.5 && intakeMotor.getPower() >= 0.5
+                && launcherMotor.getPower() != 0 && turret.onTarget)
             indicator.green();
-        else if (Math.abs(flywheelPID.current - flywheelPID.target) <= 1.5 && launcherMotor.getPower() != 0)
+        else if (Math.abs(flywheelPID.current - flywheelPID.target) <= 1.5 && launcherMotor.getPower() != 0
+            && turret.onTarget)
             indicator.yellow();
         else
             indicator.red();
@@ -171,6 +173,14 @@ public class LaunchIntakeSystem {
         if (liftTimer.milliseconds() > 1000 && liftOpen)
             liftClose();
     }
+
+//    public void up(){
+//        angleServo.setPosition(angleServo.getPosition() + 0.025);
+//    }
+//
+//    public void down(){
+//        angleServo.setPosition(angleServo.getPosition() - 0.025);
+//    }
 
     public void stepUpPower() {
         currentStep = Math.min(currentStep + 1, maxStep);
@@ -210,6 +220,8 @@ public class LaunchIntakeSystem {
     }
 
     public void liftBlip() {
+        if (intakeTimer.milliseconds() < 400)
+            return;
         liftTimer.reset();
         liftOpen();
     }
@@ -232,7 +244,7 @@ public class LaunchIntakeSystem {
                 ? powerSteps[currentStep]
                 : power);
         telemetry.addLine();
-        telemetry.addData("angle", angle);
+        telemetry.addData("angle", angleServo.getPosition());
         telemetry.addData("power", power);
     }
 
@@ -266,22 +278,24 @@ public class LaunchIntakeSystem {
     }
 
     private double calcAutoPower(double x) {
-        power = (((-2.2941e-7 * x
-                + 0.00010807) * x
-                - 0.0182732) * x
-                + 1.46786) * x
-                + 2.86572;
+//        power = (((-2.2941e-7 * x
+//                + 0.00010807) * x
+//                - 0.0182732) * x
+//                + 1.46786) * x
+//                + 2.86572;
+        power = (0.000151259 * x + 0.214458) * x + 26.45371;
         return power;
     }
 
     private double calcAutoHood(double x) {
-        angle = (((-1.04061e-6 * x
-                + 0.000438459) * x
-                - 0.0687862) * x
-                + 4.78304) * x
-                - 124.39506;
-        angle = Math.min(1, Math.max(0, angle));
-        if (x > 124) angle = 1;
+//        angle = (((-1.04061e-6 * x
+//                + 0.000438459) * x
+//                - 0.0687862) * x
+//                + 4.78304) * x
+//                - 124.39506;
+//        angle = Math.min(1, Math.max(0, angle));
+//        if (x > 124) angle = 1;
+        angle = (-0.000136603 * x + 0.0316666) * x - 0.93366;
         return angle;
     }
 
