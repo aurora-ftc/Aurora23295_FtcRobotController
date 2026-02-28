@@ -37,25 +37,25 @@ public class Bot3Blue extends OpMode {
     // Subsystems
     private DcMotor launcherMotor;
     private DcMotor intakeMotor;
-    private Servo pushServo;
-
-    // Power steps
+    private Servo liftServo;
+    private Servo ts1, ts2;
+    private Servo angleServo;
 
     // === Tunable Parameter ===
 
-    public static double SHOT_INTERVAL_S = 1;
-    public static double PUSH_SERVO_FLICK_TIME_S = 0.5;
+    public static double WAIT_TIME_S = 1;
+    public static double TOTAL_TIME_S = 2;
 
     // Poses
-    private final Pose startPose = new Pose(59, 8.8, Math.toRadians(90));
-    private final Pose launchPose = new Pose(59, 16, Math.toRadians(112));
-    private final Pose pickup1StartPose = new Pose(44, 36, Math.toRadians(180));
-    private final Pose pickup1EndPose = new Pose(14, 36, Math.toRadians(180));
-    private final Pose pickup2StartPose = new Pose(44, 60, Math.toRadians(180));
-    private final Pose pickup2EndPose = new Pose(14, 60, Math.toRadians(180));
-    private final Pose pickup3StartPose = new Pose(44, 84, Math.toRadians(180));
-    private final Pose pickup3EndPose = new Pose(14, 84, Math.toRadians(180));
-    private final Pose parkPose = new Pose(59, 35, Math.toRadians(90));
+    private final Pose startPose = new Pose(57, 8.8, Math.toRadians(180));
+    private final Pose launchPose = new Pose(57, 18, Math.toRadians(180));
+    private final Pose pickup1StartPose = new Pose(44, 32, Math.toRadians(180));
+    private final Pose pickup1EndPose = new Pose(24, 32, Math.toRadians(180));
+    private final Pose pickup2StartPose = new Pose(44, 52, Math.toRadians(180));
+    private final Pose pickup2EndPose = new Pose(24, 52, Math.toRadians(180));
+    private final Pose pickup3StartPose = new Pose(44, 78, Math.toRadians(180));
+    private final Pose pickup3EndPose = new Pose(24, 78, Math.toRadians(180));
+    private final Pose parkPose = new Pose(59, 40, Math.toRadians(180));
 
     // Paths
     public PathChain firstLaunch, pickup1Start, pickup1End, secondLaunch, pickup2Start, pickup2End, thirdLaunch,
@@ -63,15 +63,13 @@ public class Bot3Blue extends OpMode {
 
     // === Burst scheduler ===
     private boolean burstActive = false;
-    private int shotsRemaining = 0;
-    private double lastShotTimeS = 0.0;
+    private double startTimeS = 0.0;
 
     // --- Build paths ---
     private void buildPaths() {
         firstLaunch = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, launchPose))
                 .setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading())
-                .setTimeoutConstraint(4000)
                 .build();
 
         pickup1Start = follower.pathBuilder()
@@ -132,11 +130,10 @@ public class Bot3Blue extends OpMode {
 
     // --- Burst shooting (non-blocking) ---
     private void startBurst() {
-        shotsRemaining = 3;
         burstActive = true;
 
-        // Wait a bit before firing the first shot.
-        lastShotTimeS = 1;
+        // Wait a bit before firing.
+        startTimeS = 2;
 
         actionTimer.resetTimer();
     }
@@ -152,20 +149,14 @@ public class Bot3Blue extends OpMode {
 
         double t = actionTimer.getElapsedTimeSeconds();
 
-        // Fire next shot on interval.
-        if (shotsRemaining > 0 && (t - lastShotTimeS) >= SHOT_INTERVAL_S) {
-            pushServo.setPosition(CLOSE);
-            shotsRemaining--;
-            lastShotTimeS = t;
+        if ((t - startTimeS) >= WAIT_TIME_S && (t - startTimeS) < TOTAL_TIME_S) {
+            liftServo.setPosition(OPEN);
+            intakeMotor.setPower(1);
         }
 
-        // Retract the servo after last shot time + flick time (e.g., 0.5s).
-        if (t - lastShotTimeS >= PUSH_SERVO_FLICK_TIME_S) {
-            pushServo.setPosition(OPEN);
-        }
-
-        // Done when all shots fired AND the last one is retracted.
-        if (shotsRemaining <= 0 && (t - lastShotTimeS) >= PUSH_SERVO_FLICK_TIME_S) {
+        if ((t - startTimeS) >= TOTAL_TIME_S) {
+            intakeMotor.setPower(0);
+            liftServo.setPosition(CLOSE);
             burstActive = false;
             return true;
         }
@@ -182,8 +173,9 @@ public class Bot3Blue extends OpMode {
              * 0) Start: drive firstLaunch and turn on launcher.
              */
             case 0: {
-                launcherMotor.setPower(0.72);
-                follower.followPath(firstLaunch);
+                launcherMotor.setPower(0.8);
+                intakeMotor.setPower(1);
+                follower.followPath(firstLaunch, 0.8, true);
                 setPathState(1);
                 break;
             }
@@ -207,6 +199,7 @@ public class Bot3Blue extends OpMode {
             case 2: {
                 if (updateBurst()) {
                     follower.followPath(pickup1Start, false);
+                    launcherMotor.setPower(0.7);
                     intakeMotor.setPower(1);
                     setPathState(3);
                 }
@@ -219,7 +212,7 @@ public class Bot3Blue extends OpMode {
              */
             case 3: {
                 if (!follower.isBusy()) {
-                    follower.followPath(pickup1End, 0.5, false);
+                    follower.followPath(pickup1End, 0.7, false);
                     setPathState(4);
                 }
                 break;
@@ -267,7 +260,7 @@ public class Bot3Blue extends OpMode {
              */
             case 7: {
                 if (!follower.isBusy()) {
-                    follower.followPath(pickup2End, 0.5, false);
+                    follower.followPath(pickup2End, 0.7, false);
                     setPathState(8);
                 }
                 break;
@@ -315,7 +308,7 @@ public class Bot3Blue extends OpMode {
              */
             case 11: {
                 if (!follower.isBusy()) {
-                    follower.followPath(pickup3End, 0.5, false);
+                    follower.followPath(pickup3End, 0.7, false);
                     setPathState(12);
                 }
                 break;
@@ -384,7 +377,7 @@ public class Bot3Blue extends OpMode {
         panelsTelemetry.update(telemetry);
 
         launcherMotor = hardwareMap.get(DcMotorEx.class, HWMap.LAUNCHER_MOTOR);
-        launcherMotor.setDirection(DcMotorEx.Direction.FORWARD);
+        launcherMotor.setDirection(DcMotorEx.Direction.REVERSE);
         launcherMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         launcherMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
@@ -393,9 +386,17 @@ public class Bot3Blue extends OpMode {
         intakeMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         intakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
-        pushServo = hardwareMap.get(Servo.class, HWMap.PUSH_SERVO);
-        pushServo.scaleRange(0.05, 0.3);
-        pushServo.setPosition(CLOSE);
+        liftServo = hardwareMap.get(Servo.class, HWMap.LIFT_SERVO);
+        liftServo.scaleRange(0.18, 0.285);
+        liftServo.setPosition(CLOSE);
+
+        ts1 = hardwareMap.get(Servo.class, "ts1");
+        ts1.setPosition(0.82);
+        ts2 = hardwareMap.get(Servo.class, "ts2");
+        ts2.setPosition(0.82);
+
+        angleServo = hardwareMap.get(Servo.class, "angle_servo");
+        angleServo.setPosition(0);
     }
 
     @Override
@@ -427,7 +428,6 @@ public class Bot3Blue extends OpMode {
         panelsTelemetry.debug("Heading", p.getHeading());
 
         panelsTelemetry.debug("BurstActive", burstActive);
-        panelsTelemetry.debug("ShotsRemaining", shotsRemaining);
         panelsTelemetry.debug("PathTimer(s)", pathTimer.getElapsedTimeSeconds());
         panelsTelemetry.debug("ActionTimer(s)", actionTimer.getElapsedTimeSeconds());
 
