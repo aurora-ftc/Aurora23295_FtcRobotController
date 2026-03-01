@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing.auto;
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.Turret;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -27,7 +28,7 @@ public class Bot3Blue extends OpMode {
 
     // Pedro follower
     private Follower follower;
-    private LaunchIntakeSystem launcher = new LaunchIntakeSystem();
+    private LaunchIntakeSystem launcher;
 
     // State machine
     private int pathState = -1;
@@ -36,7 +37,7 @@ public class Bot3Blue extends OpMode {
     private Timer pathTimer;
     private Timer actionTimer;
 
-    // Subsystems
+    // Subsystem
     private DcMotor intakeMotor;
     private Servo liftServo;
     private Servo ts1, ts2;
@@ -48,14 +49,14 @@ public class Bot3Blue extends OpMode {
     public static double TOTAL_TIME_S = 2;
 
     // Poses
-    private final Pose startPose = new Pose(57, 8.8, Math.toRadians(180));
-    private final Pose launchPose = new Pose(57, 18, Math.toRadians(180));
+    private final Pose startPose = new Pose(57, 8, Math.toRadians(180));
+    private final Pose launchPose = new Pose(52, 12, Math.toRadians(180));
     private final Pose pickup1StartPose = new Pose(44, 32, Math.toRadians(180));
-    private final Pose pickup1EndPose = new Pose(24, 32, Math.toRadians(180));
+    private final Pose pickup1EndPose = new Pose(19, 32, Math.toRadians(180));
     private final Pose pickup2StartPose = new Pose(44, 52, Math.toRadians(180));
-    private final Pose pickup2EndPose = new Pose(24, 52, Math.toRadians(180));
-    private final Pose pickup3StartPose = new Pose(44, 78, Math.toRadians(180));
-    private final Pose pickup3EndPose = new Pose(24, 78, Math.toRadians(180));
+    private final Pose pickup2EndPose = new Pose(19, 52, Math.toRadians(180));
+    private final Pose pickup3StartPose = new Pose(44, 80, Math.toRadians(180));
+    private final Pose pickup3EndPose = new Pose(19, 80, Math.toRadians(180));
     private final Pose parkPose = new Pose(59, 40, Math.toRadians(180));
 
     // Paths
@@ -358,6 +359,8 @@ public class Bot3Blue extends OpMode {
             }
         }
     }
+
+    // --- FTC OpMode lifecycle ---
     @Override
     public void init() {
         pathTimer = new Timer();
@@ -385,8 +388,8 @@ public class Bot3Blue extends OpMode {
 
         ts1 = hardwareMap.get(Servo.class, "ts1");
         ts2 = hardwareMap.get(Servo.class, "ts2");
-        ts2.setPosition(0.84);
-        ts1.setPosition(0.84);
+        ts2.setPosition(0.08);
+        ts1.setPosition(0.08);
 
         angleServo = hardwareMap.get(Servo.class, "angle_servo");
         angleServo.setPosition(0.12);
@@ -401,8 +404,8 @@ public class Bot3Blue extends OpMode {
     public void start() {
         setPathState(0);
 
-        ts2.setPosition(0.84);
-        ts1.setPosition(0.84);
+        ts2.setPosition(0.08);
+        ts1.setPosition(0.08);
     }
 
     @Override
