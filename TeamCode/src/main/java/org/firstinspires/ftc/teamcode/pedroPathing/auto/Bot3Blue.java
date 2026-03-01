@@ -388,8 +388,8 @@ public class Bot3Blue extends OpMode {
 
         ts1 = hardwareMap.get(Servo.class, "ts1");
         ts2 = hardwareMap.get(Servo.class, "ts2");
-        ts2.setPosition(0.08);
-        ts1.setPosition(0.08);
+        ts2.setPosition(0.17);
+        ts1.setPosition(0.17);
 
         angleServo = hardwareMap.get(Servo.class, "angle_servo");
         angleServo.setPosition(0.12);
