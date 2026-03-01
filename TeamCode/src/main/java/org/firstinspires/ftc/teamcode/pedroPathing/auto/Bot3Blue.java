@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing.auto;
 
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -26,6 +27,7 @@ public class Bot3Blue extends OpMode {
 
     // Pedro follower
     private Follower follower;
+    private LaunchIntakeSystem launcher = new LaunchIntakeSystem();
 
     // State machine
     private int pathState = -1;
@@ -35,7 +37,6 @@ public class Bot3Blue extends OpMode {
     private Timer actionTimer;
 
     // Subsystems
-    private DcMotor launcherMotor;
     private DcMotor intakeMotor;
     private Servo liftServo;
     private Servo ts1, ts2;
@@ -133,7 +134,7 @@ public class Bot3Blue extends OpMode {
         burstActive = true;
 
         // Wait a bit before firing.
-        startTimeS = 2;
+        startTimeS = 0.8;
 
         actionTimer.resetTimer();
     }
@@ -173,7 +174,6 @@ public class Bot3Blue extends OpMode {
              * 0) Start: drive firstLaunch and turn on launcher.
              */
             case 0: {
-                launcherMotor.setPower(0.8);
                 intakeMotor.setPower(1);
                 follower.followPath(firstLaunch, 0.8, true);
                 setPathState(1);
@@ -199,7 +199,6 @@ public class Bot3Blue extends OpMode {
             case 2: {
                 if (updateBurst()) {
                     follower.followPath(pickup1Start, false);
-                    launcherMotor.setPower(0.7);
                     intakeMotor.setPower(1);
                     setPathState(3);
                 }
@@ -343,7 +342,6 @@ public class Bot3Blue extends OpMode {
             case 14: {
                 if (updateBurst()) {
                     follower.followPath(park, false);
-                    launcherMotor.setPower(0);
                     setPathState(15);
                 }
                 break;
@@ -354,19 +352,19 @@ public class Bot3Blue extends OpMode {
              */
             case 15: {
                 if (!follower.isBusy()) {
-                    launcherMotor.setPower(0);
                     setPathState(-1);
                 }
                 break;
             }
         }
     }
-
-    // --- FTC OpMode lifecycle ---
     @Override
     public void init() {
         pathTimer = new Timer();
         actionTimer = new Timer();
+        launcher = new LaunchIntakeSystem();
+
+        launcher.init(hardwareMap);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -375,11 +373,6 @@ public class Bot3Blue extends OpMode {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
-
-        launcherMotor = hardwareMap.get(DcMotorEx.class, HWMap.LAUNCHER_MOTOR);
-        launcherMotor.setDirection(DcMotorEx.Direction.REVERSE);
-        launcherMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        launcherMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         intakeMotor = hardwareMap.get(DcMotorEx.class, HWMap.INTAKE_MOTOR);
         intakeMotor.setDirection(DcMotorEx.Direction.REVERSE);
@@ -391,12 +384,12 @@ public class Bot3Blue extends OpMode {
         liftServo.setPosition(CLOSE);
 
         ts1 = hardwareMap.get(Servo.class, "ts1");
-        ts1.setPosition(0.1);
         ts2 = hardwareMap.get(Servo.class, "ts2");
-        ts2.setPosition(0.1);
+        ts2.setPosition(0.84);
+        ts1.setPosition(0.84);
 
         angleServo = hardwareMap.get(Servo.class, "angle_servo");
-        angleServo.setPosition(0);
+        angleServo.setPosition(0.12);
     }
 
     @Override
@@ -407,17 +400,19 @@ public class Bot3Blue extends OpMode {
     @Override
     public void start() {
         setPathState(0);
+
+        ts2.setPosition(0.84);
+        ts1.setPosition(0.84);
     }
 
     @Override
-    public void stop() {
-        launcherMotor.setPower(0);
-    }
+    public void stop() {}
 
     @Override
     public void loop() {
         follower.update();
         autonomousPathUpdate();
+        launcher.spinToVelocity(57.2, telemetry);
 
         Pose p = follower.getPose();
 

@@ -37,8 +37,7 @@ public class Bot3Red extends OpMode {
     private Timer pathTimer;
     private Timer actionTimer;
 
-    // Subsystems
-    private DcMotor launcherMotor;
+    // Subsystem
     private DcMotor intakeMotor;
     private Servo liftServo;
     private Servo ts1, ts2;
@@ -50,14 +49,14 @@ public class Bot3Red extends OpMode {
     public static double TOTAL_TIME_S = 2;
 
     // Poses
-    private final Pose startPose = new Pose(87, 8.8, Math.toRadians(0));
-    private final Pose launchPose = new Pose(87, 18, Math.toRadians(0));
+    private final Pose startPose = new Pose(87, 8, Math.toRadians(0));
+    private final Pose launchPose = new Pose(92, 12, Math.toRadians(0));
     private final Pose pickup1StartPose = new Pose(100, 32, Math.toRadians(0));
-    private final Pose pickup1EndPose = new Pose(120, 32, Math.toRadians(0));
+    private final Pose pickup1EndPose = new Pose(125, 32, Math.toRadians(0));
     private final Pose pickup2StartPose = new Pose(100, 52, Math.toRadians(0));
-    private final Pose pickup2EndPose = new Pose(120, 52, Math.toRadians(0));
-    private final Pose pickup3StartPose = new Pose(100, 78, Math.toRadians(0));
-    private final Pose pickup3EndPose = new Pose(120, 78, Math.toRadians(0));
+    private final Pose pickup2EndPose = new Pose(125, 52, Math.toRadians(0));
+    private final Pose pickup3StartPose = new Pose(100, 80, Math.toRadians(0));
+    private final Pose pickup3EndPose = new Pose(120, 80, Math.toRadians(0));
     private final Pose parkPose = new Pose(85, 40, Math.toRadians(0));
 
     // Paths
@@ -136,7 +135,7 @@ public class Bot3Red extends OpMode {
         burstActive = true;
 
         // Wait a bit before firing.
-        startTimeS = 2;
+        startTimeS = 0.8;
 
         actionTimer.resetTimer();
     }
@@ -344,7 +343,6 @@ public class Bot3Red extends OpMode {
             case 14: {
                 if (updateBurst()) {
                     follower.followPath(park, false);
-                    launcherMotor.setPower(0);
                     setPathState(15);
                 }
                 break;
@@ -355,7 +353,6 @@ public class Bot3Red extends OpMode {
              */
             case 15: {
                 if (!follower.isBusy()) {
-                    launcherMotor.setPower(0);
                     setPathState(-1);
                 }
                 break;
@@ -380,11 +377,6 @@ public class Bot3Red extends OpMode {
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
 
-        launcherMotor = hardwareMap.get(DcMotorEx.class, HWMap.LAUNCHER_MOTOR);
-        launcherMotor.setDirection(DcMotorEx.Direction.REVERSE);
-        launcherMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        launcherMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-
         intakeMotor = hardwareMap.get(DcMotorEx.class, HWMap.INTAKE_MOTOR);
         intakeMotor.setDirection(DcMotorEx.Direction.REVERSE);
         intakeMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -395,9 +387,9 @@ public class Bot3Red extends OpMode {
         liftServo.setPosition(CLOSE);
 
         ts1 = hardwareMap.get(Servo.class, "ts1");
-        ts1.setPosition(0.82);
         ts2 = hardwareMap.get(Servo.class, "ts2");
-        ts2.setPosition(0.82);
+        ts2.setPosition(0.84);
+        ts1.setPosition(0.84);
 
         angleServo = hardwareMap.get(Servo.class, "angle_servo");
         angleServo.setPosition(0.12);
@@ -411,18 +403,19 @@ public class Bot3Red extends OpMode {
     @Override
     public void start() {
         setPathState(0);
+
+        ts2.setPosition(0.84);
+        ts1.setPosition(0.84);
     }
 
     @Override
-    public void stop() {
-        launcherMotor.setPower(0);
-    }
+    public void stop() {}
 
     @Override
     public void loop() {
         follower.update();
         autonomousPathUpdate();
-        launcher.spinToVelocity(57, telemetry);
+        launcher.spinToVelocity(57.2, telemetry);
 
         Pose p = follower.getPose();
 
