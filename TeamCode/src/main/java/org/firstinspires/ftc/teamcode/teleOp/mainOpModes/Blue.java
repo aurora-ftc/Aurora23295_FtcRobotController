@@ -169,13 +169,8 @@ public class Blue extends OpMode {
         else
             slow = 1;
 
-        if (BLUE_SIDE) {
-            forward = MecanumDrive.smoothDrive(gamepad1.left_stick_y);
-            strafe = MecanumDrive.smoothDrive(-gamepad1.left_stick_x);
-        } else {
-            forward = MecanumDrive.smoothDrive(-gamepad1.left_stick_y);
-            strafe = MecanumDrive.smoothDrive(gamepad1.left_stick_x);
-        }
+        forward = MecanumDrive.smoothDrive(gamepad1.left_stick_y);
+        strafe = MecanumDrive.smoothDrive(-gamepad1.left_stick_x);
 
         if (!drive.trackGoalOn) {
 

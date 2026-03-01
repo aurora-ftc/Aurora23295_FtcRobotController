@@ -57,8 +57,8 @@ public class Constants {
 
     public static final Pose2D INITIAL_POSE_BLUE = new Pose2D(DistanceUnit.INCH, -13, -35,
             AngleUnit.DEGREES, 90);
-    public static final Pose2D INITIAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 13, -35,
-            AngleUnit.DEGREES, 90);
+    public static final Pose2D INITIAL_POSE_RED = new Pose2D(DistanceUnit.INCH, 12, -61,
+            AngleUnit.DEGREES, 0);
 
     public static class HWMap {
         public static String FL_MOTOR = "front_left_motor";

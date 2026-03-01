@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.pedroPathing.auto;
 
 import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.Turret;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -26,6 +28,7 @@ public class Bot3Red extends OpMode {
 
     // Pedro follower
     private Follower follower;
+    private LaunchIntakeSystem launcher;
 
     // State machine
     private int pathState = -1;
@@ -173,7 +176,6 @@ public class Bot3Red extends OpMode {
              * 0) Start: drive firstLaunch and turn on launcher.
              */
             case 0: {
-                launcherMotor.setPower(0.8);
                 intakeMotor.setPower(1);
                 follower.followPath(firstLaunch, 0.8, true);
                 setPathState(1);
@@ -199,7 +201,6 @@ public class Bot3Red extends OpMode {
             case 2: {
                 if (updateBurst()) {
                     follower.followPath(pickup1Start, false);
-                    launcherMotor.setPower(0.7);
                     intakeMotor.setPower(1);
                     setPathState(3);
                 }
@@ -367,6 +368,9 @@ public class Bot3Red extends OpMode {
     public void init() {
         pathTimer = new Timer();
         actionTimer = new Timer();
+        launcher = new LaunchIntakeSystem();
+
+        launcher.init(hardwareMap);
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -396,7 +400,7 @@ public class Bot3Red extends OpMode {
         ts2.setPosition(0.82);
 
         angleServo = hardwareMap.get(Servo.class, "angle_servo");
-        angleServo.setPosition(0);
+        angleServo.setPosition(0.12);
     }
 
     @Override
@@ -418,6 +422,7 @@ public class Bot3Red extends OpMode {
     public void loop() {
         follower.update();
         autonomousPathUpdate();
+        launcher.spinToVelocity(57, telemetry);
 
         Pose p = follower.getPose();
 

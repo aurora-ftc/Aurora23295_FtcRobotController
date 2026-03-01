@@ -84,6 +84,18 @@ public class LaunchIntakeSystem {
         liftClose();
     }
 
+    public void init(HardwareMap hwMap) {
+        launcherMotor = hwMap.get(DcMotorEx.class, HWMap.LAUNCHER_MOTOR);
+        launcherMotor.setDirection(DcMotorEx.Direction.FORWARD);
+
+        launcherMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
+
+        flywheelPID = new PIDController(FLYWHEEL_KP,
+                FLYWHEEL_KI, FLYWHEEL_KD,
+                FLYWHEEL_KV, FLYWHEEL_KS);
+        flywheelPID.previousTime = System.nanoTime() / 1e9;
+    }
+
     public void spinToVelocity(double targetVelocity, Telemetry tele) {
 
         flywheelPID.setTarget(targetVelocity);
@@ -126,8 +138,8 @@ public class LaunchIntakeSystem {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
                 if (autoPowerOn) spinToVelocity(autoPow, tele);
-                else spinToVelocity(powerSteps[step], tele);
-//                else spinToVelocity(46, tele);
+//                else spinToVelocity(powerSteps[step], tele);
+                else spinToVelocity(40, tele);
             } else {
                 launcherMotor.setPower(0.0);
                 //spinToVelocity(0, tele);
@@ -283,7 +295,7 @@ public class LaunchIntakeSystem {
 //                - 0.0182732) * x
 //                + 1.46786) * x
 //                + 2.86572;
-        power = (0.000151259 * x + 0.214458) * x + 26.45371;
+        power = (0.00064782 * x + 0.113042) * x + 31.31039;
         return power;
     }
 

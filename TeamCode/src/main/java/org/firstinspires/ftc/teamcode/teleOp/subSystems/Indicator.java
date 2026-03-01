@@ -21,7 +21,7 @@ public class Indicator {
     }
 
     public void red() {
-        light.setPosition(0.277);
+        light.setPosition(0.28);
     }
 
     public void blue() {
