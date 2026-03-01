@@ -153,7 +153,7 @@ public class Bot3Red extends OpMode {
 
         if ((t - startTimeS) >= WAIT_TIME_S && (t - startTimeS) < TOTAL_TIME_S) {
             liftServo.setPosition(OPEN);
-            intakeMotor.setPower(1);
+            intakeMotor.setPower(0.9);
         }
 
         if ((t - startTimeS) >= TOTAL_TIME_S) {
@@ -175,7 +175,7 @@ public class Bot3Red extends OpMode {
              * 0) Start: drive firstLaunch and turn on launcher.
              */
             case 0: {
-                intakeMotor.setPower(1);
+                intakeMotor.setPower(0.9);
                 follower.followPath(firstLaunch, 0.8, true);
                 setPathState(1);
                 break;
@@ -200,7 +200,7 @@ public class Bot3Red extends OpMode {
             case 2: {
                 if (updateBurst()) {
                     follower.followPath(pickup1Start, false);
-                    intakeMotor.setPower(1);
+                    intakeMotor.setPower(0.9);
                     setPathState(3);
                 }
                 break;
@@ -248,7 +248,7 @@ public class Bot3Red extends OpMode {
             case 6: {
                 if (updateBurst()) {
                     follower.followPath(pickup2Start, false);
-                    intakeMotor.setPower(1);
+                    intakeMotor.setPower(0.9);
                     setPathState(7);
                 }
                 break;
@@ -296,7 +296,7 @@ public class Bot3Red extends OpMode {
             case 10: {
                 if (updateBurst()) {
                     follower.followPath(pickup3Start, false);
-                    intakeMotor.setPower(1);
+                    intakeMotor.setPower(0.9);
                     setPathState(11);
                 }
                 break;
