@@ -35,7 +35,7 @@ public class LaunchIntakeSystem {
 
     public boolean launcherOn = false;
     public boolean intakeOn = false;
-    private boolean autoPowerOn = false;
+    private boolean autoPowerOn = true;
     private boolean liftOpen = false;
 
     public void init(double[] powerSteps, HardwareMap hwMap, Telemetry telemetry) {
@@ -82,6 +82,7 @@ public class LaunchIntakeSystem {
         indicator.green();
 
         liftClose();
+        autoPowerOn = true;
     }
 
     public void init(HardwareMap hwMap) {
@@ -134,7 +135,7 @@ public class LaunchIntakeSystem {
         FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
-    private void setLauncherPower(int step, Telemetry tele, double autoPow, HardwareMap hwMap) {
+    private void setLauncherPower(int step, Telemetry tele, double autoPow) {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
                 if (autoPowerOn) spinToVelocity(autoPow, tele);
@@ -175,7 +176,7 @@ public class LaunchIntakeSystem {
 
         tele.addData("Battery Volts", batteryVolts);
 
-        setLauncherPower(currentStep, tele, pow, hwMap);
+        setLauncherPower(currentStep, tele, pow);
 
         if (!autoPowerOn)
             ang = 0;
