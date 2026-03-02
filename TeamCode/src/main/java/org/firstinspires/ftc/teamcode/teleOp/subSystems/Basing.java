@@ -18,7 +18,7 @@ public class Basing{
         ptoRight = hwMap.get(DcMotorEx.class, "pto_left");
 
         ptoRight.setDirection(DcMotorEx.Direction.FORWARD);
-        ptoLeft.setDirection(DcMotorEx.Direction.REVERSE); //(up is forward)
+        ptoLeft.setDirection(DcMotorEx.Direction.FORWARD); //(up is forward)
 
         ptoMotors = new DcMotorGroup(ptoLeft, ptoRight);
 
@@ -33,7 +33,7 @@ public class Basing{
         if (!ascent) {
             ptoMotors.setTargetPosition(0);
             ptoMotors.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            ptoMotors.setPower(-0.1);
+            ptoMotors.setPower(-0.05);
         }
     }
 

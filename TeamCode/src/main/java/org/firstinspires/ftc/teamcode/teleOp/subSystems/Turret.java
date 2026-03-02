@@ -26,7 +26,7 @@ public class Turret {
     private State currentState;
 
     //Adjustable
-    private final double min = 0.1, max = 0.92, zero = 0.505; //Subject to change
+    private final double min = 0.15, max = 0.95, zero = 0.48; //Subject to change
     public boolean onTarget = false;
 
     public void init(HardwareMap hwMap) {
@@ -42,6 +42,7 @@ public class Turret {
 
         pos = zero;
         tsb.setPosition(pos);
+        tsf.setPosition(pos);
         //turret.setPosition(pos);
 
         auto();
@@ -62,6 +63,7 @@ public class Turret {
 
         //turret.setPosition(pos);
         tsb.setPosition(pos);
+        tsf.setPosition(pos);
     }
 
     public void clockwise() {

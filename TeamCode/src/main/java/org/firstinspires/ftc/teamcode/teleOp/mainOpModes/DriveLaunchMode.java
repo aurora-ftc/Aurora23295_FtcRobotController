@@ -29,7 +29,7 @@ public class DriveLaunchMode extends OpMode {
     private final ElapsedTime initTimer = new ElapsedTime();
     //private PinpointDrive driveRR;
     private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
-    private Basing basing = new Basing();
+//    private Basing basing = new Basing();
     private Turret turret = new Turret();
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Pose2D initialPose, goalPose;
@@ -66,6 +66,7 @@ public class DriveLaunchMode extends OpMode {
         drive.initTracker(goalPose, false);
 
         dashboard.isEnabled();
+
         initTimer.reset();
         cameraTimer.reset();
 
@@ -109,6 +110,8 @@ public class DriveLaunchMode extends OpMode {
             else
                 initialPose = Storage.endPose;
         }
+
+        launchSystem.liftClose();
 
         drive.setOdoPosition(initialPose);
         launchSystem.disableAutoPower();
@@ -235,11 +238,6 @@ public class DriveLaunchMode extends OpMode {
             launchSystem.toggleIntake();
         else if (gamepad1.circleWasPressed())
             launchSystem.toggleIntakeReverse();
-
-//        if (gamepad2.right_bumper)
-//            launchSystem.up();
-//        else if (gamepad2.left_bumper)
-//            launchSystem.down();
 
         if (gamepad1.crossWasPressed())
             launchSystem.liftBlip();

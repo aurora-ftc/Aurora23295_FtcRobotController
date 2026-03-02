@@ -388,11 +388,11 @@ public class Bot3Red extends OpMode {
 
         ts1 = hardwareMap.get(Servo.class, "ts1");
         ts2 = hardwareMap.get(Servo.class, "ts2");
-        ts2.setPosition(0.84);
-        ts1.setPosition(0.84);
+        ts2.setPosition(0.845);
+        ts1.setPosition(0.845);
 
         angleServo = hardwareMap.get(Servo.class, "angle_servo");
-        angleServo.setPosition(0.12);
+        angleServo.setPosition(0.1);
     }
 
     @Override
@@ -404,8 +404,8 @@ public class Bot3Red extends OpMode {
     public void start() {
         setPathState(0);
 
-        ts2.setPosition(0.84);
-        ts1.setPosition(0.84);
+        ts2.setPosition(0.845);
+        ts1.setPosition(0.845);
     }
 
     @Override

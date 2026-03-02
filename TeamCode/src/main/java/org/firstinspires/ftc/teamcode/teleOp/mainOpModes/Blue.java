@@ -40,7 +40,7 @@ public class Blue extends OpMode {
     private final ElapsedTime initTimer = new ElapsedTime();
     //private PinpointDrive driveRR;
     private LaunchIntakeSystem launchSystem = new LaunchIntakeSystem();
-    private Basing basing = new Basing();
+//    private Basing basing = new Basing();
     private Turret turret = new Turret();
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Pose2D initialPose, goalPose;
@@ -120,6 +120,8 @@ public class Blue extends OpMode {
             else
                 initialPose = Storage.endPose;
         }
+
+        launchSystem.liftClose();
 
         drive.setOdoPosition(initialPose);
         launchSystem.disableAutoPower();

@@ -33,7 +33,7 @@ public class LaunchIntakeSystem {
 
     private double power, batteryVolts, batteryCorrectedKv, angle;
 
-    public boolean launcherOn = false;
+    public boolean launcherOn = true;
     public boolean intakeOn = false;
     private boolean autoPowerOn = true;
     private boolean liftOpen = false;
@@ -65,6 +65,7 @@ public class LaunchIntakeSystem {
         intakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         liftServo.scaleRange(LIFT_SERVO_MIN, LIFT_SERVO_MAX);
+
         angleServo.scaleRange(0, 1); //MIN down Max UP
 
         flywheelPID = new PIDController(FLYWHEEL_KP,
@@ -82,6 +83,8 @@ public class LaunchIntakeSystem {
         indicator.green();
 
         liftClose();
+
+        launcherOn = true;
         autoPowerOn = true;
     }
 
@@ -139,11 +142,9 @@ public class LaunchIntakeSystem {
         if (step >= 0 && step <= maxStep) {
             if (launcherOn) {
                 if (autoPowerOn) spinToVelocity(autoPow, tele);
-//                else spinToVelocity(powerSteps[step], tele);
-                else spinToVelocity(40, tele);
+                else spinToVelocity(41.5, tele);
             } else {
                 launcherMotor.setPower(0.0);
-                //spinToVelocity(0, tele);
             }
         }
     }
@@ -223,18 +224,7 @@ public class LaunchIntakeSystem {
         }
     }
 
-    public void intakeBlipLoop() {
-        if (200 < intakeTimer.milliseconds() &&
-                intakeTimer.milliseconds() < 600) {
-            intakeMotor.setPower(1);
-        } else {
-            if (!intakeOn) intakeMotor.setPower(0);
-        }
-    }
-
     public void liftBlip() {
-        if (intakeTimer.milliseconds() < 400)
-            return;
         liftTimer.reset();
         liftOpen();
     }
