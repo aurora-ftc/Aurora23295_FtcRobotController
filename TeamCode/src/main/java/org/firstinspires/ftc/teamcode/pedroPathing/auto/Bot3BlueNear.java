@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.auto;
 
-import static org.firstinspires.ftc.teamcode.teleOp.Constants.*;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
-import org.firstinspires.ftc.teamcode.teleOp.subSystems.Turret;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.CLOSE;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.HWMap;
+import static org.firstinspires.ftc.teamcode.teleOp.Constants.OPEN;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -19,9 +18,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous(name = "Bot3Blue", group = "Bot3Autos")
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.teleOp.subSystems.LaunchIntakeSystem;
+
+@Autonomous(name = "Bot3BlueNear", group = "Bot3Autos")
 @Configurable // Panels
-public class Bot3Blue extends OpMode {
+public class Bot3BlueNear extends OpMode {
 
     // Panels Telemetry
     private TelemetryManager panelsTelemetry;
@@ -49,15 +51,15 @@ public class Bot3Blue extends OpMode {
     public static double TOTAL_TIME_S = 2;
 
     // Poses
-    private final Pose startPose = new Pose(57, 8, Math.toRadians(180));
-    private final Pose launchPose = new Pose(52, 12, Math.toRadians(180));
-    private final Pose pickup1StartPose = new Pose(44, 32, Math.toRadians(180));
-    private final Pose pickup1EndPose = new Pose(19, 32, Math.toRadians(180));
+    private final Pose startPose = new Pose(24, 120, Math.toRadians(180));
+    private final Pose launchPose = new Pose(46, 100, Math.toRadians(180));
+    private final Pose pickup3StartPose = new Pose(44, 32, Math.toRadians(180));
+    private final Pose pickup3EndPose = new Pose(24, 32, Math.toRadians(180));
     private final Pose pickup2StartPose = new Pose(44, 52, Math.toRadians(180));
     private final Pose pickup2EndPose = new Pose(19, 52, Math.toRadians(180));
-    private final Pose pickup3StartPose = new Pose(44, 80, Math.toRadians(180));
-    private final Pose pickup3EndPose = new Pose(19, 80, Math.toRadians(180));
-    private final Pose parkPose = new Pose(59, 40, Math.toRadians(180));
+    private final Pose pickup1StartPose = new Pose(44, 80, Math.toRadians(180));
+    private final Pose pickup1EndPose = new Pose(19, 80, Math.toRadians(180));
+    private final Pose parkPose = new Pose(46, 70, Math.toRadians(180));
 
     // Paths
     public PathChain firstLaunch, pickup1Start, pickup1End, secondLaunch, pickup2Start, pickup2End, thirdLaunch,
@@ -388,8 +390,8 @@ public class Bot3Blue extends OpMode {
 
         ts1 = hardwareMap.get(Servo.class, "ts1");
         ts2 = hardwareMap.get(Servo.class, "ts2");
-        ts2.setPosition(0.19);
-        ts1.setPosition(0.19);
+        ts2.setPosition(0.3);
+        ts1.setPosition(0.3);
 
         angleServo = hardwareMap.get(Servo.class, "angle_servo");
         angleServo.setPosition(0.12);
@@ -404,8 +406,8 @@ public class Bot3Blue extends OpMode {
     public void start() {
         setPathState(0);
 
-        ts2.setPosition(0.19);
-        ts1.setPosition(0.19);
+        ts2.setPosition(0.3);
+        ts1.setPosition(0.3);
     }
 
     @Override
@@ -415,7 +417,7 @@ public class Bot3Blue extends OpMode {
     public void loop() {
         follower.update();
         autonomousPathUpdate();
-        launcher.spinToVelocity(57.2, telemetry);
+        launcher.spinToVelocity(47.2, telemetry);
 
         Pose p = follower.getPose();
 
